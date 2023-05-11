@@ -1,6 +1,7 @@
 from assertion import assertion
+from tbox import TBox
 
-class Abox:
+class ABox:
     # This implementation of the ABox considers a partially ordered ABox
     # I made the choice of using a directed graph to represent the partial order
     # and the choice of using a list adjacency in python (effective when the number of vertices is large here, our assertions), another possible representation is the adjacency matrix (effective when the number of edges is large)
@@ -38,7 +39,7 @@ class Abox:
         return list(self.__assertions.keys())
     
     def get_directed_edges(self) -> list():
-        # a function returning the lis tof all the edges
+        # a function returning the list of all the edges
         edges = []
         for from_assertion, (assertion_id, successors) in self.__assertions.items():
             for successor in successors:
@@ -66,3 +67,24 @@ class Abox:
                     return True
 
         return False
+    
+    def conflict_set(self, tbox: TBox) -> list():
+        conflicts = []
+        assertions = self.get_assertions()
+        tbox.negative_closure()
+        negative_axioms = tbox.get_negative_axioms()
+        # Browse all negative axioms
+        for axiom in negative_axioms:
+            # Browse all assertions
+            for assertion_1 in assertions:
+                # Browse all assertions after the current assertion (to avoid duplicate verifications)
+                for assertion_2 in assertions[assertions.index(assertion_1):] :
+                    # Check if (assertion_1 name in assertion_2 name) or (assertion_2 name in assertion_1 name)
+                    if (assertion_1.get_assertion_name() == axiom.get_left_side().get_name() and assertion_2.get_assertion_name() == axiom.get_right_side().get_name()) or \
+                          (assertion_2.get_assertion_name() == axiom.get_left_side().get_name() and assertion_1.get_assertion_name() == axiom.get_right_side().get_name()) :
+                        # replace the following call for a function in assertion to compare the individuals 
+                        # if both are concepts compare individuals
+                        if not (assertion_1.is_role() or assertion_2.is_role()):
+                            if assertion_1.get_individuals() == assertion_2.get_individuals():
+                                conflicts.append((axiom, assertion_1, assertion_2))
+        return conflicts

@@ -1,5 +1,7 @@
 #Concepts
 from axiom import Axiom, Modifier, Side
+from assertion import assertion
+from abox import ABox
 from tbox import TBox
 
 human = "Human"
@@ -36,11 +38,33 @@ axioms1 = [ax3,ax4]
 #TBOX
 tbox1 = TBox(axioms1)
 print(tbox1)
-tbox1.negative_closure()
-print(tbox1)
+#tbox1.negative_closure()
+#print(tbox1)
 # test 2
-axioms2 = [ax1,ax3]
-tbox2 = TBox(axioms2)
-print(tbox2)
-tbox2.negative_closure()
-print(tbox2)
+#axioms2 = [ax1,ax3]
+#tbox2 = TBox(axioms2)
+#print(tbox2)
+#tbox2.negative_closure()
+#print(tbox2)
+
+#Assertions 
+ass1 = assertion(man,mark)
+ass2 = assertion(eats,mark,ch1)
+ass3 = assertion(man,bill)
+ass4 = assertion(chicken,mark)
+ass5 = assertion(eats,mark,bill)
+ass6 = assertion(eats,ch1,ch2)
+ass7 = assertion(chicken,ch1)
+ass8 = assertion(chicken,ch2)
+#assertions = [ass1, ass3, ass4, ass5, ass6, ass7, ass8]
+abox = ABox()
+abox .add_assertion(ass1)
+abox .add_assertion(ass3)
+abox .add_assertion(ass4)
+abox .add_assertion(ass5)
+abox .add_assertion(ass6)
+abox .add_assertion(ass7)
+abox .add_assertion(ass8)
+conflict_set = abox.conflict_set(tbox1)
+for conf in conflict_set :
+    print("Axiom : ", conf[0], " | Conflict : ", conf[1], conf[2])

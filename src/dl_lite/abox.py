@@ -67,24 +67,3 @@ class ABox:
                     return True
 
         return False
-    
-    def conflict_set(self, tbox: TBox) -> list():
-        conflicts = []
-        assertions = self.get_assertions()
-        tbox.negative_closure()
-        negative_axioms = tbox.get_negative_axioms()
-        # Browse all negative axioms
-        for axiom in negative_axioms:
-            # Browse all assertions
-            for assertion_1 in assertions:
-                # Browse all assertions after the current assertion (to avoid duplicate verifications)
-                for assertion_2 in assertions[assertions.index(assertion_1):] :
-                    # Check if (assertion_1 name in assertion_2 name) or (assertion_2 name in assertion_1 name)
-                    if (assertion_1.get_assertion_name() == axiom.get_left_side().get_name() and assertion_2.get_assertion_name() == axiom.get_right_side().get_name()) or \
-                          (assertion_2.get_assertion_name() == axiom.get_left_side().get_name() and assertion_1.get_assertion_name() == axiom.get_right_side().get_name()) :
-                        # replace the following call for a function in assertion to compare the individuals 
-                        # if both are concepts compare individuals
-                        if not (assertion_1.is_role() or assertion_2.is_role()):
-                            if assertion_1.get_individuals() == assertion_2.get_individuals():
-                                conflicts.append((axiom, assertion_1, assertion_2))
-        return conflicts

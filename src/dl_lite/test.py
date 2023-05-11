@@ -3,6 +3,7 @@ from axiom import Axiom, Modifier, Side
 from assertion import assertion
 from abox import ABox
 from tbox import TBox
+from repair import conflict_set
 
 human = "Human"
 man = "Man"
@@ -65,6 +66,6 @@ abox .add_assertion(ass5)
 abox .add_assertion(ass6)
 abox .add_assertion(ass7)
 abox .add_assertion(ass8)
-conflict_set = abox.conflict_set(tbox1)
+conflict_set = conflict_set(tbox1,abox)
 for conf in conflict_set :
-    print("Axiom : ", conf[0], " | Conflict : ", conf[1], conf[2])
+    print("Axiom : ", conf[0], " | Conflict : (", conf[1], ", ", conf[2],")")

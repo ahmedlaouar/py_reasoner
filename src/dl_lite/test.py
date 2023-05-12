@@ -34,11 +34,11 @@ ax6 = Axiom(side8,side2)
 
 # a tbox with all possible axioms to check conflicts 
 # test 1
-axioms1 = [ax3,ax4]
+axioms1 = [ax3,ax4,ax6,ax2]
 #TBOX
 tbox1 = TBox(axioms1)
 print(tbox1)
-#tbox1.negative_closure()
+tbox1.negative_closure()
 #print(tbox1)
 # test 2
 #axioms2 = [ax1,ax3]
@@ -65,6 +65,9 @@ abox .add_assertion(ass5)
 abox .add_assertion(ass6)
 abox .add_assertion(ass7)
 abox .add_assertion(ass8)
+assertions_list = abox.get_assertions()
+for ass in assertions_list:
+    print(ass)
 conflict_set = conflict_set(tbox1,abox)
 for conf in conflict_set :
     print("Axiom : ", conf[0], " | Conflict : (", conf[1], ", ", conf[2],")")

@@ -11,7 +11,7 @@ def same_individuals(axiom: Axiom, assertion_1: assertion, assertion_2: assertio
         # Check if both assertions are concepts or both are roles and compare individuals
         if assertion_1.is_role() == assertion_2.is_role() and assertion_1.get_individuals() == assertion_2.get_individuals():
             return True
-        
+        # There is a problem in the following, the checking for Man(Mark) and Eats(Mark,Bill) with axiom Exists INV Eats < NOT Man gives an error
         # Check if assertion_1 is role and assertion_2 is concept
         if assertion_1.is_role():
             if Modifier.projection in axiom.get_left_side().get_modifiers():

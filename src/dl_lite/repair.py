@@ -11,7 +11,7 @@ def same_individuals(axiom: Axiom, assertion_1: assertion, assertion_2: assertio
         # Check if both assertions are concepts or both are roles and compare individuals
         if assertion_1.is_role() == assertion_2.is_role() and assertion_1.get_individuals() == assertion_2.get_individuals():
             return True
-        # There is a problem in the following, the checking for Man(Mark) and Eats(Mark,Bill) with axiom Exists INV Eats < NOT Man gives an error
+        
         # Check if assertion_1 is role and assertion_2 is concept
         if assertion_1.is_role():
             if Modifier.projection in axiom.get_left_side().get_modifiers():
@@ -19,7 +19,7 @@ def same_individuals(axiom: Axiom, assertion_1: assertion, assertion_2: assertio
                 if Modifier.inversion in axiom.get_left_side().get_modifiers() and \
                         assertion_1.get_individuals()[1] == assertion_2.get_individuals()[0]:
                     return True
-                if assertion_1.get_individuals()[0] == assertion_2.get_individuals()[0]:
+                if Modifier.inversion not in axiom.get_left_side().get_modifiers() and assertion_1.get_individuals()[0] == assertion_2.get_individuals()[0]:
                     return True
                 
         # Check if assertion_1 is concept and assertion_2 is role
@@ -29,7 +29,7 @@ def same_individuals(axiom: Axiom, assertion_1: assertion, assertion_2: assertio
                 if Modifier.inversion in axiom.get_right_side().get_modifiers() and \
                         assertion_1.get_individuals()[0] == assertion_2.get_individuals()[1]:
                     return True
-                if assertion_1.get_individuals()[0] == assertion_2.get_individuals()[0]:
+                if Modifier.inversion not in axiom.get_right_side().get_modifiers() and assertion_1.get_individuals()[0] == assertion_2.get_individuals()[0]:
                     return True
 
 def conflict_set(tbox: TBox, abox : ABox) -> list():

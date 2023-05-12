@@ -1,10 +1,10 @@
-#Concepts
+
 from axiom import Axiom, Modifier, Side
 from assertion import assertion
 from abox import ABox
 from tbox import TBox
 from repair import conflict_set
-
+#Concepts
 human = "Human"
 man = "Man"
 chicken = "Chicken"

@@ -1,4 +1,5 @@
 from assertion import assertion
+from axiom import Axiom
 from tbox import TBox
 
 class ABox:
@@ -9,11 +10,11 @@ class ABox:
         # The attribute represents the set of assertions, each assertion is associated with an integer identifier and its adjacency list in the form of a tuple : { assertion1 : (0, []), assertion2 : (1, [0,2]), assertion3 : (2,[0]), ....}
         self.__assertions = {}
 
-    def add_assertion(self, assertion: assertion) -> None:
+    def add_assertion(self, new_assertion: assertion) -> None:
         # This function adds assertions to the ABox, the id associated with each assertion is obtained here automatically
-        if assertion not in self.__assertions:
+        if new_assertion not in self.__assertions:
             assertion_id = len(self.__assertions)
-            self.__assertions[assertion] = (assertion_id, [])
+            self.__assertions[new_assertion] = (assertion_id, [])
 
     def get_assertion_by_id(self,id) -> assertion:
         for assertion, (assertion_id, _) in self.__assertions.items():
@@ -67,3 +68,4 @@ class ABox:
                     return True
 
         return False
+    

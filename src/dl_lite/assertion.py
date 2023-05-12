@@ -22,3 +22,7 @@ class assertion:
             return self.__assertion_name + "(" + self.__individual_1 + "," + self.__individual_2 + ")"
         else:
             return self.__assertion_name + "(" + self.__individual_1 + ")"
+        
+    #def __eq__(self, __value: object) -> bool:
+    #    if self.get_assertion_name() == __value.get_assertion_name() and self.get_individuals() == __value.get_individuals():
+    #        return True

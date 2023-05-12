@@ -1,4 +1,3 @@
-
 from axiom import Axiom, Modifier, Side
 from assertion import assertion
 from abox import ABox

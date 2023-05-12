@@ -58,7 +58,7 @@ def supports_deduction(find_assertion: assertion, positive_axioms: list(), abox:
                 new = assertion(axiom.get_left_side().get_name(), find_assertion.get_individuals()[0])
             for abox_assertion in abox.get_assertions():
                 if new.get_assertion_name() == abox_assertion.get_assertion_name() and new.get_individuals() == abox_assertion.get_individuals() :
-                    supports.append(new)
+                    supports.append(abox_assertion)
             supports += supports_deduction(new, positive_axioms, abox)
     return supports
 
@@ -67,3 +67,21 @@ def compute_supports(target_assertion: assertion, positive_axioms: list(), abox:
     if target_assertion in abox.get_assertions():
         supports.append(target_assertion)
     return supports
+
+def check_all_dominance(abox, conflicts, supports):
+    for conflict in conflicts:
+        conflict_supported = False
+        for support in supports:
+            if abox.is_strictly_preferred(support, conflict[1]) or abox.is_strictly_preferred(support, conflict[2]):
+                conflict_supported = True
+                break
+        if not conflict_supported:
+            return False
+    return True
+
+def check_assertion_in_cpi_repair(abox, tbox, check_assertion):
+    tbox.negative_closure()
+    conflicts = conflict_set(tbox,abox)
+    supports = compute_supports(check_assertion, tbox.get_positive_axioms(),abox)
+    if check_all_dominance(abox, conflicts, supports):
+        print(f"{check_assertion} is in the Cpi-repair of the abox")

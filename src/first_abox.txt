@@ -1,0 +1,7 @@
+BEGINABOX
+Reports(F78);2;3;
+Manager(Bob);4;
+Sales(Bob);5;
+Sign(Bob,F78);
+Edit(Bob,F78);
+ENDABOX

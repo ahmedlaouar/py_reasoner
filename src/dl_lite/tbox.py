@@ -2,14 +2,15 @@ from dl_lite.axiom import Axiom, Side
 from typing import List
 class TBox:
     # the TBox contains a list of axioms, in order to simplify things, two lists one storing negative axioms and the other storing the positive axioms are created
-    def __init__(self, axioms: List[Axiom]) -> None:
+    def __init__(self) -> None:
         self.__positive_axioms = []
         self.__negative_axioms = []
-        for axiom in axioms:
-            if axiom.is_negative_axiom():
-                self.__negative_axioms.append(axiom)
-            else:
-                self.__positive_axioms.append(axiom)
+
+    def add_axiom(self, axiom: Axiom):
+        if axiom.is_negative_axiom():
+            self.__negative_axioms.append(axiom)
+        else:
+            self.__positive_axioms.append(axiom)
 
     def get_negative_axioms(self):
         return self.__negative_axioms

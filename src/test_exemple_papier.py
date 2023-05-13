@@ -26,7 +26,9 @@ axiom3 = Axiom(side1,side5)
 axiom4= Axiom(side3,side5)
 # TBox
 axioms = [axiom1,axiom2,axiom3,axiom4]
-tbox = TBox(axioms)
+tbox = TBox()
+for axiom in axioms:
+    tbox.add_axiom(axiom)
 print(tbox)
 # Assertions
 assertion1 = assertion(reports,f78)

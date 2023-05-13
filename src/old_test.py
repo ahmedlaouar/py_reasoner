@@ -36,7 +36,9 @@ ax6 = Axiom(side8,side2)
 # test 1
 axioms1 = [ax3,ax4,ax6,ax2]
 #TBOX
-tbox1 = TBox(axioms1)
+tbox1 = TBox()
+for axiom in axioms1:
+    tbox1.add_axiom(axiom)
 print(tbox1)
 tbox1.negative_closure()
 #print(tbox1)

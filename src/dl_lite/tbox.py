@@ -1,4 +1,4 @@
-from axiom import Axiom, Side
+from dl_lite.axiom import Axiom, Side
 from typing import List
 class TBox:
     # the TBox contains a list of axioms, in order to simplify things, two lists one storing negative axioms and the other storing the positive axioms are created

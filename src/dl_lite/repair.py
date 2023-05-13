@@ -1,7 +1,7 @@
-from abox import ABox
-from assertion import assertion
-from axiom import Axiom, Modifier
-from tbox import TBox
+from dl_lite.abox import ABox
+from dl_lite.assertion import assertion
+from dl_lite.axiom import Axiom, Modifier
+from dl_lite.tbox import TBox
 
 def same_individuals(axiom: Axiom, assertion_1: assertion, assertion_2: assertion):
     

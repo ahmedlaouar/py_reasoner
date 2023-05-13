@@ -1,6 +1,4 @@
-from assertion import assertion
-from axiom import Axiom
-from tbox import TBox
+from dl_lite.assertion import assertion
 
 class ABox:
     # This implementation of the ABox considers a partially ordered ABox
@@ -24,6 +22,10 @@ class ABox:
     
     def get_assertion_id(self, assertion) -> int:
         return self.__assertions[assertion][0]
+    
+    def set_id_and_successors(self, assertion, id: int, successors) -> None:
+        if assertion in self.__assertions:
+            self.__assertions[assertion] = (id, successors.copy())
     
     def get_assertion_successors(self, assertion) -> list():
         return self.__assertions[assertion][1]

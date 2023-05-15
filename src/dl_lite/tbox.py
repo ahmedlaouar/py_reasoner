@@ -6,7 +6,7 @@ class TBox:
         self.__positive_axioms = []
         self.__negative_axioms = []
 
-    def add_axiom(self, axiom: Axiom):
+    def add_axiom(self, axiom: Axiom) -> None:
         if axiom.is_negative_axiom():
             self.__negative_axioms.append(axiom)
         else:

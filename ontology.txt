@@ -1,0 +1,89 @@
+Conceptlvtb < NOT Exists Roleuox
+Conceptrxw < Exists Roleebmthiy
+Conceptphaxh < Exists INV Roleledxpv
+Conceptginsotmke < NOT Exists Rolebhxnnzyqp
+Roleebmthiy < NOT Rolebhxnnzyqp
+Conceptryxlue < NOT Conceptwwliygzrj
+Rolekxbidqpdn < Roleledxpv
+Roleszzkmy < Rolezfrmp
+Rolevdtdu < Rolegbrwr
+Rolebqwvdcg < Rolelasvutqa
+Conceptvoiqi < NOT Exists INV Rolecmno
+Conceptryxlue < Conceptfcbzkstnr
+Rolevamdmvtmf < Rolelasvutqa
+Conceptfcbzkstnr < Exists Rolentfeoygto
+Rolezfrmp < Rolecmno
+Conceptsvltwcjqw < Conceptginsotmke
+Conceptryxlue < NOT Conceptphaxh
+Conceptnemnoto < Exists Roleszzkmy
+Conceptzivhoyq < Conceptginsotmke
+Conceptbpsmcymig < Exists Roleebmthiy
+Rolelasvutqa < Rolekxbidqpdn
+Conceptkwrydht < NOT Conceptddhbmml
+Conceptlvtb < Exists Rolegxwda
+Conceptezrlge < NOT Conceptlvtb
+Conceptwwliygzrj < NOT Conceptlvmmotcffp
+Conceptrxw < Exists Rolekxbidqpdn
+Conceptgalgybe < NOT Conceptsxqzpoeya
+Conceptvwjyd < NOT Conceptfcbzkstnr
+Conceptjpcovzpins < Exists INV Roleaccxnrkzf
+Conceptnrarcuwgme < Exists Rolefyrskcfdw
+Conceptbpsmcymig < Exists INV Roleaccxnrkzf
+Conceptmatzocy < NOT Conceptnemnoto
+Roleebmthiy < Roleuox
+Conceptztukeoefgq < NOT Conceptrxw
+Concepthacnlv < Conceptzivhoyq
+Conceptvkolg < Exists INV Rolefyrskcfdw
+Conceptnrarcuwgme < NOT Conceptsfdbb
+Conceptuggi < Conceptddhbmml
+Conceptfhioa < Exists INV Rolezfrmp
+Rolevdtdu < NOT Rolezfrmp
+Roleuox < NOT Rolenbduxbxj
+Conceptlidgygbo < Conceptjpcovzpins
+Roleaccxnrkzf < NOT Rolekxbidqpdn
+Conceptiyvpyub < Exists INV Rolewgamzui
+Conceptvkolg < Conceptnnaihygocs
+Conceptxomcgijgwr < Exists INV Roleuox
+Roleuox < Rolebqwvdcg
+Conceptwwliygzrj < Conceptfhioa
+Roleebmthiy < NOT Rolegbrwr
+Rolezfrmp < NOT Roleebmthiy
+Conceptsvltwcjqw < NOT Exists INV Roleszzkmy
+Conceptzivhoyq < NOT Conceptfhioa
+Conceptiyvpyub < NOT Conceptztukeoefgq
+Conceptginsotmke < Exists Roleledxpv
+Conceptlozhivbwf < Conceptmatzocy
+Conceptsthpylz < Conceptnrarcuwgme
+Conceptuwxdeqo < Exists INV Rolelasvutqa
+Conceptwwliygzrj < NOT Conceptddhbmml
+Roleledxpv < Rolecmno
+Conceptuggi < Conceptrxw
+Roleledxpv < NOT Rolevdtdu
+Conceptmatzocy < NOT Exists Rolelasvutqa
+Conceptbrovjw < NOT Exists Rolekxbidqpdn
+Conceptxjkk < Exists INV Rolebqwvdcg
+Rolewgamzui < Rolevdtdu
+Concepthacnlv < NOT Conceptvoiqi
+Rolentfeoygto < Rolelasvutqa
+Rolezfrmp < NOT Roleledxpv
+Conceptjpcovzpins < Exists Rolenbduxbxj
+Conceptsthpylz < Exists INV Roleuox
+Conceptlfpbwrrh < Conceptgummzddg
+Conceptnrarcuwgme < Conceptsxqzpoeya
+Conceptiyvpyub < NOT Exists Rolentfeoygto
+Rolebhxnnzyqp < Roleuox
+Rolenbduxbxj < NOT Rolecmno
+Conceptnrarcuwgme < Exists Rolezfrmp
+Rolenbduxbxj < Roleaccxnrkzf
+Conceptnemnoto < Exists Rolenbduxbxj
+Conceptfhioa < NOT Exists Roleuox
+Rolewgamzui < Rolebqwvdcg
+Conceptuwxdeqo < Exists INV Rolentfeoygto
+Conceptnnaihygocs < Conceptdbpoxi
+Conceptmnqxpv < Exists Rolebhxnnzyqp
+Conceptjaluqjmce < NOT Exists Rolebqwvdcg
+Conceptalfqgbf < NOT Exists Rolentfeoygto
+Rolelasvutqa < Rolevdtdu
+Conceptmnqxpv < NOT Conceptezrlge
+Conceptvkolg < NOT Exists INV Rolentfeoygto
+Roleszzkmy < Rolebqwvdcg

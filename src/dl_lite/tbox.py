@@ -24,6 +24,7 @@ class TBox:
     def negative_closure(self):
         # This function computes the negative closure of the TBox
         # The negative closure starts with the set of all negative axioms, need to check if an axiom is already here before adding it (doing a copy or not depends on multiple criteria here)
+        print("---------- Start of negative closure computation ----------")
         cln = self.__negative_axioms
         # For each negative axiom, we check if there is a positive axiom that extends it 
         for negative_axiom in cln:
@@ -38,11 +39,13 @@ class TBox:
                     new_side = Side(positive_axiom.get_left_side().get_name(),negative_axiom.get_left_side().get_modifiers().copy())
                     new_axiom = Axiom(new_side,negative_axiom.get_right_side())
                     cln.append(new_axiom)
+                    print(new_axiom)
                 elif negative_axiom.get_right_side().get_name() == positive_axiom.get_right_side().get_name():
                     new_side = Side(positive_axiom.get_left_side().get_name(),negative_axiom.get_right_side().negate().get_modifiers())
                     new_axiom = Axiom(new_side,negative_axiom.get_left_side().negate())
                     cln.append(new_axiom)
-
+                    print(new_axiom)
+        print("---------- End of negative closure computation ----------")
         #return cln
 
     def __str__(self) -> str:

@@ -33,6 +33,7 @@ def same_individuals(axiom: Axiom, assertion_1: assertion, assertion_2: assertio
                     return True
 
 def conflict_set(tbox: TBox, abox : ABox) -> list():
+        print("---------- Start of conflict set computation ----------")
         conflicts = []
         assertions = abox.get_assertions()
         #tbox.negative_closure()
@@ -46,7 +47,9 @@ def conflict_set(tbox: TBox, abox : ABox) -> list():
                     # replace the following call for a function in assertion to compare the individuals 
                     if same_individuals(axiom, assertion_1, assertion_2) or same_individuals(axiom, assertion_2, assertion_1):
                         conflicts.append((axiom, assertion_1, assertion_2))
+        print("---------- End of conflict set computation ----------")
         return conflicts
+
 
 def supports_deduction(find_assertion: assertion, positive_axioms: list(), abox: ABox):
     supports = []

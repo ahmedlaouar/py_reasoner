@@ -23,6 +23,9 @@ class ABox:
     def get_assertion_id(self, assertion) -> int:
         return self.__assertions[assertion][0]
     
+    def get_size(self):
+        return len(self.__assertions)
+
     def set_id_and_successors(self, assertion, id: int, successors) -> None:
         if assertion in self.__assertions:
             self.__assertions[assertion] = (id, successors.copy())

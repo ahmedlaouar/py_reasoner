@@ -1,6 +1,6 @@
 BEGINTBOX
 Manager < Staff
 Sales < Staff
-Manager < NOT Exists Edit
-Sales < NOT Exists Sign
+Manager < NOT EXISTS Edit
+Sales < NOT EXISTS Sign
 ENDTBOX

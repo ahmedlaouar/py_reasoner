@@ -7,9 +7,8 @@ import concurrent.futures
 
 def same_individuals(axiom: Axiom, assertion_1: assertion, assertion_2: assertion):
     
-    # Check if assertions match with axiom sides 
-    if (assertion_1.get_assertion_name() == axiom.get_left_side().get_name() and assertion_2.get_assertion_name() == axiom.get_right_side().get_name()):
-        
+    # Check if assertions match with axiom sides
+    if (assertion_1.get_assertion_name() == axiom.get_left_side().get_name() and assertion_2.get_assertion_name() == axiom.get_right_side().get_name()):  
         # Check if both assertions are concepts or both are roles and compare individuals
         if assertion_1.is_role() == assertion_2.is_role() and assertion_1.get_individuals() == assertion_2.get_individuals():
             return True

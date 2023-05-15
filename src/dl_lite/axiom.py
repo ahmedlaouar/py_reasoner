@@ -4,7 +4,7 @@ from collections import Counter
 class Modifier(Enum):
     negation = "NOT"
     inversion = "INV"
-    projection = "Exists"
+    projection = "EXISTS"
 
 class Side:
     def __init__(self, name, modifiers = list()): #: list(Modifier)

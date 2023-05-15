@@ -52,13 +52,13 @@ def generate_dataset(abox_file_path, tbox_file_path, num_lines, Ni, Nc, Nr):
             else:
                 combination = [random.choice(concepts), random.choice(roles)]
                 if random_number < 0.2:
-                    line = '{} < NOT Exists INV {}\n'.format(combination[0],combination[1])
+                    line = '{} < NOT EXISTS INV {}\n'.format(combination[0],combination[1])
                 elif random_number < 0.5:
-                    line = '{} < NOT Exists {}\n'.format(combination[0],combination[1])
+                    line = '{} < NOT EXISTS {}\n'.format(combination[0],combination[1])
                 elif random_number < 0.7:
-                    line = '{} < Exists INV {}\n'.format(combination[0],combination[1])
+                    line = '{} < EXISTS INV {}\n'.format(combination[0],combination[1])
                 else:
-                    line = '{} < Exists {}\n'.format(combination[0],combination[1])
+                    line = '{} < EXISTS {}\n'.format(combination[0],combination[1])
             if (combination[0],combination[1]) not in generated_tbox and (combination[1],combination[0]) not in generated_tbox:
                 generated_tbox.add((combination[0],combination[1]))
                 file.write(line)

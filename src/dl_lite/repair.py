@@ -2,6 +2,7 @@ from dl_lite.abox import ABox
 from dl_lite.assertion import assertion
 from dl_lite.axiom import Axiom, Modifier
 from dl_lite.tbox import TBox
+import threading
 
 def same_individuals(axiom: Axiom, assertion_1: assertion, assertion_2: assertion):
     
@@ -91,3 +92,32 @@ def check_assertion_in_cpi_repair(abox, tbox, check_assertion):
     supports = compute_supports(check_assertion, tbox.get_positive_axioms(),abox)
     if check_all_dominance(abox, conflicts, supports):
         print(f"{check_assertion} is in the Cpi-repair of the abox")
+
+def process_axiom(axiom, assertions, conflicts, counter):
+    
+    for assertion_1 in assertions:
+        for assertion_2 in assertions[assertions.index(assertion_1):]:
+            if same_individuals(axiom, assertion_1, assertion_2) or same_individuals(axiom, assertion_2, assertion_1):
+                conflicts.append((axiom, assertion_1, assertion_2))
+                #print(f"Axiom {counter}: {axiom} | Conflict: ({assertion_1}, {assertion_2})")
+    print(f"Axiom number = {counter} done.")
+
+def conflict_set_with_threads(tbox: TBox, abox: ABox) -> list:
+    print("---------- Computation of conflicts set ----------")
+    conflicts = []
+    assertions = abox.get_assertions()
+    negative_axioms = tbox.get_negative_axioms()
+
+    threads = []
+    counter = 1
+    for axiom in negative_axioms:
+        t = threading.Thread(target=process_axiom, args=(axiom, assertions, conflicts, counter))
+        t.start()
+        threads.append(t)
+        counter += 1
+
+    # Wait for all threads to finish
+    for t in threads:
+        t.join()
+
+    return conflicts

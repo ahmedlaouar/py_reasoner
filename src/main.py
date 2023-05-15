@@ -1,10 +1,11 @@
-from dl_lite.abox import ABox
+from dl_lite.repair import check_assertion_in_cpi_repair
 from dl_lite_parser.abox_parser import read_abox
 from dl_lite_parser.tbox_parser import read_tbox
 import pathlib
 
 path = pathlib.Path().resolve()
-#print(path)
+
+check_assertion = "Staff(Bob)"
 
 tbox = read_tbox(str(path)+"/src/first_tbox.txt")
 print(tbox)
@@ -19,3 +20,5 @@ for asser in assertions_list:
 preference_relation = abox.get_directed_edges()
 for edge1,edge2 in preference_relation:
     print(edge1, " -> ",edge2)
+
+check_assertion_in_cpi_repair(abox, tbox, check_assertion)

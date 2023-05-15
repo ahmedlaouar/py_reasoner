@@ -16,15 +16,6 @@ print("---------- Reading the ABox from file ----------")
 abox = read_abox(str(path)+"/dataset.txt")
 print(f"Size of the ABox = {abox.get_size()}")
 
-#a,b,c,d = Side("A"), Side("B"), Side("C"), Side("D")
-#ax1,ax2,ax3,ax4 = Axiom(a,b), Axiom(b,c), Axiom(c,d), Axiom(d,a)
-#test_tbox = TBox()
-#test_tbox.add_axiom(ax1)
-#test_tbox.add_axiom(ax2)
-#test_tbox.add_axiom(ax3)
-#test_tbox.add_axiom(ax4)
-#test_tbox.resolve_circular()
-
 print("---------------------------------------------------------")
 tbox.resolve_circular()
 

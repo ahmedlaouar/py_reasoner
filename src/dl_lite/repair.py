@@ -33,13 +33,15 @@ def same_individuals(axiom: Axiom, assertion_1: assertion, assertion_2: assertio
                     return True
 
 def conflict_set(tbox: TBox, abox : ABox) -> list():
-        print("---------- Start of conflict set computation ----------")
+        print("---------- Computation of conflicts set ----------")
         conflicts = []
         assertions = abox.get_assertions()
         #tbox.negative_closure()
         negative_axioms = tbox.get_negative_axioms()
         # Browse all negative axioms
+        counter = 1
         for axiom in negative_axioms:
+            print(f"Axiom number = {counter}")
             # Browse all assertions
             for assertion_1 in assertions:
                 # Browse all assertions after the current assertion (to avoid duplicate verifications)
@@ -47,7 +49,8 @@ def conflict_set(tbox: TBox, abox : ABox) -> list():
                     # replace the following call for a function in assertion to compare the individuals 
                     if same_individuals(axiom, assertion_1, assertion_2) or same_individuals(axiom, assertion_2, assertion_1):
                         conflicts.append((axiom, assertion_1, assertion_2))
-        print("---------- End of conflict set computation ----------")
+                        print(f"Axiom {counter}: {axiom} | Conflict: ({assertion_1}, {assertion_2})")
+            counter += 1
         return conflicts
 
 

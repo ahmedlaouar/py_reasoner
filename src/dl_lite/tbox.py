@@ -24,7 +24,7 @@ class TBox:
     def negative_closure(self):
         # This function computes the negative closure of the TBox
         # The negative closure starts with the set of all negative axioms, need to check if an axiom is already here before adding it (doing a copy or not depends on multiple criteria here)
-        print("---------- Start of negative closure computation ----------")
+        print("---------- Computation negative closure ----------")
         cln = self.__negative_axioms
         # For each negative axiom, we check if there is a positive axiom that extends it 
         for negative_axiom in cln:
@@ -38,14 +38,16 @@ class TBox:
                 if negative_axiom.get_left_side().get_name() == positive_axiom.get_right_side().get_name():
                     new_side = Side(positive_axiom.get_left_side().get_name(),negative_axiom.get_left_side().get_modifiers().copy())
                     new_axiom = Axiom(new_side,negative_axiom.get_right_side())
-                    cln.append(new_axiom)
-                    print(new_axiom)
+                    # need to find a way to avoid the following verification:
+                    if new_axiom not in cln:
+                        cln.append(new_axiom)
+                        #print(new_axiom)
                 elif negative_axiom.get_right_side().get_name() == positive_axiom.get_right_side().get_name():
                     new_side = Side(positive_axiom.get_left_side().get_name(),negative_axiom.get_right_side().negate().get_modifiers())
                     new_axiom = Axiom(new_side,negative_axiom.get_left_side().negate())
-                    cln.append(new_axiom)
-                    print(new_axiom)
-        print("---------- End of negative closure computation ----------")
+                    if new_axiom not in cln:
+                        cln.append(new_axiom)
+                        #print(new_axiom)
         #return cln
 
     def __str__(self) -> str:
@@ -53,3 +55,27 @@ class TBox:
         for axiom in self.__positive_axioms + self.__negative_axioms:
             s += axiom.__str__() + "\n"
         return s
+    
+    def check_circular(self, positive_axioms, current_axiom, visited, current_path, to_remove):
+        visited.append(current_axiom)
+        current_path.append(current_axiom)
+
+        for next_axiom in positive_axioms:
+            if current_axiom.get_right_side().get_name() == next_axiom.get_left_side().get_name():
+                if next_axiom in current_path:
+                    to_remove.clear()
+                    to_remove.append(next_axiom)
+                else:
+                    self.check_circular(positive_axioms, next_axiom, visited, current_path, to_remove)
+        
+        current_path.remove(current_axiom)
+
+    def resolve_circular(self):
+        to_remove = []
+        visited = []
+        current_path = []
+        for axiom_elem in self.get_positive_axioms():
+            if axiom_elem not in visited:
+                self.check_circular(self.get_positive_axioms(), axiom_elem, visited, current_path, to_remove)
+        
+        for re in to_remove : print(re)

@@ -2,7 +2,7 @@ from dl_lite.axiom import Axiom, Modifier, Side
 from dl_lite.assertion import assertion
 from dl_lite.abox import ABox
 from dl_lite.tbox import TBox
-from dl_lite.repair import conflict_set
+from dl_lite.repair import conflict_set, conflict_set_concurrent_futures, conflict_set_with_threads
 sideB1 = Side("B1",[Modifier.negation])
 sideB2 = Side("B2")
 sideRn = Side("R",[Modifier.negation,Modifier.projection,Modifier.inversion])
@@ -81,6 +81,6 @@ abox .add_assertion(ass8)
 assertions_list = abox.get_assertions()
 for ass in assertions_list:
     print(ass)
-conflict_set = conflict_set(tbox1,abox)
+conflict_set = conflict_set_with_threads(tbox1,abox)
 for conf in conflict_set :
     print("Axiom : ", conf[0], " | Conflict : (", conf[1], ", ", conf[2],")")

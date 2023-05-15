@@ -2,7 +2,7 @@ from dl_lite.axiom import Axiom, Modifier, Side
 from dl_lite.assertion import assertion
 from dl_lite.abox import ABox
 from dl_lite.tbox import TBox
-from dl_lite.repair import check_assertion_in_cpi_repair
+from dl_lite.repair import check_assertion_in_cpi_repair, conflict_set_with_threads
 # Individuals
 f78 = "F78"
 bob = "Bob"
@@ -57,6 +57,9 @@ for ass in assertions_list:
 preference_relation = abox.get_directed_edges()
 for edge1,edge2 in preference_relation:
     print(edge1, " -> ",edge2)
+
+conflicts = conflict_set_with_threads(tbox,abox)
+print(f"The size of the conflicts = {len(conflicts)}")
 
 assertion6 = assertion(staff,bob)
 print(f"Checking if {assertion6} is in Cpirepair de abox:")

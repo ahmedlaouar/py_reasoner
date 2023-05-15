@@ -3,6 +3,7 @@ from dl_lite.assertion import assertion
 from dl_lite.axiom import Axiom, Modifier
 from dl_lite.tbox import TBox
 import threading
+import concurrent.futures
 
 def same_individuals(axiom: Axiom, assertion_1: assertion, assertion_2: assertion):
     
@@ -100,7 +101,7 @@ def process_axiom(axiom, assertions, conflicts, counter):
             if same_individuals(axiom, assertion_1, assertion_2) or same_individuals(axiom, assertion_2, assertion_1):
                 conflicts.append((axiom, assertion_1, assertion_2))
                 #print(f"Axiom {counter}: {axiom} | Conflict: ({assertion_1}, {assertion_2})")
-    print(f"Axiom number = {counter} done.")
+    print(f"Axiom number {counter} done.")
 
 def conflict_set_with_threads(tbox: TBox, abox: ABox) -> list:
     print("---------- Computation of conflicts set ----------")
@@ -119,5 +120,40 @@ def conflict_set_with_threads(tbox: TBox, abox: ABox) -> list:
     # Wait for all threads to finish
     for t in threads:
         t.join()
+
+    return conflicts
+
+def process_assertions(axiom, assertions, conflicts, assertion_1):
+    for assertion_2 in assertions[assertions.index(assertion_1):]:
+            if same_individuals(axiom, assertion_1, assertion_2) or same_individuals(axiom, assertion_2, assertion_1):
+                conflicts.append((axiom, assertion_1, assertion_2))
+
+def parallelized_process_axiom(axiom, assertions, conflicts, counter):
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        futures_1 = []
+        for assertion_1 in assertions:
+            future_1 = executor.submit(process_assertions, axiom, assertions, conflicts, assertion_1)
+            futures_1.append(future_1)
+        
+        # Wait for all futures to complete
+        concurrent.futures.wait(futures_1)
+    print(f"Axiom number {counter} done.")
+
+def conflict_set_concurrent_futures(tbox: TBox, abox: ABox) -> list:
+    print("---------- Computation of conflicts set ----------")
+    conflicts = []
+    assertions = abox.get_assertions()
+    negative_axioms = tbox.get_negative_axioms()
+
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        counter = 1
+        futures = []
+        for axiom in negative_axioms:
+            future = executor.submit(process_axiom, axiom, assertions, conflicts, counter)
+            futures.append(future)
+            counter += 1
+
+        # Wait for all futures to complete
+        concurrent.futures.wait(futures)
 
     return conflicts

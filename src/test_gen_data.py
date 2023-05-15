@@ -3,7 +3,7 @@ from dl_lite.axiom import Axiom, Side
 from dl_lite.tbox import TBox
 from dl_lite_parser.abox_parser import read_abox
 from dl_lite_parser.tbox_parser import read_tbox
-from dl_lite.repair import conflict_set, conflict_set_with_threads
+from dl_lite.repair import conflict_set, conflict_set_concurrent_futures, conflict_set_with_threads
 import pathlib
 
 path = pathlib.Path().resolve()
@@ -32,7 +32,7 @@ print(f"The size of the negative closure = {len(tbox.get_negative_axioms())}")
 print("---------------------------------------------------------")
 # Measure execution time
 start_time = time.time()
-conflicts = conflict_set_with_threads(tbox, abox)
+conflicts = conflict_set_concurrent_futures(tbox, abox) #conflict_set_with_threads(tbox, abox)
 end_time = time.time()
 execution_time = end_time - start_time
 print(f"Execution time: {execution_time} seconds")

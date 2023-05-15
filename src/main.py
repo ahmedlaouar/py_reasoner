@@ -1,6 +1,6 @@
 import time
 from dl_lite.assertion import assertion
-from dl_lite.repair import check_all_dominance, check_assertion_in_cpi_repair, compute_supports, conflict_set_concurrent_futures, conflict_set_with_threads
+from dl_lite.repair import check_all_dominance, check_assertion_in_cpi_repair, compute_supports, conflict_set_concurrent_futures
 from dl_lite_parser.abox_parser import read_abox
 from dl_lite_parser.tbox_parser import read_tbox
 import pathlib

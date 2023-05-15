@@ -1,4 +1,4 @@
-from dl_lite.axiom import Axiom, Side
+from dl_lite.axiom import Axiom, Modifier, Side
 from typing import List
 class TBox:
     # the TBox contains a list of axioms, in order to simplify things, two lists one storing negative axioms and the other storing the positive axioms are created
@@ -24,7 +24,7 @@ class TBox:
     def negative_closure(self):
         # This function computes the negative closure of the TBox
         # The negative closure starts with the set of all negative axioms, need to check if an axiom is already here before adding it (doing a copy or not depends on multiple criteria here)
-        print("---------- Computation negative closure ----------")
+        print("---------- Computation of negative closure ----------")
         cln = self.__negative_axioms
         # For each negative axiom, we check if there is a positive axiom that extends it 
         for negative_axiom in cln:
@@ -36,18 +36,32 @@ class TBox:
                 # Indeed in both conditions, when names match between positive and negative axioms, modifiers from the negative axiom are used in the negative new axiom and negation is applied when needed
                 # Both types of rules are discussed in the documentation, this is a shortcut I made thanks to the implementation that seperates names and modifiers in both sides of an axiom    
                 if negative_axiom.get_left_side().get_name() == positive_axiom.get_right_side().get_name():
-                    new_side = Side(positive_axiom.get_left_side().get_name(),negative_axiom.get_left_side().get_modifiers().copy())
+
+                    new_modifiers = negative_axiom.get_left_side().get_modifiers().copy()
+                    if Modifier.projection in new_modifiers:
+                        new_modifiers.remove(Modifier.projection)
+                    if Modifier.inversion in new_modifiers:
+                        new_modifiers.remove(Modifier.inversion)
+
+                    new_side = Side(positive_axiom.get_left_side().get_name(),new_modifiers)
                     new_axiom = Axiom(new_side,negative_axiom.get_right_side())
                     # need to find a way to avoid the following verification:
                     if new_axiom not in cln:
                         cln.append(new_axiom)
-                        #print(new_axiom)
+                        
                 elif negative_axiom.get_right_side().get_name() == positive_axiom.get_right_side().get_name():
-                    new_side = Side(positive_axiom.get_left_side().get_name(),negative_axiom.get_right_side().negate().get_modifiers())
+                    
+                    new_modifiers = negative_axiom.get_right_side().negate().get_modifiers().copy()
+                    if Modifier.projection in new_modifiers:
+                        new_modifiers.remove(Modifier.projection)
+                    if Modifier.inversion in new_modifiers:
+                        new_modifiers.remove(Modifier.inversion)
+
+                    new_side = Side(positive_axiom.get_left_side().get_name(),new_modifiers)
                     new_axiom = Axiom(new_side,negative_axiom.get_left_side().negate())
                     if new_axiom not in cln:
                         cln.append(new_axiom)
-                        #print(new_axiom)
+                        
         #return cln
 
     def __str__(self) -> str:
@@ -78,4 +92,7 @@ class TBox:
             if axiom_elem not in visited:
                 self.check_circular(self.get_positive_axioms(), axiom_elem, visited, current_path, to_remove)
         
-        for re in to_remove : print(re)
+        for re in to_remove : 
+            if re in self.__positive_axioms:
+                self.__positive_axioms.delete(re)
+            print(re)

@@ -3,6 +3,17 @@ from dl_lite.assertion import assertion
 from dl_lite.abox import ABox
 from dl_lite.tbox import TBox
 from dl_lite.repair import conflict_set
+sideB1 = Side("B1",[Modifier.negation])
+sideB2 = Side("B2")
+sideRn = Side("R",[Modifier.negation,Modifier.projection,Modifier.inversion])
+sideR = Side("R",[Modifier.projection,Modifier.inversion])
+axiomN = Axiom(sideR,sideB1)
+axiomP = Axiom(sideB2,sideR)
+tb1 = TBox()
+tb1.add_axiom(axiomN)
+tb1.add_axiom(axiomP)
+tb1.negative_closure()
+print(tb1)
 #Concepts
 human = "Human"
 man = "Man"

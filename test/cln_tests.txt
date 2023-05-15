@@ -1,0 +1,7 @@
+BEGINTBOX
+B2 < Exists INV R1
+Exists INV R1 < NOT B1
+B4 < Exists INV R2
+B3 < NOT Exists INV R2
+
+ENDTBOX

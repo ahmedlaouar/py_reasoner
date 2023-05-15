@@ -128,8 +128,9 @@ def process_assertions(axiom, assertions, conflicts, assertion_1):
             if same_individuals(axiom, assertion_1, assertion_2) or same_individuals(axiom, assertion_2, assertion_1):
                 conflicts.append((axiom, assertion_1, assertion_2))
 
+# using ProcessPoolExecutor instead of a ThreadPoolExecutor.
 def parallelized_process_axiom(axiom, assertions, conflicts, counter):
-    with concurrent.futures.ThreadPoolExecutor() as executor:
+    with concurrent.futures.ProcessPoolExecutor() as executor:
         futures_1 = []
         for assertion_1 in assertions:
             future_1 = executor.submit(process_assertions, axiom, assertions, conflicts, assertion_1)
@@ -139,17 +140,18 @@ def parallelized_process_axiom(axiom, assertions, conflicts, counter):
         concurrent.futures.wait(futures_1)
     print(f"Axiom number {counter} done.")
 
+# using ProcessPoolExecutor instead of a ThreadPoolExecutor. useful comment "although we may have multiple threads in a ThreadPoolExecutor, only one thread can execute at a time."
 def conflict_set_concurrent_futures(tbox: TBox, abox: ABox) -> list:
     print("---------- Computation of conflicts set ----------")
     conflicts = []
     assertions = abox.get_assertions()
     negative_axioms = tbox.get_negative_axioms()
 
-    with concurrent.futures.ThreadPoolExecutor() as executor:
+    with concurrent.futures.ProcessPoolExecutor() as executor:
         counter = 1
         futures = []
         for axiom in negative_axioms:
-            future = executor.submit(process_axiom, axiom, assertions, conflicts, counter)
+            future = executor.submit(parallelized_process_axiom, axiom, assertions, conflicts, counter)
             futures.append(future)
             counter += 1
 

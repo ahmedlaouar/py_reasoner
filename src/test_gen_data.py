@@ -1,6 +1,4 @@
 import time
-from dl_lite.assertion import assertion
-from dl_lite.axiom import Axiom, Side
 from dl_lite.tbox import TBox
 from dl_lite_parser.abox_parser import read_abox
 from dl_lite_parser.tbox_parser import read_tbox

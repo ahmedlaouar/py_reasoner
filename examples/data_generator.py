@@ -34,7 +34,7 @@ def generate_dataset(abox_file_path, tbox_file_path, num_lines, Ni, Nc, Nr):
 
     with open(tbox_file_path, 'w') as file:
         types = ['two_concepts', 'two_roles', 'concept_and_role']
-        for _ in range(num_lines // 100):
+        for _ in range(num_lines // 200):
             combination_type = random.choice(types)
             random_number = random.random()
             if combination_type == 'two_concepts':
@@ -63,8 +63,8 @@ def generate_dataset(abox_file_path, tbox_file_path, num_lines, Ni, Nc, Nr):
                 generated_tbox.add((combination[0],combination[1]))
                 file.write(line)
 
-abox_file_path = 'dataset.txt'
-tbox_file_path = 'ontology.txt'
+abox_file_path = 'examples/dataset.txt'
+tbox_file_path = 'examples/ontology.txt'
 num_lines = 10000#00
 Ni = 100
 Nc = 50

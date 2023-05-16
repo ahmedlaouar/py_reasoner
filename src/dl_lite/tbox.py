@@ -36,11 +36,12 @@ class TBox:
                 # Indeed in both conditions, when names match between positive and negative axioms, modifiers from the negative axiom are used in the negative new axiom and negation is applied when needed
                 # Both types of rules are discussed in the documentation, this is a shortcut I made thanks to the implementation that seperates names and modifiers in both sides of an axiom    
                 if negative_axiom.get_left_side().get_name() == positive_axiom.get_right_side().get_name():
-
+                    if (Modifier.inversion in negative_axiom.get_left_side().get_modifiers()) == (Modifier.inversion not in positive_axiom.get_right_side().get_modifiers()):
+                        continue
                     new_modifiers = negative_axiom.get_left_side().get_modifiers().copy()
-                    if Modifier.projection in new_modifiers:
+                    if Modifier.projection in new_modifiers and Modifier.projection in positive_axiom.get_right_side().get_modifiers():
                         new_modifiers.remove(Modifier.projection)
-                    if Modifier.inversion in new_modifiers:
+                    if Modifier.inversion in new_modifiers and Modifier.inversion in positive_axiom.get_right_side().get_modifiers():
                         new_modifiers.remove(Modifier.inversion)
 
                     new_side = Side(positive_axiom.get_left_side().get_name(),new_modifiers)
@@ -50,11 +51,12 @@ class TBox:
                         cln.append(new_axiom)
                         
                 elif negative_axiom.get_right_side().get_name() == positive_axiom.get_right_side().get_name():
-                    
+                    if (Modifier.inversion in negative_axiom.get_right_side().get_modifiers()) == (Modifier.inversion not in positive_axiom.get_right_side().get_modifiers()):
+                        continue
                     new_modifiers = negative_axiom.get_right_side().negate().get_modifiers().copy()
-                    if Modifier.projection in new_modifiers:
+                    if Modifier.projection in new_modifiers and Modifier.projection in positive_axiom.get_right_side().get_modifiers():
                         new_modifiers.remove(Modifier.projection)
-                    if Modifier.inversion in new_modifiers:
+                    if Modifier.inversion in new_modifiers and Modifier.inversion in positive_axiom.get_right_side().get_modifiers():
                         new_modifiers.remove(Modifier.inversion)
 
                     new_side = Side(positive_axiom.get_left_side().get_name(),new_modifiers)
@@ -63,6 +65,12 @@ class TBox:
                         cln.append(new_axiom)
                         
         #return cln
+    def check_integrity(self):
+        for axiom in self.__negative_axioms:
+            if axiom.get_left_side().get_name() == axiom.get_right_side().get_name():
+                print("This TBox is not consistent")
+                break
+        
 
     def __str__(self) -> str:
         s = "-------------------- TBOX Axioms --------------------\n"

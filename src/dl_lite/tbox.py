@@ -58,7 +58,8 @@ class TBox:
         for axiom in self.__negative_axioms:
             if axiom.get_left_side().get_name() == axiom.get_right_side().get_name():
                 print("This TBox is not consistent")
-                break
+                return False
+        return True
         
 
     def __str__(self) -> str:

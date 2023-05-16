@@ -69,7 +69,10 @@ class Axiom:
                 return Axiom(self.__left_side,self.__right_side.negate())
         else:
             return Axiom(self.__left_side,self.__right_side.negate())
-                
+        
+    def inverse_negative_axiom(self):
+        # returns a new inversed axiom (left in right, right in left)
+        return Axiom(self.__right_side.negate(),self.__left_side.negate())                
 
     def __str__(self) -> str:
         return "{} < {}".format(self.__left_side.__str__(), self.__right_side.__str__())

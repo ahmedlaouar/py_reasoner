@@ -34,7 +34,7 @@ def same_individuals(axiom: Axiom, assertion_1: assertion, assertion_2: assertio
                     return True
 
 def conflict_set(tbox: TBox, abox : ABox) -> list():
-        print("---------- Computation of conflicts set ----------")
+        print("------------ Computation of conflicts set -----------")
         conflicts = []
         assertions = abox.get_assertions()
         #tbox.negative_closure()
@@ -71,8 +71,9 @@ def supports_deduction(find_assertion: assertion, positive_axioms: list(), abox:
 
 def compute_supports(target_assertion: assertion, positive_axioms: list(), abox: ABox):
     supports = supports_deduction(target_assertion, positive_axioms, abox)
-    if target_assertion in abox.get_assertions():
-        supports.append(target_assertion)
+    for abox_assertion in abox.get_assertions():
+        if target_assertion.get_assertion_name() == abox_assertion.get_assertion_name() and target_assertion.get_individuals() == abox_assertion.get_individuals():
+            supports.append(abox_assertion)
     return supports
 
 def check_all_dominance(abox, conflicts, supports):
@@ -103,7 +104,7 @@ def process_axiom(axiom, assertions, conflicts, counter):
     print(f"Axiom number {counter} done.")
 
 def conflict_set_with_threads(tbox: TBox, abox: ABox) -> list:
-    print("---------- Computation of conflicts set ----------")
+    print("------------ Computation of conflicts set -----------")
     conflicts = []
     assertions = abox.get_assertions()
     negative_axioms = tbox.get_negative_axioms()

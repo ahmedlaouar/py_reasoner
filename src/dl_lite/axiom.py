@@ -33,7 +33,7 @@ class Side:
         
     def __str__(self) -> str:
         if not self.__modifiers:
-            return ' ' + self.__name
+            return self.__name
         else:
             return ' '.join([m.value for m in self.__modifiers]) + ' ' + self.__name
     
@@ -72,7 +72,7 @@ class Axiom:
                 
 
     def __str__(self) -> str:
-        return self.__left_side.__str__() + " < " + self.__right_side.__str__()
+        return "{} < {}".format(self.__left_side.__str__(), self.__right_side.__str__())
     
     def __eq__(self, __value: object) -> bool:
         if (isinstance(__value, Axiom)):

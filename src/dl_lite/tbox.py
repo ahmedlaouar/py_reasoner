@@ -65,7 +65,7 @@ class TBox:
         #return cln
 
     def __str__(self) -> str:
-        s = "TBox Axioms : \n"
+        s = "-------------------- TBOX Axioms --------------------\n"
         for axiom in self.__positive_axioms + self.__negative_axioms:
             s += axiom.__str__() + "\n"
         return s
@@ -94,5 +94,5 @@ class TBox:
         
         for re in to_remove : 
             if re in self.__positive_axioms:
-                self.__positive_axioms.delete(re)
+                self.__positive_axioms.remove(re)
             print(re)

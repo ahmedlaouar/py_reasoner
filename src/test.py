@@ -1,4 +1,6 @@
 from dl_lite.abox import ABox
+from dl_lite.axiom import Axiom, Side
+from dl_lite.tbox import TBox
 from dl_lite_parser.abox_parser import read_abox
 from dl_lite_parser.tbox_parser import read_tbox
 import pathlib
@@ -20,11 +22,11 @@ preference_relation = abox.get_directed_edges()
 for edge1,edge2 in preference_relation:
     print(edge1, " -> ",edge2)
 
-#a,b,c,d = Side("A"), Side("B"), Side("C"), Side("D")
-#ax1,ax2,ax3,ax4 = Axiom(a,b), Axiom(b,c), Axiom(c,d), Axiom(d,a)
-#test_tbox = TBox()
-#test_tbox.add_axiom(ax1)
-#test_tbox.add_axiom(ax2)
-#test_tbox.add_axiom(ax3)
-#test_tbox.add_axiom(ax4)
-#test_tbox.resolve_circular()
+a,b,c,d = Side("A"), Side("B"), Side("C"), Side("D")
+ax1,ax2,ax3,ax4 = Axiom(a,b), Axiom(b,a), Axiom(c,d), Axiom(d,c)
+test_tbox = TBox()
+test_tbox.add_axiom(ax1)
+test_tbox.add_axiom(ax2)
+test_tbox.add_axiom(ax3)
+test_tbox.add_axiom(ax4)
+test_tbox.resolve_circular()

@@ -70,6 +70,7 @@ class TBox:
             s += axiom.__str__() + "\n"
         return s
     
+    # The following two functions must be rewritten, some special cases are not taken into consideration
     def check_circular(self, positive_axioms, current_axiom, visited, current_path, to_remove):
         visited.append(current_axiom)
         current_path.append(current_axiom)

@@ -18,8 +18,16 @@ print(f"Size of the ABox = {abox.get_size()}")
 
 print("---------------------------------------------------------")
 tbox.resolve_circular()
-
+print(len(tbox.get_positive_axioms()))
 tbox.negative_closure()
+with open(str(path)+"/negative_closure_ontology.txt", 'w') as file:
+    for axiom in tbox.get_positive_axioms():
+        line = "{}\n".format(axiom)
+        file.write(line)
+    for axiom in tbox.get_negative_axioms():
+        line = "{}\n".format(axiom)
+        file.write(line)
+
 print(f"The size of the negative closure = {len(tbox.get_negative_axioms())}")
 print("---------------------------------------------------------")
 # Measure execution time

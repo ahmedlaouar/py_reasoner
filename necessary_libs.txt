@@ -1,0 +1,11 @@
+Install Psycopg2
+sudo apt-get install libpq-dev
+sudo apt-get install python3-pip
+sudo pip3 install Psycopg2
+Add user:
+sudo -u postgres createuser --interactive
+sudo -u postgres createdb sammy
+sudo adduser sammy
+sudo -u sammy psql
+Consider including the libs directly with the project, use a sqlite database inside project it's smaller and more appropriate to this use case.
+Reproductibility issues.

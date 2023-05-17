@@ -14,6 +14,12 @@ class assertion:
         else:
             return self.__individual_1,
 
+    def get_individuals2(self):
+        if self.__is_role:
+            return self.__individual_1,self.__individual_2
+        else:
+            return self.__individual_1,None
+
     def is_role(self):
         return self.__is_role
     

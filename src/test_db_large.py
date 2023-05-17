@@ -1,4 +1,3 @@
-
 import os
 import pathlib
 import time
@@ -16,9 +15,9 @@ db_path = os.path.join(project_directory, f"{database_name}.db")
 create_database(host,database_name,user,user,db_path)
 
 path = pathlib.Path().resolve()
-
-tbox = read_tbox(str(path)+"/src/first_tbox.txt")
-print(tbox)
+print("---------- Reading the TBox from file ----------")
+tbox = read_tbox(str(path)+"/examples/ontology.txt")
+print(f"Size of the TBox = {len(tbox.get_negative_axioms())+len(tbox.get_positive_axioms())}")
 print("-----------------------------------------------------")
 tbox.negative_closure()
 print(f"Size of the negative closure = {len(tbox.get_negative_axioms())}")
@@ -32,7 +31,7 @@ try:
     )
 
     cursor = conn.cursor()
-    file_path = str(path)+"/src/first_abox.txt"
+    file_path = str(path)+"/examples/dataset.txt"
     abox_to_database(file_path,database_name,cursor)
     
     # Measure execution time
@@ -47,11 +46,10 @@ try:
     conn.close()
     
     print(f"Size of the conflicts = {len(conflicts)}")
-    for c in conflicts:
-        print(c)
-    print("-----------------------------------------------------")
-    with open(str(path)+"/src/conflicts_first_dataset_sql.txt", 'w') as file:
+    print("---------------------------------------------------------")
+    with open(str(path)+"/examples/conflicts_set_SQL.txt", 'w') as file:
         for conf in conflicts :
             file.write(str(conf)+'\n')
+    print("-----------------------------------------------------")
 except (Exception, psycopg2.DatabaseError) as e:
     print("An error occurred:", e)

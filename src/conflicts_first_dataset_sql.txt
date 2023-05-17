@@ -1,0 +1,2 @@
+(2, 'Manager', 'Bob', 'None', 5, 'Edit', 'Bob', 'F78')
+(3, 'Sales', 'Bob', 'None', 4, 'Sign', 'Bob', 'F78')

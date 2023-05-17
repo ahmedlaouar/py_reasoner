@@ -1,0 +1,46 @@
+stalnaker
+
+
+--------- Reading the TBox from file ----------
+Size of the TBox = 50
+-----------------------------------------------------
+---------- Computation of negative closure ----------
+Size of the negative closure = 33
+------------ Computation of conflicts set -----------
+Axiom number = 1
+Axiom number = 2
+Axiom number = 3
+Axiom number = 4
+Axiom number = 5
+Axiom number = 6
+Axiom number = 7
+Axiom number = 8
+Axiom number = 9
+Axiom number = 10
+Axiom number = 11
+Axiom number = 12
+Axiom number = 13
+Axiom number = 14
+Axiom number = 15
+Axiom number = 16
+Axiom number = 16
+Axiom number = 17
+Axiom number = 18
+Axiom number = 19
+Axiom number = 20
+Axiom number = 21
+Axiom number = 22
+Axiom number = 23
+Axiom number = 24
+Axiom number = 25
+Axiom number = 26
+Axiom number = 27
+Axiom number = 28
+Axiom number = 29
+Axiom number = 30
+Axiom number = 31
+Axiom number = 32
+Execution time: 0.11200475692749023 seconds
+Size of the conflicts = 2241
+---------------------------------------------------------
+-----------------------------------------------------

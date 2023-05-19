@@ -4,7 +4,8 @@ import pathlib
 import time
 import psycopg2
 from database_version.parser_to_db import abox_to_database, create_database
-from dl_lite.new_repair import conflict_set
+from dl_lite.assertion import assertion
+from dl_lite.new_repair import compute_supports, conflict_set
 from dl_lite_parser.tbox_parser import read_tbox
 
 database_name = "test_abox"
@@ -41,10 +42,6 @@ try:
     end_time = time.time()
     execution_time = end_time - start_time
     print(f"Execution time: {execution_time} seconds")
-
-    conn.commit()
-    cursor.close()
-    conn.close()
     
     print(f"Size of the conflicts = {len(conflicts)}")
     for c in conflicts:
@@ -53,5 +50,16 @@ try:
     with open(str(path)+"/src/conflicts_first_dataset_sql.txt", 'w') as file:
         for conf in conflicts :
             file.write(str(conf)+'\n')
+    
+    check_assertion = assertion("Staff","Bob")
+    supports = compute_supports(check_assertion, tbox.get_positive_axioms(),cursor)
+    print(f"Size of the supports = {len(supports)}")
+    for support in supports:
+        print(support)
+
+    conn.commit()
+    cursor.close()
+    conn.close()
+
 except (Exception, psycopg2.DatabaseError) as e:
     print("An error occurred:", e)

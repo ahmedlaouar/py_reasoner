@@ -69,6 +69,7 @@ class TBox:
         return s
     
     # The following two functions must be rewritten, some special cases are not taken into consideration
+    # To be removed
     def check_circular(self, positive_axioms, current_axiom, visited, current_path, to_remove):
         visited.append(current_axiom)
         current_path.append(current_axiom)
@@ -82,7 +83,7 @@ class TBox:
                     self.check_circular(positive_axioms, next_axiom, visited, current_path, to_remove)
         
         current_path.remove(current_axiom)
-
+    # To be removed
     def resolve_circular(self):
         to_remove = []
         visited = []

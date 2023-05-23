@@ -4,8 +4,8 @@ import pathlib
 import time
 import psycopg2
 from database_version.parser_to_db import abox_to_database, create_database
-from dl_lite.assertion import assertion
-from dl_lite.new_repair import compute_supports, conflict_set
+from dl_lite.assertion import assertion, w_assertion
+from dl_lite.new_repair import check_all_dominance, check_assertion_in_cpi_repair, compute_supports, conflict_set, is_strictly_preferred
 from dl_lite_parser.tbox_parser import read_tbox
 
 database_name = "test_abox"
@@ -45,18 +45,28 @@ try:
     
     print(f"Size of the conflicts = {len(conflicts)}")
     for c in conflicts:
-        print(c)
+        print(c[0],c[1])
     print("-----------------------------------------------------")
     with open(str(path)+"/src/conflicts_first_dataset_sql.txt", 'w') as file:
         for conf in conflicts :
-            file.write(str(conf)+'\n')
+            s = "({}),({})".format(conf[0],conf[1])
+            file.write(s+'\n')
     
     check_assertion = assertion("Staff","Bob")
     supports = compute_supports(check_assertion, tbox.get_positive_axioms(),cursor)
     print(f"Size of the supports = {len(supports)}")
-    for support in supports:
-        print(support)
+    #for support in supports:
+    #    print(support)
 
+    #test_assertion = w_assertion("Reports","F78",weight=1)
+
+    #for support in supports:
+    #    print(is_strictly_preferred(cursor, test_assertion, support))
+
+    print(check_all_dominance(cursor,conflicts,supports))
+
+    check_assertion_in_cpi_repair(cursor, tbox, check_assertion)
+    
     conn.commit()
     cursor.close()
     conn.close()

@@ -1,5 +1,5 @@
 from dl_lite.abox import ABox
-from dl_lite.assertion import assertion
+from dl_lite.assertion import assertion, w_assertion
 from dl_lite.axiom import Axiom, Modifier
 from dl_lite.tbox import TBox
 import threading
@@ -43,7 +43,15 @@ def conflict_set(tbox: TBox, cursor) -> list():
             continue
         else:
             for row in rows:
-                conflicts.append(row)
+                if row[3] == 'None' or row[3] == None:
+                    assertion_1 = w_assertion(row[1],row[2],weight=row[0])
+                else:
+                    assertion_1 = w_assertion(row[1],row[2],row[3],weight=row[0])
+                if row[7] == 'None' or row[7] == None:
+                    assertion_2 = w_assertion(row[5],row[6],weight=row[4])
+                else:
+                    assertion_2 = w_assertion(row[5],row[6],row[7],weight=row[4])
+                conflicts.append((assertion_1,assertion_2))
         counter += 1
     return conflicts
 
@@ -69,10 +77,10 @@ def supports_deduction(find_assertion: assertion, positive_axioms: list(), curso
                 rows = cursor.fetchall()
                 if len(rows) != 0:
                     for row in rows:
-                        if row[3] == 'None':
-                            new_assertion = assertion(row[1],row[2])
+                        if row[3] == 'None' or row[3] == None:
+                            new_assertion = w_assertion(row[1],row[2],weight=row[0])
                         else:
-                            new_assertion = assertion(row[1],row[2],row[3])
+                            new_assertion = w_assertion(row[1],row[2],row[3],weight=row[0])
                         supports.append(new_assertion)
             next_assertion = assertion(axiom.get_left_side().get_name(),find_assertion.get_individuals2()[0],find_assertion.get_individuals2()[1])
             supports += supports_deduction(next_assertion, positive_axioms, cursor)
@@ -83,7 +91,68 @@ def compute_supports(target_assertion: assertion, positive_axioms: list(), curso
     query = f"""SELECT * FROM assertions WHERE assertion_name = '{target_assertion.get_assertion_name()}' AND 
     individual_1 = '{target_assertion.get_individuals2()[0]}' and individual_2 = '{target_assertion.get_individuals2()[1]}'"""
     cursor.execute(query)
-    rows = cursor.fetchall()
-    if len(rows) != 0:
+    row = cursor.fetchone()
+    if row is not None:
         supports.append(target_assertion)            
     return supports
+
+def is_strictly_preferred(cursor, w_assertion_1, w_assertion_2, first_call=True) -> bool:
+    # a test if assertion_1 is strictly preferred to assertion_2    
+    vertex_1 = w_assertion_1.get_assertion_weight()
+    vertex_2 = w_assertion_2.get_assertion_weight()
+    cursor.execute(f"SELECT successor FROM partial_order WHERE assertion_id={vertex_1}")
+    result = cursor.fetchall()
+    successors_1 = []
+    if len(result) != 0:
+        for row in result:
+            if len(row) != 0 : successors_1.append(row[0])  # Extract the first element of each tuple
+
+    successors_2 = []
+    cursor.execute(f"SELECT successor FROM partial_order WHERE assertion_id={vertex_2}")
+    result = cursor.fetchall()
+    if len(result) != 0:
+        for row in result:
+            if len(row) != 0 : successors_2.append(row[0])  # Extract the first element of each tuple
+
+    # in the first call, we don't want the two assertions to be equivalent (both in each one successors)
+    if first_call and (vertex_2 in successors_1) and (vertex_1 not in successors_2):
+        return True
+    
+    # in the rest of the subsequent recursive calls if the assertion is equivalent to one of our assertions successors (or their successors) it is retianed
+    if not first_call and (vertex_2 in successors_1):
+        return True
+    # for all assertion successors and their successors we need to check if assertion_2 is their, the partial order is a transitive relation  
+    
+    if len(successors_1) != 0: # Check if assertion_1 has successors
+        for vertex in successors_1:
+            
+            cursor.execute(f"SELECT * FROM assertions WHERE id={vertex}")
+            row = cursor.fetchone()
+            if row is not None:
+                if row[3] == 'None' or row[3] == None:
+                    new_assertion = w_assertion(row[1],row[2],weight=row[0])
+                else:
+                    new_assertion = w_assertion(row[1],row[2],row[3],weight=row[0])
+                if is_strictly_preferred(cursor, new_assertion, w_assertion_2, False):
+                    return True
+
+    return False
+
+def check_all_dominance(cursor, conflicts, supports):
+
+    for conflict in conflicts:
+        conflict_supported = False
+        for support in supports:
+            if is_strictly_preferred(cursor, support, conflict[0]) or is_strictly_preferred(cursor, support, conflict[1]):
+                conflict_supported = True
+                break
+        if not conflict_supported:
+            return False
+    return True
+
+def check_assertion_in_cpi_repair(cursor, tbox, check_assertion):
+    tbox.negative_closure()
+    conflicts = conflict_set(tbox, cursor)
+    supports = compute_supports(check_assertion, tbox.get_positive_axioms(),cursor)
+    if check_all_dominance(cursor, conflicts, supports):
+        print(f"{check_assertion} is in the Cpi-repair of the abox")

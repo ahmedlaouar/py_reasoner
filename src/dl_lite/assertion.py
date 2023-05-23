@@ -32,3 +32,22 @@ class assertion:
     #def __eq__(self, __value: object) -> bool:
     #    if self.get_assertion_name() == __value.get_assertion_name() and self.get_individuals() == __value.get_individuals():
     #        return True
+
+class w_assertion(assertion):
+    def __init__(self, assertion_name, individual_1, individual_2 = None, weight=-1):
+        if individual_2 is None:
+            super().__init__(assertion_name, individual_1)
+        else:
+            super().__init__(assertion_name, individual_1, individual_2)
+        self.__weight = weight
+
+    def get_assertion_weight(self):
+        return self.__weight
+    
+    def __str__(self) -> str:
+        ind1 = super().get_individuals()[0]
+        if self.is_role():
+            ind2 = super().get_individuals2()[1]
+            return "{}({},{}),{}".format(super().get_assertion_name(),ind1,ind2,self.__weight)
+        else:
+            return "{}({}),{}".format(super().get_assertion_name(),ind1,self.__weight)

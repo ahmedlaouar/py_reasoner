@@ -55,18 +55,27 @@ try:
     check_assertion = assertion("Staff","Bob")
     supports = compute_supports(check_assertion, tbox.get_positive_axioms(),cursor)
     print(f"Size of the supports = {len(supports)}")
-    #for support in supports:
-    #    print(support)
-
-    #test_assertion = w_assertion("Reports","F78",weight=1)
-
-    #for support in supports:
-    #    print(is_strictly_preferred(cursor, test_assertion, support))
-
+    
     print(check_all_dominance(cursor,conflicts,supports))
 
     check_assertion_in_cpi_repair(cursor, tbox, check_assertion)
     
+    check_assertion_2 = assertion("Reports","F78")
+    supports_2 = compute_supports(check_assertion_2, tbox.get_positive_axioms(),cursor)
+    print(f"Size of the supports = {len(supports_2)}")
+    
+    print(check_all_dominance(cursor,conflicts,supports_2))
+
+    check_assertion_in_cpi_repair(cursor, tbox, check_assertion_2)
+
+    check_assertion_3 = assertion("Manager","Bob")
+    supports_3 = compute_supports(check_assertion_3, tbox.get_positive_axioms(),cursor)
+    print(f"Size of the supports = {len(supports_3)}")
+    
+    print(check_all_dominance(cursor,conflicts,supports_3))
+
+    check_assertion_in_cpi_repair(cursor, tbox, check_assertion_3)
+
     conn.commit()
     cursor.close()
     conn.close()

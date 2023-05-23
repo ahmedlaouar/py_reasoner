@@ -91,7 +91,11 @@ def compute_supports(target_assertion: assertion, positive_axioms: list(), curso
     cursor.execute(query)
     row = cursor.fetchone()
     if row is not None:
-        supports.append(target_assertion)            
+        if row[3] == 'None' or row[3] == None:
+            new_assertion = w_assertion(row[1],row[2],weight=row[0])
+        else:
+            new_assertion = w_assertion(row[1],row[2],row[3],weight=row[0])
+        supports.append(new_assertion)
     return supports
 
 def is_strictly_preferred(cursor, w_assertion_1, w_assertion_2, first_call=True) -> bool:
@@ -154,3 +158,5 @@ def check_assertion_in_cpi_repair(cursor, tbox, check_assertion):
     supports = compute_supports(check_assertion, tbox.get_positive_axioms(),cursor)
     if check_all_dominance(cursor, conflicts, supports):
         print(f"{check_assertion} is in the Cpi-repair of the abox")
+    else:
+        print(f"{check_assertion} is not in the Cpi-repair of the abox")

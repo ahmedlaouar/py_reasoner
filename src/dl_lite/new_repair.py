@@ -1,8 +1,6 @@
-from dl_lite.abox import ABox
 from dl_lite.assertion import assertion, w_assertion
 from dl_lite.axiom import Axiom, Modifier
 from dl_lite.tbox import TBox
-import threading
 
 def generate_query(axiom: Axiom):
     left_side = axiom.get_left_side()

@@ -5,7 +5,7 @@ import time
 import psycopg2
 from database_version.parser_to_db import abox_to_database, create_database, read_pos
 from dl_lite.assertion import assertion, w_assertion
-from dl_lite.new_repair import check_all_dominance, check_assertion_in_cpi_repair, compute_supports, conflict_set, generate_possible_assertions, is_strictly_preferred
+from dl_lite.new_repair import check_all_dominance, check_assertion_in_cpi_repair, compute_supports, conflict_set, generate_possible_assertions, get_all_assertions, is_strictly_preferred
 from dl_lite_parser.tbox_parser import read_tbox
 
 database_name = "test_abox"
@@ -54,39 +54,13 @@ try:
 
     pos_order = read_pos(str(path)+"/src/first_pos.txt")
 
-    for element in pos_order:
-        print(element,pos_order[element])
-
-    check_assertion = assertion("Staff","Bob")
-    supports = compute_supports(check_assertion, tbox.get_positive_axioms(),cursor)
-    print(f"Size of the supports = {len(supports)}")
-    
-    print(check_all_dominance(cursor,pos_order,conflicts,supports))
-
-    check_assertion_in_cpi_repair(cursor, tbox, pos_order, check_assertion)
-    
-    check_assertion_2 = assertion("Reports","F78")
-    supports_2 = compute_supports(check_assertion_2, tbox.get_positive_axioms(),cursor)
-    print(f"Size of the supports = {len(supports_2)}")
-    
-    print(check_all_dominance(cursor, pos_order, conflicts,supports_2))
-
-    check_assertion_in_cpi_repair(cursor, tbox, pos_order, check_assertion_2)
-
-    check_assertion_3 = assertion("Manager","Bob")
-    supports_3 = compute_supports(check_assertion_3, tbox.get_positive_axioms(),cursor)
-    print(f"Size of the supports = {len(supports_3)}")
-    
-    print(check_all_dominance(cursor, pos_order, conflicts,supports_3))
-
-    check_assertion_in_cpi_repair(cursor, tbox, pos_order, check_assertion_3)
-
     print("The next part is for testing :")
     # Generate all possible assertions to compute the whole repair
     possible = generate_possible_assertions(cursor, tbox.get_positive_axioms())
-    for current in possible:
-        print(current)
+    possible += get_all_assertions(cursor)
 
+    for check_assertion in possible:
+        check_assertion_in_cpi_repair(cursor, tbox, pos_order, check_assertion)
 
     conn.commit()
     cursor.close()

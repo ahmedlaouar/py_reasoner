@@ -5,7 +5,7 @@ import time
 import psycopg2
 from database_version.parser_to_db import abox_to_database, create_database, read_pos
 from dl_lite.assertion import assertion, w_assertion
-from dl_lite.new_repair import check_all_dominance, check_assertion_in_cpi_repair, compute_supports, conflict_set, is_strictly_preferred
+from dl_lite.new_repair import check_all_dominance, check_assertion_in_cpi_repair, compute_supports, conflict_set, generate_possible_assertions, get_all_assertions, is_strictly_preferred, new_check_assertion_in_cpi_repair
 from dl_lite_parser.tbox_parser import read_tbox
 
 database_name = "test_abox"
@@ -19,7 +19,7 @@ create_database(host,database_name,user,user,db_path)
 path = pathlib.Path().resolve()
 common_path = "/benchmark_data/data/"
 tbox = read_tbox(str(path)+common_path+"ontology0.txt")
-print(tbox)
+#print(tbox)
 print("-----------------------------------------------------")
 tbox.negative_closure()
 print(f"Size of the negative closure = {len(tbox.get_negative_axioms())}")
@@ -37,28 +37,25 @@ try:
     file_path = str(path)+common_path+"dataset_small.txt"
     abox_to_database(file_path,database_name,cursor)
     
-    pos_order = read_pos(str(path)+common_path+"pos_dataset_small.txt")
-
-    for element in pos_order:
-        print(element,pos_order[element])    
+    pos_order = read_pos(str(path)+common_path+"pos_dataset_small.txt") 
 
     # Measure execution time
-    """start_time = time.time()
+    start_time = time.time()
     conflicts = conflict_set(tbox,cursor)
     end_time = time.time()
     execution_time = end_time - start_time
     print(f"Execution time: {execution_time} seconds")
     
     print(f"Size of the conflicts = {len(conflicts)}")
-    for c in conflicts:
-        print(c[0],c[1])
-    print("-----------------------------------------------------")
-    with open(str(path)+"/src/conflicts_first_dataset_sql.txt", 'w') as file:
-        for conf in conflicts :
-            s = "({}),({})".format(conf[0],conf[1])
-            file.write(s+'\n')"""
     
+    print("The next part is for testing :")
+    # Generate all possible assertions to compute the whole repair
+    possible = generate_possible_assertions(cursor, tbox.get_positive_axioms())
+    possible += get_all_assertions(cursor)
 
+    for check_assertion in possible:
+        new_check_assertion_in_cpi_repair(cursor, tbox, pos_order, check_assertion)
+    
 
     conn.commit()
     cursor.close()

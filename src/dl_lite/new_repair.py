@@ -33,6 +33,7 @@ def conflict_set(tbox: TBox, cursor) -> list():
     counter = 1
     for axiom in negative_axioms:
         print(f"Axiom number = {counter}")
+        counter += 1
         # For each axiom, take left and right side, according to each case generate a query to the database and retreive the result of a select statement
         query = generate_query(axiom)
         cursor.execute(query)
@@ -49,8 +50,7 @@ def conflict_set(tbox: TBox, cursor) -> list():
                     assertion_2 = w_assertion(row[5],row[6],weight=row[4])
                 else:
                     assertion_2 = w_assertion(row[5],row[6],row[7],weight=row[4])
-                conflicts.append((assertion_1,assertion_2))
-        counter += 1
+                conflicts.append((assertion_1,assertion_2))        
     return conflicts
 
 def supports_deduction(find_assertion: assertion, positive_axioms: list(), cursor):
@@ -178,6 +178,13 @@ def check_all_dominance(cursor, pos, conflicts, supports):
 def check_assertion_in_cpi_repair(cursor, tbox, pos, check_assertion):
     tbox.negative_closure()
     conflicts = conflict_set(tbox, cursor)
+    supports = compute_supports(check_assertion, tbox.get_positive_axioms(),cursor)
+    if check_all_dominance(cursor, pos, conflicts, supports):
+        print(f"{check_assertion} is in the Cpi-repair of the abox")
+    else:
+        print(f"{check_assertion} is not in the Cpi-repair of the abox")
+
+def new_check_assertion_in_cpi_repair(cursor, tbox, pos, conflicts, check_assertion):
     supports = compute_supports(check_assertion, tbox.get_positive_axioms(),cursor)
     if check_all_dominance(cursor, pos, conflicts, supports):
         print(f"{check_assertion} is in the Cpi-repair of the abox")

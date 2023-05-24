@@ -187,9 +187,20 @@ def check_assertion_in_cpi_repair(cursor, tbox, pos, check_assertion):
 def new_check_assertion_in_cpi_repair(cursor, tbox, pos, conflicts, check_assertion):
     supports = compute_supports(check_assertion, tbox.get_positive_axioms(),cursor)
     if check_all_dominance(cursor, pos, conflicts, supports):
-        print(f"{check_assertion} is in the Cpi-repair of the abox")
+        #print(f"{check_assertion} is in the Cpi-repair of the abox")
+        return True
     else:
-        print(f"{check_assertion} is not in the Cpi-repair of the abox")
+        #print(f"{check_assertion} is not in the Cpi-repair of the abox")
+        return False
+
+def compute_cpi_repair(cursor, tbox, pos, conflicts, check_list):
+    cpi_repair = []
+    for check_assertion in check_list:
+        supports = compute_supports(check_assertion, tbox.get_positive_axioms(),cursor)
+        if check_all_dominance(cursor, pos, conflicts, supports):
+            cpi_repair.append(check_assertion)
+    return cpi_repair
+        
 
 # need to work more on this
 def generate_possible_assertions(cursor, positive_axioms):
@@ -227,10 +238,9 @@ def get_all_assertions(cursor):
     for row in rows:
         if row[2] == None or row[2] == 'None':
             new_assertion = assertion(row[0],row[1])
-            assertions_list.append(new_assertion)
         else:
             new_assertion = assertion(row[0],row[1],row[2])
-            assertions_list.append(new_assertion)
+        assertions_list.append(new_assertion)
     return assertions_list
 
 def generate_assertions_naive(cursor, positive_axioms):
@@ -248,5 +258,11 @@ def generate_assertions_naive(cursor, positive_axioms):
     rows = cursor.fetchall()
     for row in rows:
         individual_2_list.append(row[0])
-    #for name in assertion_names:
-
+    for name in assertion_names:
+        for individual_1 in individual_1_list:
+            new_assertion = assertion(name,individual_1)
+            generated_list.append(new_assertion)
+            for individual_2 in individual_2_list:
+                new_assertion = assertion(name,individual_1,individual_2)
+                generated_list.append(new_assertion)
+    return generated_list

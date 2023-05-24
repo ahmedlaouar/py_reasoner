@@ -5,7 +5,7 @@ import time
 import psycopg2
 from database_version.parser_to_db import abox_to_database, create_database, read_pos
 from dl_lite.assertion import assertion, w_assertion
-from dl_lite.new_repair import check_all_dominance, check_assertion_in_cpi_repair, compute_supports, conflict_set, generate_possible_assertions, get_all_assertions, is_strictly_preferred, new_check_assertion_in_cpi_repair
+from dl_lite.new_repair import check_all_dominance, check_assertion_in_cpi_repair, compute_cpi_repair, compute_supports, conflict_set, generate_assertions_naive, generate_possible_assertions, get_all_assertions, is_strictly_preferred, new_check_assertion_in_cpi_repair
 from dl_lite_parser.tbox_parser import read_tbox
 
 database_name = "test_abox"
@@ -53,9 +53,17 @@ try:
     possible = generate_possible_assertions(cursor, tbox.get_positive_axioms())
     possible += get_all_assertions(cursor)
 
+    verif_count = 0
     for check_assertion in possible:
-        new_check_assertion_in_cpi_repair(cursor, tbox, pos_order, check_assertion)
-    
+        if (new_check_assertion_in_cpi_repair(cursor, tbox, pos_order, conflicts, check_assertion)):
+            verif_count += 1
+    print("The size of the cpi_repair using method 1: ",verif_count)
+
+    check_list = generate_assertions_naive(cursor,tbox.get_positive_axioms())
+
+    cpi_repair = compute_cpi_repair(cursor, tbox, pos_order, conflicts, check_list)
+    print("The size of the cpi_repair using method 2: ",len(cpi_repair))
+
 
     conn.commit()
     cursor.close()

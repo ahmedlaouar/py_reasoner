@@ -49,7 +49,8 @@ try:
     print("---------------------------------------------------------")
     with open(str(path)+"/examples/conflicts_set_SQL.txt", 'w') as file:
         for conf in conflicts :
-            file.write(str(conf)+'\n')
+            s = "({}),({})".format(conf[0],conf[1])
+            file.write(s+'\n')
     print("-----------------------------------------------------")
 except (Exception, psycopg2.DatabaseError) as e:
     print("An error occurred:", e)

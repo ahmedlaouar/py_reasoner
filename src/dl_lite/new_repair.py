@@ -98,6 +98,29 @@ def compute_supports(target_assertion: assertion, positive_axioms: list(), curso
         supports.append(new_assertion)
     return supports
 
+def check_is_preferred_weight(pos,weight_1,weight_2) -> bool:
+    if weight_2 in pos[weight_1]: return True
+    else: 
+        for successor in pos[weight_1]:
+            return check_is_preferred_weight(pos,successor,weight_2)
+    return False
+
+def is_strictly_preferred_pos(cursor, pos, w_assertion_1, w_assertion_2) -> bool:
+    # a test if assertion_1 is strictly preferred to assertion_2
+    vertex_1 = w_assertion_1.get_assertion_weight()
+    vertex_2 = w_assertion_2.get_assertion_weight()
+    cursor.execute(f"SELECT successor FROM partial_order WHERE assertion_id={vertex_1}")
+    result = cursor.fetchone()
+    weight_1 = result[0]
+    cursor.execute(f"SELECT successor FROM partial_order WHERE assertion_id={vertex_2}")
+    result = cursor.fetchone()
+    weight_2 = result[0]
+    # Check if the assertions have the same weight associated
+    if weight_1 == weight_2:
+        return False
+    return check_is_preferred_weight(pos,weight_1,weight_2)
+
+# Deprecated, to be removed
 def is_strictly_preferred(cursor, w_assertion_1, w_assertion_2, first_call=True) -> bool:
     # a test if assertion_1 is strictly preferred to assertion_2    
     vertex_1 = w_assertion_1.get_assertion_weight()
@@ -140,23 +163,69 @@ def is_strictly_preferred(cursor, w_assertion_1, w_assertion_2, first_call=True)
 
     return False
 
-def check_all_dominance(cursor, conflicts, supports):
+def check_all_dominance(cursor, pos, conflicts, supports):
 
     for conflict in conflicts:
         conflict_supported = False
         for support in supports:
-            if is_strictly_preferred(cursor, support, conflict[0]) or is_strictly_preferred(cursor, support, conflict[1]):
+            if is_strictly_preferred_pos(cursor, pos, support, conflict[0]) or is_strictly_preferred_pos(cursor, pos, support, conflict[1]):
                 conflict_supported = True
                 break
         if not conflict_supported:
             return False
     return True
 
-def check_assertion_in_cpi_repair(cursor, tbox, check_assertion):
+def check_assertion_in_cpi_repair(cursor, tbox, pos, check_assertion):
     tbox.negative_closure()
     conflicts = conflict_set(tbox, cursor)
     supports = compute_supports(check_assertion, tbox.get_positive_axioms(),cursor)
-    if check_all_dominance(cursor, conflicts, supports):
+    if check_all_dominance(cursor, pos, conflicts, supports):
         print(f"{check_assertion} is in the Cpi-repair of the abox")
     else:
         print(f"{check_assertion} is not in the Cpi-repair of the abox")
+
+# need to work more on this
+def generate_possible_assertions(cursor, positive_axioms):
+    list_to_check = []
+
+    for axiom in positive_axioms:
+        if Modifier.projection in axiom.get_right_side().get_modifiers():
+            continue
+        query = f"SELECT individual_1,individual_2 FROM assertions WHERE assertion_name = '{axiom.get_left_side().get_name()}'"
+        cursor.execute(query)
+        rows = cursor.fetchall()
+        if len(rows) != 0:
+            assertion_name = axiom.get_right_side().get_name()
+            for row in rows:
+                if row[1] == None or row[1] == 'None':
+                    ind_name = row[0]                    
+                    new_assertion = assertion(assertion_name,ind_name)
+                elif Modifier.projection in axiom.get_left_side().get_modifiers() and Modifier.inversion in axiom.get_left_side().get_modifiers():
+                    ind_name = row[1]                    
+                    new_assertion = assertion(assertion_name,ind_name)
+                elif Modifier.projection in axiom.get_left_side().get_modifiers():
+                    ind_name = row[0]                    
+                    new_assertion = assertion(assertion_name,ind_name)
+                else:
+                    new_assertion = assertion(assertion_name,row[0],row[1])
+                if new_assertion not in list_to_check:
+                    list_to_check.append(new_assertion)
+    return list_to_check
+
+def generate_assertions_naive(cursor, positive_axioms):
+    generated_list = []
+    individual_1_list = []
+    individual_2_list = []
+    assertion_names = list(set([axiom.get_right_side().get_name() for axiom in positive_axioms]))
+    query_1 = f"SELECT UNIQUE individual_1 FROM assertions"
+    query_2 = f"SELECT UNIQUE individual_2 FROM assertions"
+    cursor.execute(query_1)
+    rows = cursor.fetchall()
+    for row in rows:
+        individual_1_list.append(row[0])
+    cursor.execute(query_2)
+    rows = cursor.fetchall()
+    for row in rows:
+        individual_2_list.append(row[0])
+    #for name in assertion_names:
+

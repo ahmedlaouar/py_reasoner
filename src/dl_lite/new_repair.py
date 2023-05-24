@@ -212,13 +212,27 @@ def generate_possible_assertions(cursor, positive_axioms):
                     list_to_check.append(new_assertion)
     return list_to_check
 
+def get_all_assertions(cursor):
+    assertions_list = []
+    query = f"SELECT DISTINCT assertion_name,individual_1,individual_2 FROM assertions"
+    cursor.execute(query)
+    rows = cursor.fetchall()
+    for row in rows:
+        if row[2] == None or row[2] == 'None':
+            new_assertion = assertion(row[0],row[1])
+            assertions_list.append(new_assertion)
+        else:
+            new_assertion = assertion(row[0],row[1],row[2])
+            assertions_list.append(new_assertion)
+    return assertions_list
+
 def generate_assertions_naive(cursor, positive_axioms):
     generated_list = []
     individual_1_list = []
     individual_2_list = []
     assertion_names = list(set([axiom.get_right_side().get_name() for axiom in positive_axioms]))
-    query_1 = f"SELECT UNIQUE individual_1 FROM assertions"
-    query_2 = f"SELECT UNIQUE individual_2 FROM assertions"
+    query_1 = f"SELECT DISTINCT individual_1 FROM assertions"
+    query_2 = f"SELECT DISTINCT individual_2 FROM assertions"
     cursor.execute(query_1)
     rows = cursor.fetchall()
     for row in rows:

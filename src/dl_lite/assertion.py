@@ -29,9 +29,9 @@ class assertion:
         else:
             return "{}({})".format(self.__assertion_name,self.__individual_1)
         
-    #def __eq__(self, __value: object) -> bool:
-    #    if self.get_assertion_name() == __value.get_assertion_name() and self.get_individuals() == __value.get_individuals():
-    #        return True
+    def __eq__(self, __value: object) -> bool:
+        if self.get_assertion_name() == __value.get_assertion_name() and self.get_individuals() == __value.get_individuals():
+            return True
 
 class w_assertion(assertion):
     def __init__(self, assertion_name, individual_1, individual_2 = None, weight=-1):

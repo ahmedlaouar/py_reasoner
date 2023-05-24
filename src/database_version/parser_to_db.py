@@ -92,3 +92,13 @@ def abox_to_database(file_path: str,database_name,cursor):
         );''')
 
     read_abox(file_path,cursor)
+
+def read_pos(file_path: str):
+    pos_order = {}
+    with open(file_path, 'r') as file:
+        for line in file:
+            splitted = line.split(";")
+            weight = int(splitted[0])
+            successors = [int(x) for x in splitted[1:-1]]
+            pos_order[weight] = successors
+    return pos_order

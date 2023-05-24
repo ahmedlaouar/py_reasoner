@@ -3,7 +3,7 @@ import os
 import pathlib
 import time
 import psycopg2
-from database_version.parser_to_db import abox_to_database, create_database
+from database_version.parser_to_db import abox_to_database, create_database, read_pos
 from dl_lite.assertion import assertion, w_assertion
 from dl_lite.new_repair import check_all_dominance, check_assertion_in_cpi_repair, compute_supports, conflict_set, is_strictly_preferred
 from dl_lite_parser.tbox_parser import read_tbox
@@ -37,13 +37,11 @@ try:
     file_path = str(path)+common_path+"dataset_small.txt"
     abox_to_database(file_path,database_name,cursor)
     
-    check_assertion1 = w_assertion("Rolehwpfy","Indzddswizuc","Indqjeuypinp",105)
-    check_assertion2 = w_assertion("Conceptjbzexayzs","Indfxwo",weight=201)
-    check_assertion3 = w_assertion("Conceptguzqweq","Indqgjv",weight=888)
-    
-    print(is_strictly_preferred(cursor, check_assertion1, check_assertion2))
-    print(is_strictly_preferred(cursor, check_assertion1, check_assertion3))
-    print(is_strictly_preferred(cursor, check_assertion2, check_assertion3))
+    pos_order = read_pos(str(path)+common_path+"pos_dataset_small.txt")
+
+    for element in pos_order:
+        print(element,pos_order[element])    
+
     # Measure execution time
     """start_time = time.time()
     conflicts = conflict_set(tbox,cursor)

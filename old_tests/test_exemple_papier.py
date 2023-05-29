@@ -1,8 +1,8 @@
 from dl_lite.axiom import Axiom, Modifier, Side
 from dl_lite.assertion import assertion
-from dl_lite.abox import ABox
+from old_codes.abox import ABox
 from dl_lite.tbox import TBox
-from dl_lite.repair import check_assertion_in_cpi_repair, conflict_set_with_threads
+from old_codes.repair import check_assertion_in_cpi_repair, conflict_set_with_threads
 # Individuals
 f78 = "F78"
 bob = "Bob"

@@ -1,8 +1,8 @@
 import time
 from dl_lite.tbox import TBox
-from dl_lite_parser.abox_parser import read_abox
+from old_codes.abox_parser import read_abox
 from dl_lite_parser.tbox_parser import read_tbox
-from dl_lite.repair import conflict_set, conflict_set_with_threads
+from old_codes.repair import conflict_set, conflict_set_with_threads
 import pathlib
 from sys import exit
 

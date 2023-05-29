@@ -250,7 +250,8 @@ def generate_possible_assertions_rec(cursor, positive_axioms):
     
     return list_to_check
 
-# need to work more on this
+# need to work more on this (deprecated)
+# To remove
 def generate_possible_assertions(cursor, positive_axioms):
     list_to_check = []
 
@@ -291,6 +292,7 @@ def get_all_assertions(cursor):
         assertions_list.append(new_assertion)
     return assertions_list
 
+# To remove
 def generate_assertions_naive(cursor, positive_axioms):
     generated_list = []
     individual_1_list = []

@@ -1,4 +1,4 @@
-from dl_lite.abox import ABox
+from old_codes.abox import ABox
 from dl_lite.assertion import assertion
 from dl_lite.axiom import Axiom, Modifier
 from dl_lite.tbox import TBox

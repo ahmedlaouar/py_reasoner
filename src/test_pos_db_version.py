@@ -18,7 +18,7 @@ create_database(host,database_name,user,user,db_path)
 
 path = pathlib.Path().resolve()
 
-tbox = read_tbox(str(path)+"/src/first_tbox.txt")
+tbox = read_tbox(str(path)+"/src/test_examples/example1/first_tbox.txt")
 print(tbox)
 print("-----------------------------------------------------")
 tbox.negative_closure()
@@ -33,7 +33,7 @@ try:
     )
 
     cursor = conn.cursor()
-    file_path = str(path)+"/src/first_abox.txt"
+    file_path = str(path)+"/src/test_examples/example1/first_abox.txt"
     abox_to_database(file_path,database_name,cursor)
     
     # Measure execution time
@@ -47,12 +47,12 @@ try:
     for c in conflicts:
         print(c[0],c[1])
     print("-----------------------------------------------------")
-    with open(str(path)+"/src/conflicts_first_dataset_sql.txt", 'w') as file:
+    with open(str(path)+"/src/test_examples/example1/conflicts_first_dataset_sql.txt", 'w') as file:
         for conf in conflicts :
             s = "({}),({})".format(conf[0],conf[1])
             file.write(s+'\n')
 
-    pos_order = read_pos(str(path)+"/src/first_pos.txt")
+    pos_order = read_pos(str(path)+"/src/test_examples/example1/first_pos.txt")
 
     print("The next part is for testing :")
     # Generate all possible assertions to compute the whole repair

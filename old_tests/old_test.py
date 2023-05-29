@@ -1,8 +1,8 @@
 from dl_lite.axiom import Axiom, Modifier, Side
 from dl_lite.assertion import assertion
-from dl_lite.abox import ABox
+from old_codes.abox import ABox
 from dl_lite.tbox import TBox
-from dl_lite.repair import conflict_set, conflict_set_concurrent_futures, conflict_set_with_threads
+from old_codes.repair import conflict_set, conflict_set_concurrent_futures, conflict_set_with_threads
 sideB1 = Side("B1",[Modifier.negation])
 sideB2 = Side("B2")
 sideRn = Side("R",[Modifier.negation,Modifier.projection,Modifier.inversion])

@@ -1,7 +1,7 @@
-from dl_lite.abox import ABox
+from old_codes.abox import ABox
 from dl_lite.axiom import Axiom, Side
 from dl_lite.tbox import TBox
-from dl_lite_parser.abox_parser import read_abox
+from old_codes.abox_parser import read_abox
 from dl_lite_parser.tbox_parser import read_tbox
 import pathlib
 

@@ -1,6 +1,6 @@
 
 # Example of the content of the file abox.txt
-from dl_lite.abox import ABox
+from old_codes.abox import ABox
 from dl_lite.assertion import assertion
 
 def process_line(line):

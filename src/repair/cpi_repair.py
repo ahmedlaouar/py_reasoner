@@ -1,5 +1,3 @@
-
-import sys
 from dl_lite.assertion import assertion
 from repair.dominance import check_all_dominance, is_strictly_preferred_pos
 from repair.conflicts import conflict_set, conflicts_one_axiom
@@ -25,11 +23,14 @@ def compute_cpi_repair(cursor, tbox, pos, conflicts, check_list):
     return cpi_repair
 
 #In this version the check list is only formed with the assertions that may be added to the cpi_repair 
-def compute_cpi_repair_bis(cursor, tbox, pos, check_list):
+def compute_cpi_repair_bis(cursor, tbox, pos, check_list, conflicts=None):
     cpi_repair = []
     # First phase is to check additionnal assertions
     for check_assertion in check_list:
-        if check_assertion_optimized(cursor, tbox, pos, check_assertion):
+        #if check_assertion_optimized(cursor, tbox, pos, check_assertion):
+        #    cpi_repair.append(check_assertion)
+        supports = compute_supports(check_assertion, tbox.get_positive_axioms(),cursor)
+        if check_all_dominance(cursor, pos, conflicts, supports):
             cpi_repair.append(check_assertion)
     # Second phase is to retrive form the database and verify the assertions of the ABox one by one
     query = f"SELECT DISTINCT assertion_name,individual_1,individual_2 FROM assertions"
@@ -40,7 +41,10 @@ def compute_cpi_repair_bis(cursor, tbox, pos, check_list):
             new_assertion = assertion(row[0],row[1])
         else:
             new_assertion = assertion(row[0],row[1],row[2])
-        if check_assertion_optimized(cursor, tbox, pos, new_assertion):
+        #if check_assertion_optimized(cursor, tbox, pos, new_assertion):
+        #    cpi_repair.append(new_assertion)
+        supports = compute_supports(new_assertion, tbox.get_positive_axioms(),cursor)
+        if check_all_dominance(cursor, pos, conflicts, supports):
             cpi_repair.append(new_assertion)
     return cpi_repair
 

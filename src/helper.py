@@ -96,7 +96,7 @@ def cpi_repair_helper(tbox,abox_path,pos_path):
         print(f"Size of assertions to test: {len(check_list)+abox_size}")
         print(f"Time to generate additionnal assertions to test: {inter_time4-inter_time3}")
 
-        cpi_repair = compute_cpi_repair_bis(cursor, tbox, pos_order, check_list)
+        cpi_repair = compute_cpi_repair_bis(cursor, tbox, pos_order, check_list, reduced_conflicts)
 
         print(f"The size of the cpi_repair: {len(cpi_repair)}")
         inter_time5 = time.time()

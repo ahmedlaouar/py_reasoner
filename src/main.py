@@ -1,8 +1,9 @@
 import time
 import argparse
 from dl_lite.assertion import assertion
-from old_codes.repair import check_all_dominance, check_assertion_in_cpi_repair, compute_supports, conflict_set, conflict_set_with_threads
-from old_codes.abox_parser import read_abox, process_line
+from olds.old_codes.repair import check_all_dominance, check_assertion_in_cpi_repair, compute_supports, conflict_set, conflict_set_with_threads
+from olds.old_codes.abox_parser import read_abox, process_line
+
 from dl_lite_parser.tbox_parser import read_tbox
 import pathlib
 

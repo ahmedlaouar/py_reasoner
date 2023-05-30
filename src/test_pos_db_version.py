@@ -4,8 +4,10 @@ import pathlib
 import time
 import psycopg2
 from dl_lite_parser.parser_to_db import abox_to_database, create_database, read_pos
-from dl_lite.assertion import assertion, w_assertion
-from repair.new_repair import check_all_dominance, check_assertion_in_cpi_repair, compute_supports, conflict_set, generate_possible_assertions, generate_possible_assertions_rec, get_all_assertions, is_strictly_preferred
+from dl_lite.assertion import assertion
+from repair.conflicts import conflict_set
+from repair.assertions_generator import generate_possible_assertions_rec, get_all_assertions
+from repair.cpi_repair import check_assertion_in_cpi_repair
 from dl_lite_parser.tbox_parser import read_tbox
 
 database_name = "test_abox"
@@ -60,7 +62,16 @@ try:
     possible += get_all_assertions(cursor)
 
     for check_assertion in possible:
-        check_assertion_in_cpi_repair(cursor, tbox, pos_order, check_assertion)
+        if check_assertion_in_cpi_repair(cursor, tbox, pos_order, check_assertion):
+            print(f"{check_assertion} is in the Cpi-repair of the abox")
+        else:
+            print(f"{check_assertion} is not in the Cpi-repair of the abox")
+
+    test_assertion = assertion("Staff","F78")
+    if check_assertion_in_cpi_repair(cursor, tbox, pos_order, test_assertion):
+        print(f"{test_assertion} is in the Cpi-repair of the abox")
+    else:
+        print(f"{test_assertion} is not in the Cpi-repair of the abox")
 
     conn.commit()
     cursor.close()

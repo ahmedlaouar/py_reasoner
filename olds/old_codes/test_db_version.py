@@ -5,7 +5,7 @@ import time
 import psycopg2
 from dl_lite_parser.parser_to_db import abox_to_database, create_database
 from dl_lite.assertion import assertion, w_assertion
-from repair.new_repair import check_all_dominance, check_assertion_in_cpi_repair, compute_supports, conflict_set, is_strictly_preferred
+from repair.assertions_generator import check_all_dominance, check_assertion_in_cpi_repair, compute_supports, conflict_set, is_strictly_preferred
 from dl_lite_parser.tbox_parser import read_tbox
 
 database_name = "test_abox"
@@ -18,7 +18,7 @@ create_database(host,database_name,user,user,db_path)
 
 path = pathlib.Path().resolve()
 
-tbox = read_tbox(str(path)+"/src/first_tbox.txt")
+tbox = read_tbox(str(path)+"/src/test_examples/example1/first_tbox.txt")
 print(tbox)
 print("-----------------------------------------------------")
 tbox.negative_closure()
@@ -33,7 +33,7 @@ try:
     )
 
     cursor = conn.cursor()
-    file_path = str(path)+"/src/first_abox.txt"
+    file_path = str(path)+"/src/test_examples/example1/first_abox.txt"
     abox_to_database(file_path,database_name,cursor)
     
     # Measure execution time
@@ -47,7 +47,7 @@ try:
     for c in conflicts:
         print(c[0],c[1])
     print("-----------------------------------------------------")
-    with open(str(path)+"/src/conflicts_first_dataset_sql.txt", 'w') as file:
+    with open(str(path)+"/src/test_examples/example1/conflicts_first_dataset_sql.txt", 'w') as file:
         for conf in conflicts :
             s = "({}),({})".format(conf[0],conf[1])
             file.write(s+'\n')

@@ -3,7 +3,7 @@ import pathlib
 import time
 import psycopg2
 from dl_lite_parser.parser_to_db import abox_to_database, create_database
-from repair.new_repair import conflict_set
+from repair.conflicts import conflict_set
 from dl_lite_parser.tbox_parser import read_tbox
 
 database_name = "test_abox"

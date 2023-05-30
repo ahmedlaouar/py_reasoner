@@ -15,22 +15,22 @@ def generate_pos(size):
             pos_order[current] = random.sample(pos, num_successors)
     return pos_order
 
-pos_order = generate_pos(50)
+pos_order = generate_pos(1000)
 
 weighted_lines = []
 # Read the dataset from the file
-with open(common_path+'dataset_small.txt', 'r') as file:
+with open(common_path+'dataset_medium.txt', 'r') as file:
     lines = file.read().splitlines()
     for line in lines:
         weight = random.choice(list(pos_order.keys()))
         weighted_lines.append(line+str(weight)+";\n")
 
 # Write the partial order to a new file
-with open(common_path+'dataset_small.txt', 'w') as file:
+with open(common_path+'dataset_medium.txt', 'w') as file:
     for line in weighted_lines:
         file.write(line)
 
-with open(common_path+'pos_dataset_small.txt', 'w') as file:
+with open(common_path+'pos_dataset_medium.txt', 'w') as file:
     for element in pos_order:
         to_write = [str(x) for x in pos_order[element]]
         if len(to_write) == 0:

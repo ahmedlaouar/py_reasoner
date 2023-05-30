@@ -1,7 +1,6 @@
 import argparse
 import pathlib
 from dl_lite_parser.parser_to_db import process_line
-
 from dl_lite_parser.tbox_parser import read_tbox
 from helper import check_in_cpi_repair_helper, conflicts_helper, cpi_repair_helper
 #necessary global constants
@@ -48,14 +47,18 @@ if __name__ == '__main__':
     if args.command == 'compute_cpi_repair':
         abox_path = str(path)+args.abox
         pos_path = str(path)+args.pos
-        cpi_repair_helper(tbox,abox_path,pos_path)
+        tbox_size, abox_size, pos_size, conflicts_size, cpi_repair_size, execution_time = cpi_repair_helper(tbox,abox_path,pos_path)
+        with open(str(path)+'/benchmark_data/results/execution_results.txt', 'a') as file:
+            file.write('\n')
+            file.write(f"{tbox_size}; {abox_size}; {pos_size}; {conflicts_size}; {cpi_repair_size}; {execution_time}")
+        print(tbox_size, abox_size, pos_size, conflicts_size, cpi_repair_size, execution_time)
 
     elif args.command == 'check_in_cpi_repair':
         abox_path = str(path)+args.abox
         pos_path = str(path)+args.pos
         check_assertion_text = args.assertion
         check_assertion = process_line(check_assertion_text)[0]
-        check_in_cpi_repair_helper(tbox,abox_path,pos_path,check_assertion)        
+        check_in_cpi_repair_helper(tbox,abox_path,pos_path,check_assertion)
 
     elif args.command == 'check_integrity':
         tbox.negative_closure()

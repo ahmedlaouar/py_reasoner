@@ -1,0 +1,4 @@
+#tbox_size; #abox_size; #conflicts_size; #cpi_repair_size; cpi_repair_execution_time(s)
+4; 5; 2; 2; 0.01443791389465332
+108; 1000; 0; 1065; 0.38654303550720215
+108; 1000; 50; 0; 1065; 0.42454981803894043

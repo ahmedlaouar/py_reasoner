@@ -1,4 +1,4 @@
-/bin/python3 /home/laouar/Documents/Phd_work/Cpi-repair_impl/py_reasoner/src/py_reasoner.py compute_cpi_repair -t /src/test_examples/example1/first_tbox.txt -a /src/test_examples/example1/first_abox.txt -p /src/test_examples/example1/first_pos.txt
-/bin/python3 /home/laouar/Documents/Phd_work/Cpi-repair_impl/py_reasoner/src/py_reasoner.py compute_cpi_repair -t /benchmark_data/data/ontology0.txt -a /benchmark_data/data/dataset_small.txt -p /benchmark_data/data/pos_dataset_small.txt
-/bin/python3 /home/laouar/Documents/Phd_work/Cpi-repair_impl/py_reasoner/src/py_reasoner.py compute_cpi_repair -t /benchmark_data/data/ontology1.txt -a /benchmark_data/data/dataset.txt -p /benchmark_data/data/pos_dataset.txt
-/bin/python3 /home/laouar/Documents/Phd_work/Cpi-repair_impl/py_reasoner/src/py_reasoner.py compute_cpi_repair -t /benchmark_data/data/ontology0.txt -a /benchmark_data/data/dataset_medium.txt -p /benchmark_data/data/pos_dataset_medium.txt
+/bin/python3 src/py_reasoner.py compute_cpi_repair -t /src/test_examples/example1/first_tbox.txt -a /src/test_examples/example1/first_abox.txt -p /src/test_examples/example1/first_pos.txt
+/bin/python3 src/py_reasoner.py compute_cpi_repair -t /benchmark_data/data/ontology0.txt -a /benchmark_data/data/dataset_small.txt -p /benchmark_data/data/pos_dataset_small.txt
+/bin/python3 src/py_reasoner.py compute_cpi_repair -t /benchmark_data/data/ontology1.txt -a /benchmark_data/data/dataset.txt -p /benchmark_data/data/pos_dataset.txt
+/bin/python3 src/py_reasoner.py compute_cpi_repair -t /benchmark_data/data/ontology0.txt -a /benchmark_data/data/dataset_medium.txt -p /benchmark_data/data/pos_dataset_medium.txt

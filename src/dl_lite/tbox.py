@@ -57,7 +57,6 @@ class TBox:
     def check_integrity(self):
         for axiom in self.__negative_axioms:
             if axiom.get_left_side().get_name() == axiom.get_right_side().get_name():
-                print("This TBox is not consistent")
                 return False
         return True
         

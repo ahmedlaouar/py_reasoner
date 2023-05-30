@@ -3,9 +3,9 @@ import os
 import pathlib
 import time
 import psycopg2
-from database_version.parser_to_db import abox_to_database, create_database, read_pos
+from dl_lite_parser.parser_to_db import abox_to_database, create_database, read_pos
 from dl_lite.assertion import assertion, w_assertion
-from dl_lite.new_repair import check_all_dominance, check_assertion_in_cpi_repair, compute_cpi_repair, compute_supports, conflict_set, generate_assertions_naive, generate_possible_assertions, generate_possible_assertions_rec, get_all_assertions, is_strictly_preferred, new_check_assertion_in_cpi_repair
+from repair.new_repair import check_all_dominance, check_assertion_in_cpi_repair, compute_cpi_repair, compute_supports, conflict_set, generate_assertions_naive, generate_possible_assertions, generate_possible_assertions_rec, get_all_assertions, is_strictly_preferred, new_check_assertion_in_cpi_repair
 from dl_lite_parser.tbox_parser import read_tbox
 
 database_name = "test_abox"

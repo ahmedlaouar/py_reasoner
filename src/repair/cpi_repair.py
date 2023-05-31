@@ -13,7 +13,6 @@ def check_assertion_in_cpi_repair(cursor, tbox, pos, check_assertion, conflicts=
     else:
         return False
 
-
 def compute_cpi_repair(cursor, tbox, pos, conflicts, check_list):
     cpi_repair = []
     for check_assertion in check_list:
@@ -57,7 +56,7 @@ def check_assertion_optimized(cursor, tbox, pos, check_assertion):
     for negative_axiom in tbox.get_negative_axioms():
         conflicts = conflicts_one_axiom(negative_axiom, cursor, pos)
         for conflict in conflicts:
-            conflict_supported = False #lag to track if a supporting assertion dominates the conflict
+            conflict_supported = False # flag to track if a supporting assertion dominates the conflict
             for support in supports:
                 if is_strictly_preferred_pos(cursor, pos, support, conflict[0]) or is_strictly_preferred_pos(cursor, pos, support, conflict[1]):
                     conflict_supported = True # Set the flag to indicate that a dominating support is found

@@ -44,13 +44,13 @@ def conflict_set(tbox: TBox, cursor) -> list():
         else:
             for row in rows:
                 if row[3] == 'None' or row[3] == None:
-                    assertion_1 = w_assertion(row[1],row[2],weight=row[0])
+                    assertion_1 = w_assertion(row[1],row[2],weight=row[4])
                 else:
-                    assertion_1 = w_assertion(row[1],row[2],row[3],weight=row[0])
-                if row[7] == 'None' or row[7] == None:
-                    assertion_2 = w_assertion(row[5],row[6],weight=row[4])
+                    assertion_1 = w_assertion(row[1],row[2],row[3],weight=row[4])
+                if row[8] == 'None' or row[8] == None:
+                    assertion_2 = w_assertion(row[6],row[7],weight=row[9])
                 else:
-                    assertion_2 = w_assertion(row[5],row[6],row[7],weight=row[4])
+                    assertion_2 = w_assertion(row[6],row[7],row[8],weight=row[9])
                 conflicts.append((assertion_1,assertion_2))        
     return conflicts
 
@@ -72,13 +72,13 @@ def reduced_conflict_set(tbox: TBox, cursor, pos) -> list():
         else:
             for row in rows:
                 if row[3] == 'None' or row[3] == None:
-                    assertion_1 = w_assertion(row[1],row[2],weight=row[0])
+                    assertion_1 = w_assertion(row[1],row[2],weight=row[4])
                 else:
-                    assertion_1 = w_assertion(row[1],row[2],row[3],weight=row[0])
-                if row[7] == 'None' or row[7] == None:
-                    assertion_2 = w_assertion(row[5],row[6],weight=row[4])
+                    assertion_1 = w_assertion(row[1],row[2],row[3],weight=row[4])
+                if row[8] == 'None' or row[8] == None:
+                    assertion_2 = w_assertion(row[6],row[7],weight=row[9])
                 else:
-                    assertion_2 = w_assertion(row[5],row[6],row[7],weight=row[4])
+                    assertion_2 = w_assertion(row[6],row[7],row[8],weight=row[9])
                 dominated = False
                 for conf in conflicts:
                     if (is_strictly_preferred(cursor, pos, conf[0], assertion_1) or is_strictly_preferred(cursor, pos, conf[0], assertion_2)) and (is_strictly_preferred(cursor, pos, conf[1], assertion_1) or is_strictly_preferred(cursor, pos, conf[1], assertion_2)):
@@ -96,13 +96,13 @@ def conflicts_one_axiom(negative_axiom, cursor, pos) -> list():
     if len(rows) != 0:
         for row in rows:
             if row[3] == 'None' or row[3] == None:
-                assertion_1 = w_assertion(row[1],row[2],weight=row[0])
+                assertion_1 = w_assertion(row[1],row[2],weight=row[4])
             else:
-                assertion_1 = w_assertion(row[1],row[2],row[3],weight=row[0])
-            if row[7] == 'None' or row[7] == None:
-                assertion_2 = w_assertion(row[5],row[6],weight=row[4])
+                assertion_1 = w_assertion(row[1],row[2],row[3],weight=row[4])
+            if row[8] == 'None' or row[8] == None:
+                assertion_2 = w_assertion(row[6],row[7],weight=row[9])
             else:
-                assertion_2 = w_assertion(row[5],row[6],row[7],weight=row[4])
+                assertion_2 = w_assertion(row[6],row[7],row[8],weight=row[9])
             dominated = False
             for conf in conflicts:
                 if (is_strictly_preferred_pos(cursor, pos, conf[0], assertion_1) or is_strictly_preferred_pos(cursor, pos, conf[0], assertion_2)) and (is_strictly_preferred_pos(cursor, pos, conf[1], assertion_1) or is_strictly_preferred_pos(cursor, pos, conf[1], assertion_2)):

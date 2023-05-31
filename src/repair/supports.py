@@ -23,9 +23,9 @@ def supports_deduction(find_assertion: assertion, positive_axioms: list(), curso
                 if len(rows) != 0:
                     for row in rows:
                         if row[3] == 'None' or row[3] == None:
-                            new_assertion = w_assertion(row[1],row[2],weight=row[0])
+                            new_assertion = w_assertion(row[1],row[2],weight=row[4])
                         else:
-                            new_assertion = w_assertion(row[1],row[2],row[3],weight=row[0])
+                            new_assertion = w_assertion(row[1],row[2],row[3],weight=row[4])
                         supports.append(new_assertion)
             next_assertion = assertion(axiom.get_left_side().get_name(),find_assertion.get_individuals2()[0],find_assertion.get_individuals2()[1])
             supports += supports_deduction(next_assertion, positive_axioms, cursor)
@@ -39,8 +39,8 @@ def compute_supports(target_assertion: assertion, positive_axioms: list(), curso
     row = cursor.fetchone()
     if row is not None:
         if row[3] == 'None' or row[3] == None:
-            new_assertion = w_assertion(row[1],row[2],weight=row[0])
+            new_assertion = w_assertion(row[1],row[2],weight=row[4])
         else:
-            new_assertion = w_assertion(row[1],row[2],row[3],weight=row[0])
+            new_assertion = w_assertion(row[1],row[2],row[3],weight=row[4])
         supports.append(new_assertion)
     return supports

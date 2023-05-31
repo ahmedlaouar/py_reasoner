@@ -39,15 +39,16 @@ def process_line(line):
         individuals = names[1].split(',')
         individual_1 = individuals[0]
         individual_2 = individuals[1].replace(")", "")
-        if splitted[1:] == [""] : splitted[1:] = []
-        successors = [int(x) for x in splitted[1:-1]]
-
-        return  assertion(assertion_name,individual_1,individual_2),successors
+        #if splitted[1:] == [""] : weight = 0 #splitted[1:] = []
+        #successors = [int(x) for x in splitted[1:-1]]
+        weight = int(splitted[1])
+        return  assertion(assertion_name,individual_1,individual_2),weight
     else:
         individual_1 = names[1].replace(")", "")
-        if splitted[1:] == [""] : splitted[1:] = []
-        successors = [int(x) for x in splitted[1:-1]]
-        return  assertion(assertion_name,individual_1),successors
+        #if splitted[1:] == [""] : splitted[1:] = []
+        #successors = [int(x) for x in splitted[1:-1]]
+        weight = int(splitted[1])
+        return  assertion(assertion_name,individual_1),weight
 
 def read_abox(file_path: str, cursor):
     with open(file_path, 'r') as file:
@@ -55,12 +56,12 @@ def read_abox(file_path: str, cursor):
         for line in file:
             if line.strip() == "BEGINABOX" or line.strip() == "ENDABOX":
                 continue
-            new_assertion,successors = process_line(line) 
+            new_assertion,weight = process_line(line) 
             # Insert values into the "assertions" table
-            cursor.execute(f"INSERT INTO assertions (id, assertion_name, individual_1, individual_2) VALUES ('{co}', '{new_assertion.get_assertion_name()}', '{new_assertion.get_individuals2()[0]}', '{new_assertion.get_individuals2()[1]}')")           
+            cursor.execute(f"INSERT INTO assertions (id, assertion_name, individual_1, individual_2, weight) VALUES ('{co}', '{new_assertion.get_assertion_name()}', '{new_assertion.get_individuals2()[0]}', '{new_assertion.get_individuals2()[1]}', '{weight}')")           
             # Insert values into the "partial_order" table
-            for successor in successors:
-                cursor.execute(f"INSERT INTO partial_order (assertion_id,successor) VALUES ('{co}','{successor}')")
+            #for successor in successors:
+            #    cursor.execute(f"INSERT INTO partial_order (assertion_id,successor) VALUES ('{co}','{successor}')")
             co += 1
     return
 
@@ -80,16 +81,17 @@ def abox_to_database(file_path: str,database_name,cursor):
             id INT PRIMARY KEY,
             assertion_name VARCHAR(50),
             individual_1 VARCHAR(50),
-            individual_2 VARCHAR(50)
+            individual_2 VARCHAR(50),
+            weight INT
         );''')
 
-    cursor.execute('''
-        CREATE TABLE partial_order (
-            id SERIAL PRIMARY KEY,
-            assertion_id INT,
-            successor INT,
-            FOREIGN KEY (assertion_id) REFERENCES assertions(id)
-        );''')
+    #cursor.execute('''
+    #    CREATE TABLE partial_order (
+    #        id SERIAL PRIMARY KEY,
+    #        assertion_id INT,
+    #        successor INT,
+    #        FOREIGN KEY (assertion_id) REFERENCES assertions(id)
+    #    );''')
 
     read_abox(file_path,cursor)
 

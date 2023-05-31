@@ -2,7 +2,7 @@
 import sys
 import time
 import psycopg2
-from dl_lite_parser.parser_to_db import abox_to_database, read_pos, read_pos_to_adj_matrix
+from dl_lite_parser.parser_to_db import abox_to_database, read_full_pos, read_pos, read_pos_to_adj_matrix
 from repair.assertions_generator import generate_possible_assertions_rec, get_all_assertions
 from repair.conflicts import conflict_set, reduced_conflict_set
 from repair.cpi_repair import check_assertion_in_cpi_repair, compute_cpi_repair, compute_cpi_repair_bis
@@ -72,7 +72,7 @@ def cpi_repair_helper(tbox,abox_path,pos_path):
         if row is not None:
             abox_size = row[0]
         
-        pos_matrix = read_pos_to_adj_matrix(pos_path)
+        pos_matrix = read_full_pos(pos_path)
         print(f"Reading done, size of the ABox: {abox_size}, POS size: {len(pos_matrix)-1}")
         inter_time1 = time.time()
         print(f"Time to read: {inter_time1-inter_time0}")

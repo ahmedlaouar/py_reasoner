@@ -21,7 +21,6 @@ def generate_query(axiom: Axiom):
     else:
         query = f'''SELECT * FROM assertions t1 INNER JOIN assertions t2 ON t1.individual_1 = t2.individual_1 and t1.individual_2 = t2.individual_2
         WHERE t1.assertion_name = '{left_side.get_name()}' AND t2.assertion_name = '{right_side.get_name()}';'''
-
     return query
 
 # here to define a conflict set function that query an sql database
@@ -61,7 +60,6 @@ def reduced_conflict_set(tbox: TBox, cursor, pos) -> list():
     # Browse all negative axioms
     counter = 1
     for axiom in negative_axioms:
-        #print(f"Axiom number = {counter}")
         counter += 1
         # For each axiom, take left and right side, according to each case generate a query to the database and retreive the result of a select statement
         query = generate_query(axiom)

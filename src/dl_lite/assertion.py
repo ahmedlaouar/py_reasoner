@@ -45,9 +45,7 @@ class w_assertion(assertion):
         return self.__weight
     
     def __str__(self) -> str:
-        ind1 = super().get_individuals()[0]
         if self.is_role():
-            ind2 = super().get_individuals2()[1]
-            return "{}({},{}),{}".format(super().get_assertion_name(),ind1,ind2,self.__weight)
+            return "{}({},{}),{}".format(super().get_assertion_name(),super().get_individuals()[0],super().get_individuals2()[1],self.__weight)
         else:
-            return "{}({}),{}".format(super().get_assertion_name(),ind1,self.__weight)
+            return "{}({}),{}".format(super().get_assertion_name(),super().get_individuals()[0],self.__weight)

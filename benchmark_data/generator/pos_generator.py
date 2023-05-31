@@ -2,6 +2,8 @@
 import random
 
 common_path = "benchmark_data/data/"
+abox_file_path = common_path+"dataset_2023053117.txt"
+pos_file_path = common_path+"pos_2023053117.txt"
 # POS for Partially Ordered Set
 def generate_pos(size):
     pos = [x for x in range(1,size+1)]
@@ -19,18 +21,18 @@ pos_order = generate_pos(1000)
 
 weighted_lines = []
 # Read the dataset from the file
-with open(common_path+'dataset_medium.txt', 'r') as file:
+with open(abox_file_path, 'r') as file:
     lines = file.read().splitlines()
     for line in lines:
         weight = random.choice(list(pos_order.keys()))
         weighted_lines.append(line+str(weight)+";\n")
 
 # Write the partial order to a new file
-with open(common_path+'dataset_medium.txt', 'w') as file:
+with open(abox_file_path, 'w') as file:
     for line in weighted_lines:
         file.write(line)
 
-with open(common_path+'pos_dataset_medium.txt', 'w') as file:
+with open(pos_file_path, 'w') as file:
     for element in pos_order:
         to_write = [str(x) for x in pos_order[element]]
         if len(to_write) == 0:

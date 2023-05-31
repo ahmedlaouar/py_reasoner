@@ -1,7 +1,7 @@
 from dl_lite.assertion import w_assertion
 from dl_lite.axiom import Axiom, Modifier
 from dl_lite.tbox import TBox
-from repair.dominance import is_strictly_preferred_pos
+from repair.dominance import is_strictly_preferred, is_strictly_preferred_pos
 
 def generate_query(axiom: Axiom):
     left_side = axiom.get_left_side()
@@ -81,7 +81,7 @@ def reduced_conflict_set(tbox: TBox, cursor, pos) -> list():
                     assertion_2 = w_assertion(row[5],row[6],row[7],weight=row[4])
                 dominated = False
                 for conf in conflicts:
-                    if (is_strictly_preferred_pos(cursor, pos, conf[0], assertion_1) or is_strictly_preferred_pos(cursor, pos, conf[0], assertion_2)) and (is_strictly_preferred_pos(cursor, pos, conf[1], assertion_1) or is_strictly_preferred_pos(cursor, pos, conf[1], assertion_2)):
+                    if (is_strictly_preferred(cursor, pos, conf[0], assertion_1) or is_strictly_preferred(cursor, pos, conf[0], assertion_2)) and (is_strictly_preferred(cursor, pos, conf[1], assertion_1) or is_strictly_preferred(cursor, pos, conf[1], assertion_2)):
                         dominated = True
                 if not dominated:
                     conflicts.append((assertion_1,assertion_2))        

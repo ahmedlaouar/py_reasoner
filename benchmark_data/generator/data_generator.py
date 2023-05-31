@@ -64,18 +64,18 @@ def generate_dataset(abox_file_path, tbox_file_path, num_lines, Ni, Nc, Nr):
                 generated_lines.add(line)
                 file.write(line)
 
-    t_lines = [num_lines//10000, num_lines//1000, num_lines//100]
+    t_lines = [num_lines//1000, num_lines//100]
     for i in range(len(t_lines)):
         generate_ontology(tbox_file_path+str(i), t_lines[i], concepts, roles)
     
 
 common_path = "benchmark_data/data/"
-abox_file_path = common_path+"dataset"
-tbox_file_path = common_path+"ontology"
-num_lines = 1000000
+abox_file_path = common_path+"dataset_2023053117"
+tbox_file_path = common_path+"ontology_2023053117_"
+num_lines = 100000
 Ni = 1000
-Nc = 500
-Nr = 200
+Nc = 200
+Nr = 150
 generate_dataset(abox_file_path, tbox_file_path, num_lines, Ni, Nc, Nr)
 
 

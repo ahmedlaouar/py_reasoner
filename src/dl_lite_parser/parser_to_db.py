@@ -102,3 +102,21 @@ def read_pos(file_path: str):
             successors = [int(x) for x in splitted[1:-1]]
             pos_order[weight] = successors
     return pos_order
+
+def is_preferred(pos,i,j) -> bool:
+    check = False
+    if j in pos[i]: return True
+    else: 
+        for successor in pos[i]:
+            check = is_preferred(pos,successor,j)
+    return check
+
+def read_pos_to_adj_matrix(file_path: str):
+    pos_set = read_pos(file_path)
+    n = len(pos_set.keys())
+    pos_matrix = [[0 for _ in range(n+1)] for _ in range(n+1)]
+    for i in range(1,n+1):
+        for j in range(1,n+1):
+            if is_preferred(pos_set,i,j):
+                pos_matrix[i][j] = 1
+    return pos_matrix

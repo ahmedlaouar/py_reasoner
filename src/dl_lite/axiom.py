@@ -7,7 +7,7 @@ class Modifier(Enum):
     projection = "EXISTS"
 
 class Side:
-    def __init__(self, name, modifiers = list()): #: list(Modifier)
+    def __init__(self, name, modifiers = list()):
         self.__name = name
         self.__modifiers = modifiers
 

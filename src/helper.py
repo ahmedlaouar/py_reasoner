@@ -2,7 +2,7 @@
 import sys
 import time
 import psycopg2
-from dl_lite_parser.parser_to_db import abox_to_database, read_pos
+from dl_lite_parser.parser_to_db import abox_to_database, read_pos, read_pos_to_adj_matrix
 from repair.assertions_generator import generate_possible_assertions_rec, get_all_assertions
 from repair.conflicts import conflict_set, reduced_conflict_set
 from repair.cpi_repair import check_assertion_in_cpi_repair, compute_cpi_repair, compute_cpi_repair_bis
@@ -72,8 +72,8 @@ def cpi_repair_helper(tbox,abox_path,pos_path):
         if row is not None:
             abox_size = row[0]
         
-        pos_order = read_pos(pos_path)
-        print(f"Reading done, size of the ABox: {abox_size}, POS size: {len(pos_order.keys())}")
+        pos_matrix = read_pos_to_adj_matrix(pos_path)
+        print(f"Reading done, size of the ABox: {abox_size}, POS size: {len(pos_matrix)-1}")
         inter_time1 = time.time()
         print(f"Time to read: {inter_time1-inter_time0}")
         
@@ -84,10 +84,10 @@ def cpi_repair_helper(tbox,abox_path,pos_path):
         print(f"Time to compute conflicts without dominance check: {inter_time2-inter_time1}")
         
         # Compute the conflicts with dominance check
-        reduced_conflicts = reduced_conflict_set(tbox, cursor, pos_order)
+        reduced_conflicts = reduced_conflict_set(tbox, cursor, pos_matrix)
         print(f"Size of the conflicts with dominance check: {len(reduced_conflicts)}")
         inter_time3 = time.time()
-        print(f"Time to compute conflicts without dominance check: {inter_time3-inter_time2}")
+        print(f"Time to compute conflicts with dominance check: {inter_time3-inter_time2}")
 
         check_list = generate_possible_assertions_rec(cursor, tbox.get_positive_axioms())
         
@@ -96,7 +96,7 @@ def cpi_repair_helper(tbox,abox_path,pos_path):
         print(f"Size of assertions to test: {len(check_list)+abox_size}")
         print(f"Time to generate additionnal assertions to test: {inter_time4-inter_time3}")
 
-        cpi_repair = compute_cpi_repair_bis(cursor, tbox, pos_order, check_list, reduced_conflicts)
+        cpi_repair = compute_cpi_repair_bis(cursor, tbox, pos_matrix, check_list, reduced_conflicts)
 
         print(f"The size of the cpi_repair: {len(cpi_repair)}")
         inter_time5 = time.time()
@@ -106,7 +106,7 @@ def cpi_repair_helper(tbox,abox_path,pos_path):
         end_time = time.time()
         execution_time = end_time - start_time
         print(f"Execution time: {execution_time} seconds")
-
+        
         conn.commit()
         cursor.close()
         conn.close()
@@ -114,7 +114,7 @@ def cpi_repair_helper(tbox,abox_path,pos_path):
     except (Exception, psycopg2.DatabaseError) as e:
         print("An error occurred:", e)
 
-    return tbox.tbox_size(), abox_size, len(pos_order.keys()), len(conflicts), len(cpi_repair), cp_repair_time
+    return tbox.tbox_size(), abox_size, len(pos_matrix)-1, len(conflicts), len(cpi_repair), cp_repair_time
 
 def check_in_cpi_repair_helper(tbox,abox_path,pos_path,check_assertion):
     try:  

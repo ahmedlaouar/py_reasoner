@@ -32,7 +32,7 @@ def compute_cpi_repair_bis(cursor, tbox, pos, check_list, conflicts=None):
         supports = compute_supports(check_assertion, tbox.get_positive_axioms(),cursor)
         if check_all_dominance(cursor, pos, conflicts, supports):
             cpi_repair.append(check_assertion)
-    # Second phase is to retrive form the database and verify the assertions of the ABox one by one
+    # Second phase is to retrive and verify the assertions form the database of the ABox one by one
     query = f"SELECT DISTINCT assertion_name,individual_1,individual_2 FROM assertions"
     cursor.execute(query)
     rows = cursor.fetchall()

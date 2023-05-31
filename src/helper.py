@@ -91,7 +91,7 @@ def cpi_repair_helper(tbox,abox_path,pos_path):
 
         check_list = generate_possible_assertions_rec(cursor, tbox.get_positive_axioms())
         
-        check_list += get_all_assertions(cursor)
+        #check_list += get_all_assertions(cursor)
         inter_time4 = time.time()
         print(f"Size of assertions to test: {len(check_list)+abox_size}")
         print(f"Time to generate additionnal assertions to test: {inter_time4-inter_time3}")
@@ -105,7 +105,7 @@ def cpi_repair_helper(tbox,abox_path,pos_path):
 
         end_time = time.time()
         execution_time = end_time - start_time
-        print(f"Execution time: {execution_time} seconds")        
+        print(f"Execution time: {execution_time} seconds")
 
         conn.commit()
         cursor.close()

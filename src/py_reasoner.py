@@ -5,9 +5,8 @@ from dl_lite_parser.tbox_parser import read_tbox
 from helper import check_in_cpi_repair_helper, conflicts_helper, cpi_repair_helper
 #necessary global constants
 path = pathlib.Path().resolve()
-database_name = "test_abox"
-host = "localhost"
-user = "py_reasoner"
+database_name = "/src/py_reasoner.db"
+db_path = str(path)+database_name
 
 if __name__ == '__main__':    
     
@@ -47,7 +46,7 @@ if __name__ == '__main__':
     if args.command == 'compute_cpi_repair':
         abox_path = str(path)+args.abox
         pos_path = str(path)+args.pos
-        tbox_size, abox_size, pos_size, conflicts_size, cpi_repair_size, execution_time = cpi_repair_helper(tbox,abox_path,pos_path)
+        tbox_size, abox_size, pos_size, conflicts_size, cpi_repair_size, execution_time = cpi_repair_helper(tbox,abox_path,pos_path,db_path)
         with open(str(path)+'/benchmark_data/results/execution_results.txt', 'a') as file:
             file.write('\n')
             file.write(f"{tbox_size}; {abox_size}; {pos_size}; {conflicts_size}; {cpi_repair_size}; {execution_time}")
@@ -58,7 +57,7 @@ if __name__ == '__main__':
         pos_path = str(path)+args.pos
         check_assertion_text = args.assertion
         check_assertion = process_line(check_assertion_text)[0]
-        check_in_cpi_repair_helper(tbox,abox_path,pos_path,check_assertion)
+        check_in_cpi_repair_helper(tbox,abox_path,pos_path,check_assertion,db_path)
 
     elif args.command == 'check_integrity':
         tbox.negative_closure()
@@ -73,7 +72,7 @@ if __name__ == '__main__':
 
     elif args.command == 'conflicts_set':
         abox_path = str(path)+args.abox
-        conflicts_helper(tbox,abox_path)
+        conflicts_helper(tbox,abox_path,db_path)
     
     else:
         parser.print_help()

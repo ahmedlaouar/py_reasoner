@@ -24,28 +24,28 @@ def compute_cpi_repair(cursor, tbox, pos, conflicts, check_list):
 #In this version the check list is only formed with the assertions that may be added to the cpi_repair 
 def compute_cpi_repair_bis(cursor, tbox, pos, check_list, conflicts=None):
     cpi_repair = []
-    # First phase is to check additionnal assertions
+    
+    # First phase is to check additional assertions
     for check_assertion in check_list:
-        #if check_assertion_optimized(cursor, tbox, pos, check_assertion):
-        #    cpi_repair.append(check_assertion)
-        supports = compute_supports(check_assertion, tbox.get_positive_axioms(),cursor)
+        supports = compute_supports(check_assertion, tbox.get_positive_axioms(), cursor)
         if check_all_dominance(pos, conflicts, supports):
             cpi_repair.append(check_assertion)
-    # Second phase is to retrive and verify the assertions form the database of the ABox one by one
-    query = f"SELECT DISTINCT assertion_name,individual_1,individual_2 FROM assertions"
+    
+    # Second phase is to retrieve and verify the assertions from the database (ABox) one by one
+    query = "SELECT DISTINCT assertion_name, individual_1, individual_2 FROM assertions"
     cursor.execute(query)
     rows = cursor.fetchall()
     for row in rows:
-        if row[2] == None or row[2] == 'None':
-            new_assertion = assertion(row[0],row[1])
+        if row[2] is None or row[2] == 'None':
+            new_assertion = assertion(row[0], row[1])
         else:
-            new_assertion = assertion(row[0],row[1],row[2])
-        #if check_assertion_optimized(cursor, tbox, pos, new_assertion):
-        #    cpi_repair.append(new_assertion)
-        supports = compute_supports(new_assertion, tbox.get_positive_axioms(),cursor)
+            new_assertion = assertion(row[0], row[1], row[2])
+        supports = compute_supports(new_assertion, tbox.get_positive_axioms(), cursor)
         if check_all_dominance(pos, conflicts, supports):
             cpi_repair.append(new_assertion)
+    
     return cpi_repair
+
 
 def check_assertion_optimized(cursor, tbox, pos, check_assertion):
     supports = compute_supports(check_assertion, tbox.get_positive_axioms(),cursor)

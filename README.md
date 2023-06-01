@@ -22,7 +22,6 @@ The aim of this project is to
 
 We want to implement the backend **engine** for the available tractable inconsistency-tolerant semantics in order to apply our work to scalable inconsistent KBs.
 
-## Use
 
 ### Requirements
 
@@ -34,6 +33,9 @@ We want to implement the backend **engine** for the available tractable inconsis
 
 
 ### Current test datasets 
+
+
+## Main functions
 
 
 ### check_integrity of TBox

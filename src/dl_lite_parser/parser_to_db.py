@@ -1,36 +1,24 @@
-import psycopg2
+import os
 from dl_lite.assertion import assertion    
+import sqlite3
 
-def create_database(host,database_name,user,password,db_path):
-    
-    conn = psycopg2.connect(
-        host=host,
-        user=user,
-        password=password
-    )
-    # Disable autocommit mode to avoid error: DROP DATABASE cannot run inside a transaction block
-    conn.autocommit = True
+def empty_database(db_path):
+    if os.path.exists(db_path):
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
 
-    cursor = conn.cursor()
-    # Drop the database if it exists
-    cursor.execute(f"DROP DATABASE IF EXISTS {database_name};")
+        # Get a list of all tables in the database
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
+        tables = cursor.fetchall()
 
-    # Commit the drop database statement
-    conn.commit()
+        # Drop all tables
+        for table in tables:
+            cursor.execute(f"DROP TABLE {table[0]}")
 
-    #see how to fix this later
-    #table_space_query = f"CREATE TABLESPACE test_abox LOCATION '{db_path}';"
-    #cursor.execute(table_space_query)
-
-    create_database_query = f"CREATE DATABASE {database_name} OWNER py_reasoner TEMPLATE template0;" # TABLESPACE {database_name};"
-    cursor.execute(create_database_query)
-
-    conn.commit()
-    cursor.close()
-    conn.close()
-
-    return
-
+        conn.commit()
+        cursor.close()
+        conn.close()
+        
 def process_line(line):
     splitted = line.split(';')
     names = splitted[0].split('(')
@@ -46,29 +34,23 @@ def process_line(line):
         weight = int(splitted[1])
         return  assertion(assertion_name,individual_1),weight
 
-def read_abox(file_path: str, cursor):
+def read_abox(file_path, cursor):
     with open(file_path, 'r') as file:
         co = 1
         for line in file:
             if line.strip() == "BEGINABOX" or line.strip() == "ENDABOX":
                 continue
-            new_assertion,weight = process_line(line) 
+            new_assertion, weight = process_line(line) 
             # Insert values into the "assertions" table
             cursor.execute(f"INSERT INTO assertions (id, assertion_name, individual_1, individual_2, weight) VALUES ('{co}', '{new_assertion.get_assertion_name()}', '{new_assertion.get_individuals()[0]}', '{new_assertion.get_individuals()[1]}', '{weight}')")           
             co += 1
-    return
 
-def abox_to_database(file_path: str,database_name,cursor):
 
-    drop_query = f"drop schema if exists {database_name} cascade;"
+def abox_to_database(file_path, cursor):
+    # Drop the assertions table if it exists
+    cursor.execute("DROP TABLE IF EXISTS assertions;")
     
-    cursor.execute(drop_query)
-
-    create_query = f"CREATE schema {database_name};"
-    set_query = f"SET search_path to {database_name};"
-    cursor.execute(create_query)
-    cursor.execute(set_query)
-    
+    # Create the assertions table
     cursor.execute('''
         CREATE TABLE assertions (
             id INT PRIMARY KEY,
@@ -78,7 +60,8 @@ def abox_to_database(file_path: str,database_name,cursor):
             weight INT
         );''')
 
-    read_abox(file_path,cursor)
+    read_abox(file_path, cursor)
+
 
 def read_full_pos(file_path: str):
     with open(file_path, 'r') as file:

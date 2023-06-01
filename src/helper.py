@@ -1,10 +1,10 @@
 import sys
 import time
 import psycopg2
-from dl_lite_parser.parser_to_db import abox_to_database, read_full_pos, read_pos
+from dl_lite_parser.parser_to_db import abox_to_database, read_full_pos
 from repair.assertions_generator import generate_possible_assertions_rec
 from repair.conflicts import conflict_set, reduced_conflict_set
-from repair.cpi_repair import check_assertion_in_cpi_repair, compute_cpi_repair, compute_cpi_repair_bis
+from repair.cpi_repair import check_assertion_in_cpi_repair, compute_cpi_repair_bis
 
 #necessary global constants
 database_name = "test_abox"

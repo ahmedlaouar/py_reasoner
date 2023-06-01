@@ -46,12 +46,14 @@ class TBox:
         # First case when positive axiom right side equals exactly negative axiom left side
         if negative_axiom.get_left_side() == positive_axiom.get_right_side():
             new_axiom = Axiom(positive_axiom.get_left_side(),negative_axiom.get_right_side())
-            cln.append(new_axiom)
+            if new_axiom not in cln:
+                cln.append(new_axiom)
         # Second case is a special case, when positive axiom right side is a role and its projection or inversion or both in negative axiom left side
         elif (Modifier.projection not in positive_axiom.get_right_side().get_modifiers()) and (Modifier.inversion not in positive_axiom.get_right_side().get_modifiers()):
             new_side = Side(positive_axiom.get_left_side().get_name(),negative_axiom.get_left_side().get_modifiers())
             new_axiom = Axiom(new_side,negative_axiom.get_right_side())
-            cln.append(new_axiom)
+            if new_axiom not in cln:
+                cln.append(new_axiom)
 
     def check_integrity(self):
         for axiom in self.__negative_axioms:

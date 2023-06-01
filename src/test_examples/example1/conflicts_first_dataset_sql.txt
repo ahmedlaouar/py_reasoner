@@ -1,2 +1,0 @@
-(Manager(Bob),2),(Edit(Bob,F78),5)
-(Sales(Bob),3),(Sign(Bob,F78),4)

@@ -135,7 +135,7 @@ def check_in_cpi_repair_helper(tbox,abox_path,pos_path,check_assertion):
         
         cursor = conn.cursor()        
         abox_to_database(abox_path,database_name,cursor)
-        pos_order = read_pos(pos_path)
+        pos_order = read_full_pos(pos_path)
 
         if check_assertion_in_cpi_repair(cursor, tbox, pos_order, check_assertion):
             print(f"{check_assertion} is in the Cpi-repair of the abox")

@@ -53,9 +53,13 @@ We want to implement the backend **engine** for the available tractable inconsis
 ### check_in_cpi_repair
 
 
+## Future works
 
 
-References:
+## Comments
+
+
+## References:
 
 [1] Benferhat, S., Bouraoui, Z., Tabia, K.: How to select one preferred assertional-based repair from inconsistent and prioritized DL-Lite knowledge bases? In: International Joint Conference on Artificial Intelligence (IJCAI), Buenos Aires, Argentina. pp. 1450–1456 (2015)
 

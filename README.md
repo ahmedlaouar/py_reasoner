@@ -10,7 +10,7 @@ This leads to the necessity of computing data repairs in order to safely evaluat
 
 The main focus of this work is a subset of methods for data repairs that operates in the context of possibilistic Knowledge Bases and more generally on weighted KBs.  
 [__Possiblistic DL-Lite__](https://link.springer.com/chapter/10.1007/978-3-642-40381-1_27) extends the expressive power of DL-Lite to deal with possibilistic uncertain information without increasing the computational cost. 
-In this context, multiple ABox repairs have been proposed, mainly for totally ordered KBs~[1] and partially ordered KBs~[2]. 
+In this context, multiple ABox repairs have been proposed, mainly for totally ordered KBs[1] and partially ordered KBs[2].
 
 ### Goals
 

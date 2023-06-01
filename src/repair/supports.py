@@ -27,14 +27,14 @@ def supports_deduction(find_assertion: assertion, positive_axioms: list(), curso
                         else:
                             new_assertion = w_assertion(row[1],row[2],row[3],weight=row[4])
                         supports.append(new_assertion)
-            next_assertion = assertion(axiom.get_left_side().get_name(),find_assertion.get_individuals2()[0],find_assertion.get_individuals2()[1])
+            next_assertion = assertion(axiom.get_left_side().get_name(),find_assertion.get_individuals()[0],find_assertion.get_individuals()[1])
             supports += supports_deduction(next_assertion, positive_axioms, cursor)
     return supports
 
 def compute_supports(target_assertion: assertion, positive_axioms: list(), cursor):
     supports = supports_deduction(target_assertion, positive_axioms, cursor)
     query = f"""SELECT * FROM assertions WHERE assertion_name = '{target_assertion.get_assertion_name()}' AND 
-    individual_1 = '{target_assertion.get_individuals2()[0]}' and individual_2 = '{target_assertion.get_individuals2()[1]}'"""
+    individual_1 = '{target_assertion.get_individuals()[0]}' and individual_2 = '{target_assertion.get_individuals()[1]}'"""
     cursor.execute(query)
     row = cursor.fetchone()
     if row is not None:

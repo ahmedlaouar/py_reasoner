@@ -8,13 +8,13 @@ class assertion:
     def get_assertion_name(self):
         return self.__assertion_name
     
-    def get_individuals(self):
-        if self.__is_role:
-            return self.__individual_1,self.__individual_2
-        else:
-            return self.__individual_1,
+    #def get_individuals(self):
+    #    if self.__is_role:
+    #        return self.__individual_1,self.__individual_2
+    #    else:
+    #        return self.__individual_1,
 
-    def get_individuals2(self):
+    def get_individuals(self):
         if self.__is_role:
             return self.__individual_1,self.__individual_2
         else:
@@ -46,6 +46,6 @@ class w_assertion(assertion):
     
     def __str__(self) -> str:
         if self.is_role():
-            return "{}({},{}),{}".format(super().get_assertion_name(),super().get_individuals()[0],super().get_individuals2()[1],self.__weight)
+            return "{}({},{}),{}".format(super().get_assertion_name(),super().get_individuals()[0],super().get_individuals()[1],self.__weight)
         else:
             return "{}({}),{}".format(super().get_assertion_name(),super().get_individuals()[0],self.__weight)

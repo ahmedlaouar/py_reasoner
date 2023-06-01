@@ -29,6 +29,6 @@ def save_dag_to_file(graph, filename):
 num_nodes = 1000
 dag = generate_random_dag(num_nodes)
 # Save DAG to a text file
-filename = "random_dag_2023053117.txt"
+filename = "random_dag_1000_2023060109.txt"
 save_dag_to_file(dag, common_path+filename)
 print("DAG saved to", filename)

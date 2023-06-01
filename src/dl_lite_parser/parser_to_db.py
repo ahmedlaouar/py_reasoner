@@ -54,7 +54,7 @@ def read_abox(file_path: str, cursor):
                 continue
             new_assertion,weight = process_line(line) 
             # Insert values into the "assertions" table
-            cursor.execute(f"INSERT INTO assertions (id, assertion_name, individual_1, individual_2, weight) VALUES ('{co}', '{new_assertion.get_assertion_name()}', '{new_assertion.get_individuals2()[0]}', '{new_assertion.get_individuals2()[1]}', '{weight}')")           
+            cursor.execute(f"INSERT INTO assertions (id, assertion_name, individual_1, individual_2, weight) VALUES ('{co}', '{new_assertion.get_assertion_name()}', '{new_assertion.get_individuals()[0]}', '{new_assertion.get_individuals()[1]}', '{weight}')")           
             co += 1
     return
 

@@ -3,7 +3,7 @@
 ## Description
 
 Lightweights ontologies are used for efficient query answering and belongs to the Ontology Based Data Access (OBDA) paradigm. 
-DL-Lite is one of the most important fragments of Description Logics, here we focus on [__DL_lite_r__](https://link.springer.com/article/10.1007/s10817-007-9078-x), which underlies the OWL2-QL language.
+DL-Lite is one of the most important fragments of Description Logics, here we focus on [__DL-lite_R__](https://link.springer.com/article/10.1007/s10817-007-9078-x), which underlies the OWL2-QL language.
 
 The conceptual knowledge of the ontology (i.e., the TBox) is usually assumed to be coherent. However, the dataset (i.e., the ABox) may potentially be inconsistent with respect to the TBox, making the whole ontology inconsistent.
 This leads to the necessity of computing data repairs in order to safely evaluate queries.
@@ -25,12 +25,21 @@ We want to implement the backend **engine** for the available tractable inconsis
 
 ### Requirements
 
+To run this project, all you need is **python3** interpreter and **git**.
 
 ### Install
 
+**Clone** the repository, the main file is named "py_reasonr.py" this README serves also as a tutorial, a list of the main functionnalities is given below alongside the "commnads.txt" file containing a list of useful commands to run the available data examples on your CLI.
 
 ### Notation
 
+The used examples of ontologies are saved in 3 different types of files, a file containing the TBox or the ontology, a file containing the ABox or the dataset and a file containing a Partially Ordered Set (POS) to represent the partial preorder over the assertions in the ABox. 
+ - The TBox file: 
+
+ - The ABox file:
+
+ - The POS file:
+ 
 
 ### Current test datasets 
 

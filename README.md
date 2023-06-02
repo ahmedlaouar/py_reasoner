@@ -3,7 +3,7 @@
 ## Description
 
 Lightweights ontologies are used for efficient query answering and belongs to the Ontology Based Data Access (OBDA) paradigm. 
-DL-Lite is one of the most important fragments of Description Logics, here we focus on [__DL-lite_R__](https://link.springer.com/article/10.1007/s10817-007-9078-x), which underlies the OWL2-QL language.
+DL-Lite is one of the most important fragments of Description Logics, here we focus on [__DL-Lite_R__](https://link.springer.com/article/10.1007/s10817-007-9078-x), which underlies the OWL2-QL language.
 
 The conceptual knowledge of the ontology (i.e., the TBox) is usually assumed to be coherent. However, the dataset (i.e., the ABox) may potentially be inconsistent with respect to the TBox, making the whole ontology inconsistent.
 This leads to the necessity of computing data repairs in order to safely evaluate queries.

@@ -34,7 +34,24 @@ To run this project, all you need is **python3** interpreter and **git**.
 ### Notation
 
 The used examples of ontologies are saved in 3 different types of files, a file containing the TBox or the ontology, a file containing the ABox or the dataset and a file containing a Partially Ordered Set (POS) to represent the partial preorder over the assertions in the ABox. 
- - The TBox file: 
+
+Note that the data is represented in its raw (or native) format in this first version, it is easier to start from here and test the implementation on randomly generated data (some simulation scenarios). After that, we can provide the support for an (xml/owl) parsing to be able to test it against adaptations of the well-known benchmarking datasets.
+
+Consider the following toy scenario of a security policy of a sales company to illustrate the notation and the implementation. this scenario is based on the Concepts $\small\textsf{Manager}$, $\small\textsf{Sales}$, $\small\textsf{Staff}$ which represent employees affiliations, and $\small\textsf{Reports}$ which represents file categories. 
+
+- The TBox file: a raw example of the file containing the TBox:
+ ```
+BEGINTBOX
+Manager < Staff
+Sales < Staff
+Manager < NOT EXISTS Edit
+Sales < NOT EXISTS Sign
+ENDTBOX
+```
+
+Manager < Staff and Sales < Staff translate the DL-Lite concept inclusion axioms $\small\textsf{Manager} \sqsubseteq \small\textsf{Staff}$ and $\small\textsf{Sales} \sqsubseteq \small\textsf{Staff}$ respectively and indicate that a $\small\textsf{Manager}$ is a $\small\textsf{Staff}$ and a $\small\textsf{Sales}$ is a $\small\textsf{Staff}$.
+
+The negative axioms Manager < NOT EXISTS Edit and Sales < NOT EXISTS Sign indicate disjoint concepts and translate $\small\textsf{Manager} \sqsubseteq \exists \small\textsf{Edit}$ and $\small\textsf{Sales} \sqsubseteq \exists \small\textsf{Sign}$ respectively. This means that for the roles $\small\textsf{Edit}$ and $\small\textsf{Sign}$ respectively, 
 
  - The ABox file:
 

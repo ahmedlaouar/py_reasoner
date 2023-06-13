@@ -91,22 +91,53 @@ At a first step, we implemented 5 main functions, associated directly with the $
 ### check_integrity of TBox
 In DL-Lite, the TBox should not contain axioms of the type $A \sqsubseteq \neg A$ (self contradicting axioms). So, in order to check the integrity of the TBox we proceed by computing its negative closure, which consists in computing all the negative axioms that can be inferred from it, if this negative closure contains an axiom of the type $A \sqsubseteq \neg A$ then the TBox is not consistent and can't be used with the proposed methods. This step is necessary with each new TBox in order to confirm its consistency.
 
-### negative_closure of TBox
+It can be run using the following command :
+ ```
+python3 src/py_reasoner.py check_integrity -t benchmark_data/data/ontology_2023053117_0.txt
+```
 
+### negative_closure of TBox
+The negative closure computation is necessary to be able to compute the conflicts set, it consists in computing all the negative axioms that can be inferred from the TBox.
+
+It can be run using the following command :
+ ```
+python3 src/py_reasoner.py negative_closure -t benchmark_data/data/ontology_2023053117_0.txt
+```
 
 ### conflicts_set of ABox
+The set of conflicts is computed by processing all the negative axioms in the negative closure of the TBox and retrieving the conflcits resulting from them, two assertions A(a) and B(a) are conflicting if the TBox contains the negative axiom $A \sqsubseteq \neg B$. 
 
+It can be run using the following command :
+ ```
+python3 src/py_reasoner.py conflicts_set -t src/test_examples/example1/first_tbox.txt -a src/test_examples/example1/first_abox.txt
+```
 
 ### compute_cpi_repair
+The $c\pi$-repair of an ABox is a reapir of partially preordered ABoxes, this repair is productive and computed in polynomial time. Moreover, it yields a consistent sub-base on which we can run queries.
 
+It can be run using the following command :
+ ```
+python3 src/py_reasoner.py compute_cpi_repair -t src/test_examples/example1/first_tbox.txt -a src/test_examples/example1/first_abox.txt -p /src/test_examples/example1/first_full_pos.txt
+```
 
 ### check_in_cpi_repair
+This function is similar to compute_cpi_repair but instead of computing the whole repair, it takes one assertion and checks if it belongs to the repair. It can be useful in some special cases, and mainly for instance checking.
 
+It can be run using the following command :
+ ```
+python3 src/py_reasoner.py compute_cpi_repair -t src/test_examples/example1/first_tbox.txt -a src/test_examples/example1/first_abox.txt -p /src/test_examples/example1/first_full_pos.txt -e "Reports(F78)"
+```
 
 ## Future works
 
+The next steps in this project are:
+- Allow for owl parsing of ontologies and xml of data
+- Test and bench with LUBM benchmarking data (the DL-Lite_R adapted version)
+- Compare $\pi$-repair and $c\pi$-repair.
+- Run profound tests to evaluate code.
 
-## Comments
+
+<!-- ## Comments -->
 
 
 ## References:

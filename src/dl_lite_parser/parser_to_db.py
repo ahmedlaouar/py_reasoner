@@ -33,6 +33,19 @@ def process_line(line):
         individual_1 = names[1].replace(")", "")
         weight = int(splitted[1])
         return  assertion(assertion_name,individual_1),weight
+    
+def process_line_entry(line):
+    splitted = line.split(';')
+    names = splitted[0].split('(')
+    assertion_name = names[0]
+    if ',' in names[1]:
+        individuals = names[1].split(',')
+        individual_1 = individuals[0]
+        individual_2 = individuals[1].replace(")", "")
+        return  assertion(assertion_name,individual_1,individual_2)
+    else:
+        individual_1 = names[1].replace(")", "")
+        return  assertion(assertion_name,individual_1)
 
 def read_abox(file_path, cursor):
     with open(file_path, 'r') as file:

@@ -86,9 +86,10 @@ In order to test the implementation, we generated some random data for the TBox,
 
 ## Main functions
 
+At a first step, we implemented 5 main functions, associated directly with the $c\pi$-repair method.
 
 ### check_integrity of TBox
-
+In DL-Lite, the TBox should not contain axioms of the type $A \sqsubseteq \neg A$ (self contradicting axioms). So, in order to check the integrity of the TBox we proceed by computing its negative closure, which consists in computing all the negative axioms that can be inferred from it, if this negative closure contains an axiom of the type $A \sqsubseteq \neg A$ then the TBox is not consistent and can't be used with the proposed methods. This step is necessary with each new TBox in order to confirm its consistency.
 
 ### negative_closure of TBox
 

@@ -39,7 +39,9 @@ Note that the data is represented in its raw (or native) format in this first ve
 
 Consider the following toy scenario of a security policy of a sales company to illustrate the notation and the implementation. this scenario is based on the Concepts $\small\textsf{Manager}$, $\small\textsf{Sales}$, $\small\textsf{Staff}$ which represent employees affiliations, and $\small\textsf{Reports}$ which represents file categories. 
 
-- The TBox file: a raw example of the file containing the TBox:
+- The TBox file: contains a set of positive and negative axioms, positive axioms indicate concept and role inclusions while negative axioms indicate disjoint concepts and roles.
+
+The following is a raw example of the file containing the TBox:
  ```
 BEGINTBOX
 Manager < Staff
@@ -51,15 +53,36 @@ ENDTBOX
 
 Manager < Staff and Sales < Staff translate the DL-Lite concept inclusion axioms $\small\textsf{Manager} \sqsubseteq \small\textsf{Staff}$ and $\small\textsf{Sales} \sqsubseteq \small\textsf{Staff}$ respectively and indicate that a $\small\textsf{Manager}$ is a $\small\textsf{Staff}$ and a $\small\textsf{Sales}$ is a $\small\textsf{Staff}$.
 
-The negative axioms Manager < NOT EXISTS Edit and Sales < NOT EXISTS Sign indicate disjoint concepts and translate $\small\textsf{Manager} \sqsubseteq \exists \small\textsf{Edit}$ and $\small\textsf{Sales} \sqsubseteq \exists \small\textsf{Sign}$ respectively. This means that for the roles $\small\textsf{Edit}$ and $\small\textsf{Sign}$ respectively, 
+The negative axioms Manager < NOT EXISTS Edit and Sales < NOT EXISTS Sign indicate disjoint concepts and translate $\small\textsf{Manager} \sqsubseteq \neg \exists \small\textsf{Edit}$ and $\small\textsf{Sales} \sqsubseteq \neg \exists \small\textsf{Sign}$ respectively. This means that for the roles $\small\textsf{Edit}$ and $\small\textsf{Sign}$ respectively, the projection on the first individual (indicated by the existential quantifier $\exists$) is disjoint with the concepts $\small\textsf{Manager}$ and $\small\textsf{Sales}$ respectively.
 
- - The ABox file:
+ - The ABox file: contains a set of assertions of the form B(a) or R(a,b) (concept assertions and role assertions) and an integer value representing the weight associated with assertion, seperated with a semicolon ';'. 
 
- - The POS file:
- 
+ The following is a raw example of an ABox:
+ ```
+BEGINABOX
+Reports(F78);1;
+Manager(Bob);2;
+Sales(Bob);3;
+Sign(Bob,F78);4;
+Edit(Bob,F78);5;
+ENDABOX 
+```
+
+ - The POS file: this files contains the Partially Ordered Set associated with the ABox, it contains a set of semicolon seperated values (integers). The first element of each line represent a weight to be associated with some assertions of the ABox, the following elements are all its possible successors (or stricltly less certain values). We made this choice of storing all the successors instead of storing just the direct ones to avoid using a recursive function each time to check if a weight is strictly preferred to another, instead the POS is loaded to an adjacency matrix and the checking is equal to one access to the matrix. This is better because the used methods make all of checking and because the values are simply integers, the size of the matrix is small even with larger number of POS elements. Note that equivalence is represnted by two assertions being associated with the same weight from the POS, hence, no equivalent weights are present in the POS. Also, it POS can be seen as a directed acyclic graph DAG.
+
+ The following is a raw example of a POS associated with the ABox given above, it represents the relations 1 > 2 > 4 and 1 > 3 > 5 :
+
+ ```
+1;2;3;4;5
+2;4;
+3;5;
+4;
+5; 
+```
 
 ### Current test datasets 
 
+In order to test the implementation, we generated some random data for the TBox, ABox and POS files, this data alongside the generator can be found in the benchmark_data folder, we opted for the annotations described above and the randomly generated data to test the methods initially, before using a parser to read OWL standarised data and using well-known benchmarking data. The next step is to adapt this work with these benchmarks, but first we wanted to provide an initial proof for the applicability of the methods on simple generated random data.  
 
 ## Main functions
 

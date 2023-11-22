@@ -1,0 +1,8 @@
+BEGINTBOX
+A < G
+B < G
+D < NOT C
+D < NOT E
+D < F
+B < NOT F
+ENDTBOX

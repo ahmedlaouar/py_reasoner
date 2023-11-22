@@ -90,6 +90,8 @@ if __name__ == '__main__':
     elif args.command == 'negative_closure':
         tbox.negative_closure()
         print(f"Size of the negative closure = {len(tbox.get_negative_axioms())}")
+        for e in tbox.get_negative_axioms():
+            print(e)
 
     elif args.command == 'conflicts_set':
         if args.abox[0] != '/':

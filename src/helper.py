@@ -28,6 +28,9 @@ def conflicts_helper(tbox, abox_path, db_path):
 
         print(f"Size of the conflicts = {len(conflicts)}")
 
+        for conf in conflicts:
+            print(conf[0], conf[1])
+
         conn.commit()
         cursor.close()
         conn.close()
@@ -80,9 +83,16 @@ def cpi_repair_helper(tbox, abox_path, pos_path, db_path):
         print(f"Size of assertions to test: {len(check_list) + abox_size}")
         print(f"Time to generate additional assertions to test: {inter_time4 - inter_time3}")
 
+        for elt in check_list:
+            print(elt)
+
         cpi_repair = compute_cpi_repair_bis(cursor, tbox, pos_matrix, check_list, reduced_conflicts)
 
         print(f"The size of the cpi_repair: {len(cpi_repair)}")
+        
+        for elt in cpi_repair:
+            print(elt)
+
         inter_time5 = time.time()
         cp_repair_time = inter_time5 - inter_time3
         print(f"Time to compute cpi_repair: {cp_repair_time}")

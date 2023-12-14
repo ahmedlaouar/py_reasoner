@@ -1,0 +1,2 @@
+Sales < NOT Manager
+Sales < NOT EXISTS Sign

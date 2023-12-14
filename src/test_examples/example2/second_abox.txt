@@ -1,0 +1,6 @@
+BEGINABOX
+Sign(Bob,File78);1;
+Manager(Alice);2;
+Sales(Bob);3;
+Manager(Bob);4;
+ENDABOX

@@ -2,6 +2,18 @@ import logging
 import rdflib
 import time
 
+def get_OntologyURI(graph,return_as_string=True):
+    
+    test = [x for x, y, z in graph.triples((None, rdflib.RDF.type, rdflib.OWL.Ontology))]
+
+    if test:
+        if return_as_string:
+            return str(test[0])
+        else:
+            return test[0]
+    else:
+        return None
+
 logging.basicConfig()
 logger = logging.getLogger('logger')
 logger.warning('The system may break down')
@@ -10,13 +22,15 @@ start_time = time.time()
 
 g = rdflib.Graph()
 g.parse ('py_reasoner/ontologies/univ-bench/lubm-ex-20_disjoint.owl', format='application/rdf+xml')
-lubm = rdflib.Namespace('http://swat.cse.lehigh.edu/onto/univ-bench.owl#')
+name_space = get_OntologyURI(g)
+print(name_space)
+lubm = rdflib.Namespace(name_space)
 
-g.bind('lubm-ex-20_disjoint', lubm)
+g.bind('', lubm)
 
-custom_prefix = "owl"
-custom_namespace = rdflib.Namespace("http://www.w3.org/2002/07/owl#")
-g.bind(custom_prefix, custom_namespace)
+#custom_prefix = "owl"
+#custom_namespace = rdflib.Namespace("http://www.w3.org/2002/07/owl#")
+#g.bind(custom_prefix, custom_namespace)
 
 query = """
 select distinct ?s ?p ?o 

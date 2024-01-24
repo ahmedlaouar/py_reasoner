@@ -1,6 +1,5 @@
 import rdflib
 import subprocess
-import re
 
 ontology_path = 'ontologies/univ-bench/lubm-ex-20_disjoint.owl'
 
@@ -101,10 +100,35 @@ def rewrite_queries(queries,ontology_path :str):
 #    for query in all_queries:
 #        temp_file.write(f"{query}\n")
 
-def run_query(query_str):
-    query_str = query_str
+def generate_sql_query(query_str):
+    query = query_str.replace(' ', '').replace('),', '), ').split()
+    #split query into two sides
+    first, second = query[:2]        
+    #tokenize each side and remove commas and parenthesis
+    first_tokens = [token for token in first.replace(',', ' , ').replace('(', ' ( ').replace(')', ' ) ').split() if token not in [',', '(', ')']]
+    second_tokens= [token for token in second.replace(',', ' , ').replace('(', ' ( ').replace(')', ' ) ').split() if token not in [',', '(', ')']]
+    #find matching elements between first and second tokens
+    matching_indexes = [(i, j) for i, item1 in enumerate(first_tokens[1:]) for j, item2 in enumerate(second_tokens[1:]) if item1 == item2]
+    #Generate query according to matches
+    sql_query = f"SELECT * FROM {first_tokens[0]} t1 JOIN {second_tokens[0]} t2 ON"
+    for (index0,index1) in matching_indexes:
+        sql_query += " t1.individual"+str(index0)+" = t2.individual"+str(index1)+" and"
+    #remove last trailing and
+    sql_query = sql_query.rsplit(' ', 1)[0]
+    return sql_query, first_tokens[0], second_tokens[0]
 
-def compute_conflicts(ontology_path :str, data_path: str):
+def run_sql_query(sql_query:str,cursor, table1:str, table2:str):
+    cursor.execute(sql_query)
+    rows = cursor.fetchall()
+    #for row in rows:
+    #Here process rows and associate them with tables names
+
+def compute_conflicts(ontology_path :str, cursor):
+    conflicts = []
     negative_axioms = get_negative_axioms(ontology_path)
     queries = generate_queries(negative_axioms)
     all_queries = rewrite_queries(queries,ontology_path)
+    for query in all_queries:
+        sql_query, table1, table2 = generate_sql_query(query)
+        conflicts += run_sql_query(sql_query, table1, table2)
+    return conflicts

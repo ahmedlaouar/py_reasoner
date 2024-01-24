@@ -1,39 +1,3 @@
-def tokenize_query(query):
-    # Split the query into tokens
-    tokens = query.replace('(', ' ( ').replace(')', ' ) ').split()
-
-    # Remove commas
-    tokens = [token for token in tokens if token != ',']
-
-    return tokens
-
-def generate_sql_query(tokens):
-    # Initialize variables
-    tables = []
-    conditions = []
-
-    # Process tokens
-    i = 0
-    while i < len(tokens):
-        if tokens[i] == '(':
-            # Start of a condition block
-            table = tokens[i - 1]
-            conditions.append(tokens[i + 1])
-            i += 4  # Skip the entire condition block
-        else:
-            # Single table case
-            table = tokens[i]
-            i += 2  # Skip the table and comma
-
-        tables.append(table)
-
-    # Generate SQL query
-    if len(tables) == 2:
-        join_conditions = f"{tables[0]}.?0={tables[1]}.?0"
-        return f"SELECT * FROM {tables[0]} JOIN {tables[1]} ON {join_conditions}"
-
-    return None
-
 def main():
     # Input queries
     queries = [
@@ -54,13 +18,23 @@ def main():
 
     # Generate SQL queries
     for query in queries:
-        print(query)
-        tokens = tokenize_query(query)
-        print(tokens)
-        sql_query = generate_sql_query(tokens)
+        # Split the query into tokens
+        query = query.replace(' ', '').replace('),', '), ').split()
+        first, second = query[:2]        
+        # Remove commas
+        first_tokens = [token for token in first.replace(',', ' , ').replace('(', ' ( ').replace(')', ' ) ').split() if token not in [',', '(', ')']]
+        second_tokens= [token for token in second.replace(',', ' , ').replace('(', ' ( ').replace(')', ' ) ').split() if token not in [',', '(', ')']]
+        print(first_tokens)
+        print(second_tokens)
+        matching_indexes = [(i, j) for i, item1 in enumerate(first_tokens[1:]) for j, item2 in enumerate(second_tokens[1:]) if item1 == item2]
+        print(matching_indexes)
+        sql_query = f"SELECT * FROM {first_tokens[0]} t1 JOIN {second_tokens[0]} t2 ON"
+        for (index0,index1) in matching_indexes:
+            sql_query += " t1.individual"+str(index0)+" = t2.individual"+str(index1)+" and"
+        #remove last trailing and
+        sql_query = sql_query.rsplit(' ', 1)[0]
         print(sql_query)
-        if sql_query:
-            print(sql_query)
+        print("------------------------------------------")
 
 if __name__ == "__main__":
     main()

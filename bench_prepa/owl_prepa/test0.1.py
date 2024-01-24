@@ -1,48 +1,92 @@
-import logging
-import rdflib
-import time
+import os
+from rdflib import Graph, RDF, OWL
+import sqlite3
 
-def get_OntologyURI(graph,return_as_string=True):
-    
-    test = [x for x, y, z in graph.triples((None, rdflib.RDF.type, rdflib.OWL.Ontology))]
+def empty_database(db_path):
+    if os.path.exists(db_path):
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
 
-    if test:
-        if return_as_string:
-            return str(test[0])
-        else:
-            return test[0]
-    else:
-        return None
+        # Get a list of all tables in the database
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
+        tables = cursor.fetchall()
 
-logging.basicConfig()
-logger = logging.getLogger('logger')
-logger.warning('The system may break down')
+        # Drop all tables
+        for table in tables:
+            cursor.execute(f"DROP TABLE {table[0]}")
 
-start_time = time.time()
+        conn.commit()
+        cursor.close()
+        conn.close()
+        
+def parse_ontology(owl_file):
+    g = Graph()
+    g.parse(owl_file)
+    return g
 
-g = rdflib.Graph()
-g.parse ('py_reasoner/ontologies/univ-bench/lubm-ex-20_disjoint.owl', format='application/rdf+xml')
-name_space = get_OntologyURI(g)
-print(name_space)
-lubm = rdflib.Namespace(name_space)
+def create_database(graph, db_file):
+    conn = sqlite3.connect(db_file)
+    cursor = conn.cursor()
 
-g.bind('', lubm)
+    # Create tables for classes
+    for class_uri in graph.subjects(predicate=RDF.type, object=OWL.Class):
+        table_name = class_uri.split('#')[-1]
+        cursor.execute(f"CREATE TABLE IF NOT EXISTS {table_name} (id INTEGER PRIMARY KEY, individual0 TEXT, degree INT)")
 
-#custom_prefix = "owl"
-#custom_namespace = rdflib.Namespace("http://www.w3.org/2002/07/owl#")
-#g.bind(custom_prefix, custom_namespace)
+    # Create tables for properties
+    for prop_uri in graph.subjects(predicate=RDF.type, object=OWL.ObjectProperty):
+        table_name = prop_uri.split('#')[-1]
+        cursor.execute(f"CREATE TABLE IF NOT EXISTS {table_name} (id INTEGER PRIMARY KEY, individual0 TEXT, individual1 TEXT, degree INT)")
 
-query = """
-select distinct ?s ?p ?o 
-where { ?s owl:disjointWith ?o}
-        """
-result = g.query(query)
-# Print the result with prefixed names or original URIs
-for row in result.bindings:
-    #s = str(row['s'])
-    #o = str(row['o'])
-    s = g.qname(row['s']) if 's' in row and row['s'] else str(row['s'])
-    o = g.qname(row['o']) if 'o' in row and row['o'] else str(row['o'])
-    print(f"{s}, owl:disjointWith, {o}")
+    # Create tables for data properties
+    for data_uri in graph.subjects(predicate=RDF.type, object=OWL.DatatypeProperty):
+        table_name = data_uri.split('#')[-1]
+        cursor.execute(f"CREATE TABLE IF NOT EXISTS {table_name} (id INTEGER PRIMARY KEY, individual0 TEXT, individual1 TEXT, degree INT)")
 
-print("--- %s seconds ---" % (time.time() - start_time))
+    conn.commit()
+    conn.close()
+
+
+
+def parse_data(owl_data_file):
+    g = Graph()
+    g.parse(owl_data_file)
+    return g
+
+def insert_data(graph, db_file):
+    conn = sqlite3.connect(db_file)
+    cursor = conn.cursor()
+    co = 0
+    # Insert data for classes and properties
+    for s, p, o in graph.triples((None, None, None)):
+        try:
+            if str(p) == 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type':
+                #Class parsing
+                table_name = str(o).split('#')[-1]
+                
+                cursor.execute(f"INSERT INTO {table_name} (individual0) VALUES (?)", (str(s),))
+            else:
+                #ObjectProperty parsing
+                table_name = str(p).split('#')[-1]
+                cursor.execute(f"INSERT INTO {table_name} (individual0, individual1) VALUES (?, ?)", (str(s), str(o)))
+        except sqlite3.OperationalError as e:
+            co += 1
+            print(f"Error: {e}.")
+
+    print(co)
+    conn.commit()
+    conn.close()
+
+if __name__ == "__main__":
+    owl_file = "ontologies/univ-bench/lubm-ex-20_disjoint.owl"  # Replace with your OWL file path
+    db_file = "bench_prepa/owl_prepa/test.db"  # Replace with your desired SQLite database file path
+    owl_data_file = "bench_prepa/dataset.01/University0.owl"
+
+    empty_database(db_file)
+    graph = parse_ontology(owl_file)
+    create_database(graph, db_file)
+
+    graph_data = parse_data(owl_data_file)
+    insert_data(graph_data, db_file)
+
+

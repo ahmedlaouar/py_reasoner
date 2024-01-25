@@ -73,13 +73,13 @@ def insert_data(graph, db_file):
             co += 1
             print(f"Error: {e}.")
 
-    print(co)
+    print(f"Number of absent tables: {co}")
     conn.commit()
     conn.close()
 
 if __name__ == "__main__":
     owl_file = "ontologies/univ-bench/lubm-ex-20_disjoint.owl"  # Replace with your OWL file path
-    db_file = "bench_prepa/owl_prepa/test.db"  # Replace with your desired SQLite database file path
+    db_file = "bench_prepa/dataset.01/University0.db"  # Replace with your desired SQLite database file path
     owl_data_file = "bench_prepa/dataset.01/University0.owl"
 
     empty_database(db_file)
@@ -88,5 +88,3 @@ if __name__ == "__main__":
 
     graph_data = parse_data(owl_data_file)
     insert_data(graph_data, db_file)
-
-

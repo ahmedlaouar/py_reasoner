@@ -1,3 +1,4 @@
+from sqlite3 import Cursor
 import rdflib
 import subprocess
 
@@ -127,7 +128,7 @@ def run_sql_query(sql_query:str,cursor, table1:str, table2:str):
             conflicts.append((table1, row[0], row[1]),(table2, row[2], row[3]))      
     return conflicts
 
-def compute_conflicts(ontology_path :str, cursor):
+def compute_conflicts(ontology_path :str, cursor: Cursor):
     conflicts = []
     # analyze ontology and return disjointWith and propertyDisjointWith as negative axioms
     negative_axioms = get_negative_axioms(ontology_path)

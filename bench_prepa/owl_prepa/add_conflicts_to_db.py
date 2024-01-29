@@ -1,8 +1,7 @@
-from sqlite3 import Cursor
-import rdflib
+import random
 import subprocess
-
-ontology_path = 'ontologies/univ-bench/lubm-ex-20_disjoint.owl'
+import rdflib
+import sqlite3
 
 def get_OntologyURI(graph):
     
@@ -49,7 +48,6 @@ def get_negative_axioms(ontology_path :str):
     
     return negative_axioms
 
-
 def generate_query(axiom):
     # from a negative axiom generate a conjunctive query, here with 2 atoms since we use DL-Lite_R
     ax = axiom.split(",")
@@ -60,7 +58,6 @@ def generate_query(axiom):
     else :
         return None
     return query
-
 
 def rewrite_query(query,ontology_path :str):
     # this function calls Rapid2.jar to rewrite a query with an ontology (this step replaces the computation of cln(TBox))
@@ -93,62 +90,77 @@ def rewrite_query(query,ontology_path :str):
     
     return all_queries
 
-
-def generate_sql_query(query_str):
-    # this function generates a sql query from a conjunctive query, it assumes the query to have just 2 atoms
-    # it returns the sql_query alongside table names to faciliate construction of conlicts
-    query = query_str.replace(' ', '').replace('),', '), ').split()
-    # split query into two sides
-    first, second = query[:2]        
-    # tokenize each side and remove commas and parenthesis
-    first_tokens = [token for token in first.replace(',', ' , ').replace('(', ' ( ').replace(')', ' ) ').split() if token not in [',', '(', ')']]
-    second_tokens= [token for token in second.replace(',', ' , ').replace('(', ' ( ').replace(')', ' ) ').split() if token not in [',', '(', ')']]
-    # find matching elements between first and second tokens
-    matching_indexes = [(i, j) for i, item1 in enumerate(first_tokens[1:]) for j, item2 in enumerate(second_tokens[1:]) if item1 == item2]
-    # Insert here a verification that the integrity of the TBox (the coherence), if not exit and show error message
-    # if first_tokens[0] == second_tokens[0]: print("Warrning : The TBox is not coherent, reasoning is not possible")
-    # Generate query according to matches
-    sql_query = f"SELECT t1.id,t1.degree,t2.id,t2.degree FROM {first_tokens[0]} t1 JOIN {second_tokens[0]} t2 ON"
-    for (index0,index1) in matching_indexes:
-        sql_query += " t1.individual"+str(index0)+" = t2.individual"+str(index1)+" and"
-    # remove last trailing "and"
-    sql_query = sql_query.rsplit(' ', 1)[0]
-    return sql_query, first_tokens[0], second_tokens[0]
-
-def run_sql_query(sql_query:str,cursor: Cursor, table1:str, table2:str):
-    # this function takes a query for conflicts and gets the ids of the conflicting elements
-    # we limit only ids for space considerations, we can use ids later to get assertions
-    conflicts = []
-    cursor.execute(sql_query)
-    rows = cursor.fetchall()
-    if len(rows) != 0:
-        for row in rows:
-            conflicts.append(((table1, row[0], row[1]),(table2, row[2], row[3])))      
-    return conflicts
-
-def compute_conflicts(ontology_path :str, cursor: Cursor):
-    conflicts = []
+def add_conflicts(ontology_path, cursor, p):
     # analyze ontology and return disjointWith and propertyDisjointWith as negative axioms
     negative_axioms = get_negative_axioms(ontology_path)
     # "queries" are generated from each negative axiom in the TBox
     queries = []
     for axiom in negative_axioms:
         queries.append(generate_query(axiom))
+    print(len(queries))
     # "all_queries" are the result of rewriting all "queries"
     all_queries = []
     for query in queries:
         all_queries += rewrite_query(query,ontology_path)
-    # generate sql query from each conjunctive query
+    print(len(all_queries))
     for query in all_queries:
-        sql_query, table1, table2 = generate_sql_query(query)
-        conflicts += run_sql_query(sql_query, cursor, table1, table2)
-    return conflicts
+        query = query.replace(' ', '').replace('),', '), ').split()
+        # split query into two sides
+        first, second = query[:2]       
+        # tokenize each side and remove commas and parenthesis
+        first_tokens = [token for token in first.replace(',', ' , ').replace('(', ' ( ').replace(')', ' ) ').split() if token not in [',', '(', ')']]
+        second_tokens= [token for token in second.replace(',', ' , ').replace('(', ' ( ').replace(')', ' ) ').split() if token not in [',', '(', ')']]
+        if len(first_tokens) == 2 and len(second_tokens) == 2:
+            sql_query = f"SELECT individual0 FROM {first_tokens[0]};"
+            cursor.execute(sql_query)
+            rows = cursor.fetchall()
+            if len(rows) != 0:
+                for row in rows:
+                    if random.random() <= p:
+                        cursor.execute(f"INSERT INTO {second_tokens[0]} (individual0) VALUES (?)", (row[0],))
+        elif len(first_tokens) == 3 and len(second_tokens) == 3:
+            sql_query = f"SELECT individual0,individual1 FROM {first_tokens[0]}"
+            cursor.execute(sql_query)
+            rows = cursor.fetchall()
+            if len(rows) != 0:
+                for row in rows:
+                    if random.random() <= (p/2):
+                        cursor.execute(f"INSERT INTO {second_tokens[0]} (individual0,individual1) VALUES (?, ?)", (row[0],row[1]))
+        elif len(first_tokens) == 3 and len(second_tokens) == 2:
+            if second_tokens[1] == first_tokens[1]:
+                sql_query = f"SELECT individual0 FROM {first_tokens[0]}"
+            elif second_tokens[1] == first_tokens[2]:
+                sql_query = f"SELECT individual1 FROM {first_tokens[0]}"
+            cursor.execute(sql_query)
+            rows = cursor.fetchall()
+            if len(rows) != 0:
+                for row in rows:
+                    if random.random() <= (p/2):
+                        cursor.execute(f"INSERT INTO {second_tokens[0]} (individual0) VALUES (?)", (row[0],))
+        elif len(first_tokens) == 2 and len(second_tokens) == 3:
+            if second_tokens[1] == first_tokens[1]:
+                sql_query = f"SELECT individual0 FROM {second_tokens[0]}"
+            elif second_tokens[2] == first_tokens[1]:
+                sql_query = f"SELECT individual1 FROM {second_tokens[0]}"
+            cursor.execute(sql_query)
+            rows = cursor.fetchall()
+            if len(rows) != 0:
+                for row in rows:
+                    if random.random() <= (p/2):
+                        cursor.execute(f"INSERT INTO {first_tokens[0]} (individual0) VALUES (?)", (row[0],))
 
-#queries = generate_queries(get_negative_axioms(ontology_path))
-#all_queries = rewrite_queries(queries,ontology_path)
-#print(all_queries)
-#temp_file_path = 'src/temp/temp_query.txt'
-#with open(temp_file_path,'w') as temp_file:
-    # Write each element of the list to a new line in the file
-#    for query in all_queries:
-#        temp_file.write(f"{query}\n")
+if __name__ == "__main__":
+    owl_file = "ontologies/univ-bench/lubm-ex-20_disjoint.owl" 
+    db_file = "bench_prepa/dataset.01/University0_p_0.001.db"
+
+    # set probability p to create multiple conflicting ABoxes "0.001", "0.005", "0.05", "0.1", "0.5"
+    p = 0.001
+    conn = sqlite3.connect(db_file)
+    cursor = conn.cursor()
+    try:
+        add_conflicts(owl_file,cursor,p)
+    except sqlite3.OperationalError as e:
+            print(f"Error: {e}.")
+
+    conn.commit()
+    conn.close()

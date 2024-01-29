@@ -45,9 +45,7 @@ def run_sql_query(sql_query: str,table_name: str, cursor: Cursor):
     supports = []
     cursor.execute(sql_query)
     rows = cursor.fetchall()
-    if len(rows) == 0:
-            return
-    else:
+    if len(rows) != 0:
         for row in rows:
             supports.append((table_name, row[0], row[1]))
     return supports

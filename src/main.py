@@ -1,14 +1,11 @@
 import sqlite3
 import time
+from dl_lite.assertion import w_assertion
+from repair.owl_assertions_generator import generate_assertions
 from repair.owl_conflicts import compute_conflicts
+from repair.owl_cpi_repair import compute_cpi_repair
 
-
-if __name__ == "__main__":
-    ontology_path = "ontologies/univ-bench/lubm-ex-20_disjoint.owl"
-    #data_path = "bench_prepa/dataset.01/University0_p_0.005.db"
-    #data_path = "bench_prepa/dataset.01/University0_p_0.001.db"
-    data_path = "bench_prepa/dataset.01/University0_no_conflicts.db"
-
+def conflicts_helper(ontology_path,data_path) :
     conn = sqlite3.connect(data_path)
     cursor = conn.cursor()
 
@@ -41,4 +38,12 @@ if __name__ == "__main__":
 
     conn.commit()
     conn.close()
+
+if __name__ == "__main__":
+    ontology_path = "ontologies/univ-bench/lubm-ex-20_disjoint.owl"
     
+    data_path = "bench_prepa/dataset.01/University0_p_0.001_pos_1000.db"
+    
+    pos_path = "bench_prepa/dataset.01/pos1000.txt"
+
+    compute_cpi_repair(ontology_path,data_path,pos_path)

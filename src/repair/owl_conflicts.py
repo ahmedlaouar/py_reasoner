@@ -115,17 +115,15 @@ def generate_sql_query(query_str):
     sql_query = sql_query.rsplit(' ', 1)[0]
     return sql_query, first_tokens[0], second_tokens[0]
 
-def run_sql_query(sql_query:str,cursor, table1:str, table2:str):
+def run_sql_query(sql_query:str,cursor: Cursor, table1:str, table2:str):
     # this function takes a query for conflicts and gets the ids of the conflicting elements
     # we limit only ids for space considerations, we can use ids later to get assertions
     conflicts = []
     cursor.execute(sql_query)
     rows = cursor.fetchall()
-    if len(rows) == 0:
-            return
-    else:
+    if len(rows) != 0:
         for row in rows:
-            conflicts.append((table1, row[0], row[1]),(table2, row[2], row[3]))      
+            conflicts.append(((table1, row[0], row[1]),(table2, row[2], row[3])))      
     return conflicts
 
 def compute_conflicts(ontology_path :str, cursor: Cursor):
@@ -139,7 +137,7 @@ def compute_conflicts(ontology_path :str, cursor: Cursor):
     # "all_queries" are the result of rewriting all "queries"
     all_queries = []
     for query in queries:
-        all_queries += rewrite_query(query,ontology_path)    
+        all_queries += rewrite_query(query,ontology_path)
     # generate sql query from each conjunctive query
     for query in all_queries:
         sql_query, table1, table2 = generate_sql_query(query)

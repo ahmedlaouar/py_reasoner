@@ -6,16 +6,17 @@ from rdflib import Graph, RDF, OWL
 
 from dl_lite.assertion import w_assertion
 
-def rewrite_query(query: str, ontology_path: str):
+def rewrite_queries(queries: list, ontology_path: str):
     all_queries = []    
     # Path to your Java executable
     java_executable = 'java'
     # Path to your JAR file
     jar_file = 'libraries/Rapid2.jar'
     # Create a temporary file to store the content
-    temp_file_path = 'src/temp/temp_query.txt'
+    temp_file_path = 'src/temp/temp_query_generation.txt'
     with open(temp_file_path, 'w') as temp_file:
-        temp_file.write(query)
+        for query in queries:
+            temp_file.write(query + '\n')
     try:
         # Run the JAR file with the temporary file path as an argument
         result_bytes = subprocess.check_output([java_executable, '-jar', jar_file, "DU", "SHORT", ontology_path, temp_file_path])
@@ -40,9 +41,9 @@ def generate_sql_query(query: str):
         sql_query = f"SELECT individual1,individual0 FROM {tokens[0]}"
     elif tokens[1] == "?0":
         sql_query = f"SELECT individual0 FROM {tokens[0]}"
-    elif tokens[2] == "?0":
+    else : #if tokens[2] == "?0":
         sql_query = f"SELECT individual1 FROM {tokens[0]}"
-    return sql_query
+    return sql_query, tokens[0]
 
 def run_sql_query(sql_query: str, cursor: Cursor):
     results = []
@@ -58,30 +59,25 @@ def generate_assertions(ontology_path: str,cursor: Cursor):
     all_assertions_to_check = []
     graph = Graph()
     graph.parse (ontology_path, format='application/rdf+xml')
-    #concepts = [class_uri.split('#')[-1] for class_uri in graph.subjects(predicate=RDF.type, object=OWL.Class)]
-    for class_uri in graph.subjects(predicate=RDF.type, object=OWL.Class):
-        concept_name = class_uri.split('#')[-1]
-        query = f"Q(?0) <- {concept_name}(?0)"
-        queries = rewrite_query(query,ontology_path)
-        for cq_query in queries:
-            sql_query = generate_sql_query(cq_query)
-            results = run_sql_query(sql_query,cursor)
-            if len(results) != 0:
-                for result in results:
-                    assertion = w_assertion(concept_name,result[0])
-                    all_assertions_to_check.append(assertion)
+    concepts = [class_uri.split('#')[-1] for class_uri in graph.subjects(predicate=RDF.type, object=OWL.Class)]
+    roles = [prop_uri.split('#')[-1] for prop_uri in graph.subjects(predicate=RDF.type, object=OWL.ObjectProperty)]
+    queries = []
+    for concept_name in concepts:
+        queries.append(f"Q(?0) <- {concept_name}(?0)")
+    for role_name in roles:
+        queries.append(f"Q(?0,?1) <- {role_name}(?0,?1)")
 
-    #roles = [prop_uri.split('#')[-1] for prop_uri in graph.subjects(predicate=RDF.type, object=OWL.ObjectProperty)]
-    for prop_uri in graph.subjects(predicate=RDF.type, object=OWL.ObjectProperty):
-        role_name = prop_uri.split('#')[-1]
-        query = f"Q(?0,?1) <- {role_name}(?0,?1)"
-        queries = rewrite_query(query,ontology_path)
-        for cq_query in queries:
-            sql_query = generate_sql_query(cq_query)
-            results = run_sql_query(sql_query,cursor)
-            if len(results) != 0:
-                for result in results:
-                    assertion = w_assertion(role_name,result[0],result[1])
+    all_queries = rewrite_queries(queries,ontology_path)
+    for cq_query in all_queries:
+        sql_query, table_name = generate_sql_query(cq_query)
+        results = run_sql_query(sql_query,cursor)
+        if len(results) != 0:
+            for result in results:
+                if len(result) == 1:
+                    assertion = w_assertion(table_name,result[0])
+                    all_assertions_to_check.append(assertion)
+                if len(result) == 2:
+                    assertion = w_assertion(table_name,result[0],result[1])
                     all_assertions_to_check.append(assertion)
     
     return all_assertions_to_check

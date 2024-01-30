@@ -6,6 +6,8 @@ from rdflib import Graph, RDF, OWL
 
 from dl_lite.assertion import w_assertion
 
+speration_query = "Q(AHMED, SKIKDA) <- BornIN(AHMED, SKIKDA)"
+
 def rewrite_queries(queries: list, ontology_path: str):
     all_queries = []    
     # Path to your Java executable
@@ -15,8 +17,7 @@ def rewrite_queries(queries: list, ontology_path: str):
     # Create a temporary file to store the content
     temp_file_path = 'src/temp/temp_query_generation.txt'
     with open(temp_file_path, 'w') as temp_file:
-        for query in queries:
-            temp_file.write(query + '\n')
+        temp_file.writelines(query + '\n' for query in queries)
     try:
         # Run the JAR file with the temporary file path as an argument
         result_bytes = subprocess.check_output([java_executable, '-jar', jar_file, "DU", "SHORT", ontology_path, temp_file_path])
@@ -27,7 +28,7 @@ def rewrite_queries(queries: list, ontology_path: str):
             to_append = results[i].split("<-")[1].strip() # Remove the first part of query before Q(?0) <- as it's not useful for SQL querying then Strip to remove leading/trailing whitespaces
             all_queries.append(to_append)
     except subprocess.CalledProcessError as e:
-        print(f"Error executing for query {query}. Error: {e}")    
+        print(f"Error executing Rapid2.jar. Error: {e}")    
     return all_queries
 
 def generate_sql_query(query: str):
@@ -43,41 +44,52 @@ def generate_sql_query(query: str):
         sql_query = f"SELECT individual0 FROM {tokens[0]}"
     else : #if tokens[2] == "?0":
         sql_query = f"SELECT individual1 FROM {tokens[0]}"
-    return sql_query, tokens[0]
-
-def run_sql_query(sql_query: str, cursor: Cursor):
-    results = []
-    cursor.execute(sql_query)
-    rows = cursor.fetchall()
-    if len(rows) != 0:
-        for row in rows:
-            results.append(row)
-    return results
+    return sql_query
 
 def generate_assertions(ontology_path: str,cursor: Cursor):
     # this function reads through the ontology classes and properties (concepts and roles) and finds if they have individuals with which they can be derived from the data (ABox)
     all_assertions_to_check = []
     graph = Graph()
     graph.parse (ontology_path, format='application/rdf+xml')
-    concepts = [class_uri.split('#')[-1] for class_uri in graph.subjects(predicate=RDF.type, object=OWL.Class)]
-    roles = [prop_uri.split('#')[-1] for prop_uri in graph.subjects(predicate=RDF.type, object=OWL.ObjectProperty)]
-    queries = []
-    for concept_name in concepts:
-        queries.append(f"Q(?0) <- {concept_name}(?0)")
-    for role_name in roles:
-        queries.append(f"Q(?0,?1) <- {role_name}(?0,?1)")
 
-    all_queries = rewrite_queries(queries,ontology_path)
-    for cq_query in all_queries:
-        sql_query, table_name = generate_sql_query(cq_query)
-        results = run_sql_query(sql_query,cursor)
+    concepts = [class_uri.split('#')[-1] for class_uri in graph.subjects(predicate=RDF.type, object=OWL.Class)]
+    concept_queries = []    
+    for concept_name in concepts:
+        concept_queries.append(f"Q(?0) <- {concept_name}(?0)")
+        concept_queries.append(speration_query)
+    all_concept_queries = rewrite_queries(concept_queries,ontology_path)
+    assertions_counter = 0
+    for cq_query in all_concept_queries:
+        if cq_query == "BornIN(AHMED, SKIKDA)":
+            assertions_counter += 1
+            continue
+        sql_query = generate_sql_query(cq_query)
+        cursor.execute(sql_query)
+        results = cursor.fetchall()
         if len(results) != 0:
             for result in results:
                 if len(result) == 1:
-                    assertion = w_assertion(table_name,result[0])
+                    assertion = w_assertion(concepts[assertions_counter],result[0])
                     all_assertions_to_check.append(assertion)
+    
+    roles = [prop_uri.split('#')[-1] for prop_uri in graph.subjects(predicate=RDF.type, object=OWL.ObjectProperty)]
+    role_queries = []
+    for role_name in roles:
+        role_queries.append(f"Q(?0,?1) <- {role_name}(?0,?1)")
+        role_queries.append(speration_query)
+    all_role_queries = rewrite_queries(role_queries,ontology_path)    
+    assertions_counter = 0
+    for cq_query in all_role_queries:
+        if cq_query == "BornIN(AHMED, SKIKDA)":
+            assertions_counter += 1
+            continue
+        sql_query = generate_sql_query(cq_query)
+        cursor.execute(sql_query)
+        results = cursor.fetchall()
+        if len(results) != 0:
+            for result in results:
                 if len(result) == 2:
-                    assertion = w_assertion(table_name,result[0],result[1])
+                    assertion = w_assertion(roles[assertions_counter],result[0],result[1])
                     all_assertions_to_check.append(assertion)
     
     return all_assertions_to_check

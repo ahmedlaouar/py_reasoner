@@ -4,14 +4,11 @@ import subprocess
 
 ontology_path = 'ontologies/univ-bench/lubm-ex-20_disjoint.owl'
 
-def get_OntologyURI(graph):
-    
+def get_OntologyURI(graph):    
     test = [x for x, y, z in graph.triples((None, rdflib.RDF.type, rdflib.OWL.Ontology))]
-
     if test:
         return str(test[0])
-    else:
-        return None
+    return None
     
 def get_negative_axioms(ontology_path :str):
     # this function goes through the ontology and returns "disjointWith" and "propertyDisjointWith" as negative axioms
@@ -29,26 +26,19 @@ def get_negative_axioms(ontology_path :str):
     query2 = """
     select distinct ?s ?p ?o 
     where { ?s owl:propertyDisjointWith ?o}
-            """
-    
+            """    
     result1 = graph.query(query1)
-    
     negative_axioms = []
-
     for row in result1.bindings:
         s = graph.qname(row['s']) if 's' in row and row['s'] else str(row['s'])
         o = graph.qname(row['o']) if 'o' in row and row['o'] else str(row['o'])
         negative_axioms.append(f"{s},owl:disjointWith,{o}")
-
-    result2 = graph.query(query2)
-    
+    result2 = graph.query(query2)    
     for row in result2.bindings:
         s = graph.qname(row['s']) if 's' in row and row['s'] else str(row['s'])
         o = graph.qname(row['o']) if 'o' in row and row['o'] else str(row['o'])
         negative_axioms.append(f"{s},owl:propertyDisjointWith,{o}")
-    
     return negative_axioms
-
 
 def generate_query(axiom):
     # from a negative axiom generate a conjunctive query, here with 2 atoms since we use DL-Lite_R
@@ -61,35 +51,6 @@ def generate_query(axiom):
         return ""
     return query
 
-
-"""def rewrite_query(query,ontology_path :str):
-    # this function calls Rapid2.jar to rewrite a query with an ontology (this step replaces the computation of cln(TBox))
-    # cln(TBox) is the negative closure of the TBox which is the exhaustive list of all the negative axioms that we can infer from a TBox
-    # for space complexity reasons, the step of the computation cln(TBox) (a preprocessing of the ontology) is moved to compute_conflicts step 
-    # can be moved back if time complexity is more concerning here
-    all_queries = []    
-    # Path to your Java executable
-    java_executable = 'java'
-    # Path to your JAR file
-    jar_file = 'libraries/Rapid2.jar'
-    # Create a temporary file to store the content
-    temp_file_path = 'src/temp/temp_query_conflicts.txt'
-    with open(temp_file_path, 'w') as temp_file:
-        temp_file.write(query)
-    try:
-        # Run the JAR file with the temporary file path as an argument
-        result_bytes = subprocess.check_output([java_executable, '-jar', jar_file, "DU", "SHORT", ontology_path, temp_file_path])
-        #for line in result:print(result)
-        result = result_bytes.decode('utf-8').strip()
-        results = result.split('\n')
-        for i in range(1,len(results)):
-            to_append = results[i].split("<-")[1].strip() # Remove the first part of query before Q(?0) <- as it's not useful for SQL querying then Strip to remove leading/trailing whitespaces
-            all_queries.append(to_append)
-    except subprocess.CalledProcessError as e:
-        print(f"Error executing for query {query}. Error: {e}")
-    
-    return all_queries"""
-
 def rewrite_all_queries(queries: list,ontology_path: str):
     all_queries = []
     # Path to your Java executable
@@ -99,8 +60,7 @@ def rewrite_all_queries(queries: list,ontology_path: str):
     # Create a temporary file to store the content
     temp_file_path = 'src/temp/temp_query_conflicts.txt'
     with open(temp_file_path, 'w') as temp_file:
-        for query in queries:
-            temp_file.write(query + '\n')
+        temp_file.writelines(query + '\n' for query in queries)
     try:
         # Run the JAR file with the temporary file path as an argument
         result_bytes = subprocess.check_output([java_executable, '-jar', jar_file, "DU", "SHORT", ontology_path, temp_file_path])
@@ -111,10 +71,9 @@ def rewrite_all_queries(queries: list,ontology_path: str):
             to_append = results[i].split("<-")[1].strip() # Remove the first part of query before Q(?0) <- as it's not useful for SQL querying then Strip to remove leading/trailing whitespaces
             all_queries.append(to_append)
     except subprocess.CalledProcessError as e:
-        print(f"Error executing for query {query}. Error: {e}")    
+        print(f"Error executing Rapid2.jar. Error: {e}")
     return all_queries
     
-
 def generate_sql_query(query_str):
     # this function generates a sql query from a conjunctive query, it assumes the query to have just 2 atoms
     # it returns the sql_query alongside table names to faciliate construction of conlicts

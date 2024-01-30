@@ -1,31 +1,9 @@
 from sqlite3 import Cursor
 import subprocess
+import time
 from dl_lite.assertion import w_assertion
 
-speration_query = "Q(AHMED, SKIKDA) <- BornIN(AHMED, SKIKDA)"
-
-"""def rewrite_query(query: str, ontology_path: str):
-    all_queries = []    
-    # Path to your Java executable
-    java_executable = 'java'
-    # Path to your JAR file
-    jar_file = 'libraries/Rapid2.jar'
-    # Create a temporary file to store the content
-    temp_file_path = 'src/temp/temp_query_supports.txt'
-    with open(temp_file_path, 'w') as temp_file:
-        temp_file.write(query)
-    try:
-        # Run the JAR file with the temporary file path as an argument
-        result_bytes = subprocess.check_output([java_executable, '-jar', jar_file, "DU", "SHORT", ontology_path, temp_file_path])
-        #for line in result:print(result)
-        result = result_bytes.decode('utf-8').strip()
-        results = result.split('\n')
-        for i in range(1,len(results)):
-            to_append = results[i].split("<-")[1].strip() # Remove the first part of query before Q(?0) <- as it's not useful for SQL querying then Strip to remove leading/trailing whitespaces
-            all_queries.append(to_append)
-    except subprocess.CalledProcessError as e:
-        print(f"Error executing for query {query}. Error: {e}")    
-    return all_queries"""
+separation_query = "Q(AHMED, SKIKDA) <- BornIN(AHMED, SKIKDA)"
 
 def rewrite_queries(queries: list, ontology_path: str):
     all_queries = []    
@@ -36,8 +14,7 @@ def rewrite_queries(queries: list, ontology_path: str):
     # Create a temporary file to store the content
     temp_file_path = 'src/temp/temp_query_supports.txt'
     with open(temp_file_path, 'w') as temp_file:
-        for query in queries:
-            temp_file.write(query + '\n')
+        temp_file.writelines(query + '\n' for query in queries)
     try:
         # Run the JAR file with the temporary file path as an argument
         result_bytes = subprocess.check_output([java_executable, '-jar', jar_file, "DU", "SHORT", ontology_path, temp_file_path])
@@ -45,10 +22,9 @@ def rewrite_queries(queries: list, ontology_path: str):
         result = result_bytes.decode('utf-8').strip()
         results = result.split('\n')
         for i in range(1,len(results)):
-            to_append = results[i].split("<-")[1].strip() # Remove the first part of query before Q(?0) <- as it's not useful for SQL querying then Strip to remove leading/trailing whitespaces
-            all_queries.append(to_append)
+            all_queries.append(results[i].split("<-")[1].strip()) # Remove the first part of query before Q(?0) <- as it's not useful for SQL querying then Strip to remove leading/trailing whitespaces
     except subprocess.CalledProcessError as e:
-        print(f"Error executing for query {query}. Error: {e}")    
+        print(f"Error executing Rapid2.jar. Error: {e}")    
     return all_queries
 
 def generate_sql_query(query: str):
@@ -74,6 +50,56 @@ def run_sql_query(sql_query: str,table_name: str, cursor: Cursor):
             supports.append((table_name, row[0], row[1]))
     return supports
 
+def run_sql_queries(sql_queries: list, cursor: Cursor):
+    supports = []
+    for sql_query in sql_queries:
+        cursor.execute(sql_query)
+    rows = cursor.fetchall()
+    if len(rows) != 0:
+        for row in rows:
+            supports.append(row[1])# was (table_name, row[0], row[1]) but I think table_name and id (row[0]) are not needed here, from a support we need just its degree to compare it to conflicts
+    return supports
+
+def compute_all_supports(assertions: list, ontology_path: str, cursor: Cursor):
+    # in this version we use a seperation query, in order to perform a single rewriting with Rapid2.jar, because multiple calls to it is bad for time complexity
+    supports = {}
+    queries = []
+    time1 = time.time()
+    for assertion in assertions:
+        assertion_name = assertion.get_assertion_name()
+        individual0, individual1 = assertion.get_individuals()
+        if individual1 != None:
+            queries.append(f"Q({individual0},{individual1}) <- {assertion_name}({individual0},{individual1})")
+        else:
+            queries.append(f"Q({individual0}) <- {assertion_name}({individual0})")
+        queries.append(separation_query)
+    time2 = time.time()
+    print(f"Time to generate all BCQs {time2 - time1}")
+    all_queries = rewrite_queries(queries,ontology_path)
+    time3 = time.time()
+    print(f"Time to rewrite all BCQs {time3 - time2}")
+    
+    queries_dict = {}
+    assertions_counter = 0
+    queries_dict[assertions_counter] = []
+    for query in all_queries:
+        if query == "BornIN(AHMED, SKIKDA)":
+            assertions_counter += 1
+            queries_dict[assertions_counter] = []
+            continue
+        sql_query, table_name = generate_sql_query(query)
+        queries_dict[assertions_counter].append(sql_query) # was (sql_query,table_name) but table_name is not useful far from here
+    time4  = time.time()
+    print(f"Time to generate all SQL queries {time4 - time3}")
+
+    for key in queries_dict:
+        supports[key] = run_sql_queries(queries_dict[key],cursor)
+    time5  = time.time()
+    print(f"Time to run all SQL queries {time5 - time4}")
+    
+    return supports
+
+
 """def compute_supports(assertion : w_assertion, ontology_path: str, cursor: Cursor):
     assertion_name = assertion.get_assertion_name()
     individual0, individual1 = assertion.get_individuals()
@@ -87,28 +113,3 @@ def run_sql_query(sql_query: str,table_name: str, cursor: Cursor):
         sql_query, table_name = generate_sql_query(query)
         supports += run_sql_query(sql_query,table_name,cursor)
     return supports"""
-
-def compute_all_supports(assertions: list, ontology_path: str, cursor: Cursor):
-    # in this version we use a seperation query, in order to perform a single rewriting with Rapid2.jar, because multiple calls to it is bad for time complexity
-    supports = {}
-    queries = []
-    for assertion in assertions:
-        assertion_name = assertion.get_assertion_name()
-        individual0, individual1 = assertion.get_individuals()
-        if individual1 != None:
-            queries.append(f"Q({individual0},{individual1}) <- {assertion_name}({individual0},{individual1})")
-        else:
-            queries.append(f"Q({individual0}) <- {assertion_name}({individual0})")
-        queries.append(speration_query)
-    all_queries = rewrite_queries(queries,ontology_path)
-    assertions_counter = 0
-    supports[assertions_counter] = []
-    for query in all_queries:
-        if query == "BornIN(AHMED, SKIKDA)":
-            assertions_counter += 1
-            supports[assertions_counter] = []
-            continue
-        sql_query, table_name = generate_sql_query(query)
-        supports[assertions_counter] += run_sql_query(sql_query,table_name,cursor)
-    return supports
-

@@ -68,10 +68,9 @@ def compute_cpi_repair(ontology_path: str, data_path: str, pos_path: str):
         # returns a list of supports with the form (table_name,id,degree)
         all_items = len(all_assertions)
         for i in range(all_items):
-            #accepted = True
-            if all(any(is_strictly_preferred(pos, support, conflict_member) for support in supports[i] for conflict_member in conflict) for conflict in conflicts):
-                cpi_repair.append(all_assertions[i])
-            """for conflict in conflicts:
+            accepted = True
+            #if all(any(is_strictly_preferred(pos, support, conflict_member) for support in supports[i] for conflict_member in conflict) for conflict in conflicts): cpi_repair.append(all_assertions[i])
+            for conflict in conflicts:
                 conflict_supported = False
                 for support in supports[i]:
                     if is_strictly_preferred(pos, support, conflict[0]) or is_strictly_preferred(pos, support, conflict[1]):
@@ -81,7 +80,7 @@ def compute_cpi_repair(ontology_path: str, data_path: str, pos_path: str):
                     accepted = False
                     break
             if accepted :
-                cpi_repair.append(all_assertions[i])"""
+                cpi_repair.append(all_assertions[i])
             print_progress_bar(i + 1, all_items)
         print("\n")
         inter_time3 = time.time()

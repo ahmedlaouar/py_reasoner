@@ -27,7 +27,7 @@ def read_pos(file_path: str):
 
 def is_strictly_preferred(pos_mat, support, conflict_member) -> bool:
     # a test if support is strictly preferred to conflict_member
-    if pos_mat[support][conflict_member[2]] == 1 and pos_mat[conflict_member[2]][support] != 1:
+    if pos_mat[support[2]][conflict_member[2]] == 1 and pos_mat[conflict_member[2]][support[2]] != 1:
         return True
 
 def print_progress_bar(iteration, total, bar_length=50):
@@ -78,8 +78,8 @@ def compute_cpi_repair(ontology_path: str, data_path: str, pos_path: str):
         print(f"Number of the generated assertions = {len(all_assertions)}")
         print(f"Time to compute the generated assertions: {inter_time0 - start_time}")
         
-        test_assertions = all_assertions#[-1000:]
-        #print("testing with the first 1000 assertions")
+        test_assertions = all_assertions[:1000]
+        #print("testing with the first 10000 assertions")
         # compute the conflicts 
         # conflicts are of the form ((table1name, id, degree),(table2name, id, degree))
         conflicts = compute_conflicts(ontology_path,cursor)
@@ -88,7 +88,7 @@ def compute_cpi_repair(ontology_path: str, data_path: str, pos_path: str):
         print(f"Time to compute the conflicts: {inter_time1 - inter_time0}")
 
         # browse assertions and compute supports
-        # returns a dictionnary with assertions indexes in the list as keys and as values lists of supports with the form [degree], it was [(table_name,id,degree)] but I think that table_name and id are useless here
+        # returns a dictionnary with assertions indexes in the list as keys and as values lists of supports with the form [(table_name,id,degree)] 
         supports = compute_all_supports(test_assertions,ontology_path, cursor)
         inter_time2 = time.time()
         supports_size = sum((len(val) for val in supports.values()))

@@ -32,13 +32,13 @@ def generate_sql_query(query: str):
     # it returns the sql_query alongside table name to faciliate construction of supports
     tokens = [token for token in query.replace(',', ' , ').replace('(', ' ( ').replace(')', ' ) ').split() if token not in [',', '(', ')']]
     if len(tokens) == 2:
-        sql_query = f"SELECT t.id,t.degree FROM '{tokens[0]}' t WHERE t.individual0='{tokens[1]}'"
+        sql_query = f"SELECT id,degree FROM '{tokens[0]}' WHERE individual0='{tokens[1]}'"
     elif tokens[1][0] == "?":
-        sql_query = f"SELECT t.id,t.degree FROM '{tokens[0]}' t WHERE t.individual1='{tokens[2]}'"
+        sql_query = f"SELECT id,degree FROM '{tokens[0]}' WHERE individual1='{tokens[2]}'"
     elif tokens[2][0] == "?":
-        sql_query = f"SELECT t.id,t.degree FROM '{tokens[0]}' t WHERE t.individual0='{tokens[1]}'"
+        sql_query = f"SELECT id,degree FROM '{tokens[0]}' WHERE individual0='{tokens[1]}'"
     else:
-        sql_query = f"SELECT t.id,t.degree FROM '{tokens[0]}' t WHERE t.individual0='{tokens[1]}' AND t.individual1='{tokens[2]}'"
+        sql_query = f"SELECT id,degree FROM '{tokens[0]}' WHERE individual0='{tokens[1]}' AND individual1='{tokens[2]}'"
     return sql_query, tokens[0]
 
 def run_sql_query(sql_query: str,table_name: str, cursor: Cursor):
@@ -52,9 +52,10 @@ def run_sql_query(sql_query: str,table_name: str, cursor: Cursor):
 
 def run_sql_queries(sql_queries: list, cursor: Cursor):
     supports = []
+    rows = []
     for sql_query in sql_queries:
         cursor.execute(sql_query)
-    rows = cursor.fetchall()
+        rows.extend(cursor.fetchall())
     if len(rows) != 0:
         for row in rows:
             supports.append(row[1])# was (table_name, row[0], row[1]) but I think table_name and id (row[0]) are not needed here, from a support we need just its degree to compare it to conflicts
@@ -74,28 +75,25 @@ def compute_all_supports(assertions: list, ontology_path: str, cursor: Cursor):
             queries.append(f"Q({individual0}) <- {assertion_name}({individual0})")
         queries.append(separation_query)
     time2 = time.time()
-    print(f"Time to generate all BCQs {time2 - time1}")
+    print(f"Time to generate all BCQs {time2 - time1}, number of BCQs {len(queries)}, example {queries[6]}")
     all_queries = rewrite_queries(queries,ontology_path)
     time3 = time.time()
-    print(f"Time to rewrite all BCQs {time3 - time2}")
+    print(f"Time to rewrite all BCQs {time3 - time2}, number of rewritings {len(all_queries)}, example {all_queries[6]}")
     
-    queries_dict = {}
     assertions_counter = 0
-    queries_dict[assertions_counter] = []
+    supports[assertions_counter] = []
     for query in all_queries:
         if query == "BornIN(AHMED, SKIKDA)":
             assertions_counter += 1
-            queries_dict[assertions_counter] = []
+            supports[assertions_counter] = []
             continue
         sql_query, table_name = generate_sql_query(query)
-        queries_dict[assertions_counter].append(sql_query) # was (sql_query,table_name) but table_name is not useful far from here
-    time4  = time.time()
-    print(f"Time to generate all SQL queries {time4 - time3}")
-
-    for key in queries_dict:
-        supports[key] = run_sql_queries(queries_dict[key],cursor)
-    time5  = time.time()
-    print(f"Time to run all SQL queries {time5 - time4}")
+        # 
+        some_supports = run_sql_query(sql_query,table_name,cursor)
+        supports[assertions_counter] += some_supports
+        
+    time4 = time.time()
+    print(f"Time to generate and run all SQL queries {time4 - time3}, number of all the supports {sum((len(val) for val in supports.values()))}, example {supports[6]}")
     
     return supports
 

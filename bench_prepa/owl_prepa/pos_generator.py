@@ -6,8 +6,8 @@ def generate_random_dag(num_nodes):
     for i in range(num_nodes):
         graph[i] = []
 
-        for j in range(0, num_nodes):
-            if random.random() < 0.75 and j != i:
+        for j in range(i+1, num_nodes):
+            if random.random() < 0.75 :
                 graph[i].append(j)
 
     return graph

@@ -25,10 +25,27 @@ def read_pos(file_path: str):
 
     return pos_matrix
 
+def is_dominated(conflict, conflicts, pos_mat):
+    for element in conflicts:
+        if element == conflict:
+            continue
+        if (is_strictly_preferred(pos_mat, element[0], conflict[0]) or is_strictly_preferred(pos_mat, element[0], conflict[1])) and (is_strictly_preferred(pos_mat, element[1], conflict[0]) or is_strictly_preferred(pos_mat, element[1], conflict[1])):
+            return True
+    return False
+
+def reduce_conflicts(conflicts: list, pos_mat):
+    # this function looks for intra dominance between conflicts, if its the case, only the dominating should be taken into account
+    reduced_conflicts = []
+    for conflict in conflicts:
+        if not is_dominated(conflict, conflicts, pos_mat):
+            reduced_conflicts.append(conflict)
+    return reduced_conflicts
+
 def is_strictly_preferred(pos_mat, support, conflict_member) -> bool:
     # a test if support is strictly preferred to conflict_member
     if pos_mat[support[2]][conflict_member[2]] == 1 and pos_mat[conflict_member[2]][support[2]] != 1:
         return True
+    return False
 
 def print_progress_bar(iteration, total, bar_length=50):
     percent = ("{0:.1f}").format(100 * (iteration / float(total)))
@@ -78,7 +95,7 @@ def compute_cpi_repair(ontology_path: str, data_path: str, pos_path: str):
         print(f"Number of the generated assertions = {len(all_assertions)}")
         print(f"Time to compute the generated assertions: {inter_time0 - start_time}")
         
-        test_assertions = all_assertions[:1000]
+        test_assertions = all_assertions[:10000]
         #print("testing with the first 10000 assertions")
         # compute the conflicts 
         # conflicts are of the form ((table1name, id, degree),(table2name, id, degree))
@@ -86,6 +103,11 @@ def compute_cpi_repair(ontology_path: str, data_path: str, pos_path: str):
         inter_time1 = time.time()
         print(f"Number of the conflicts = {len(conflicts)}")
         print(f"Time to compute the conflicts: {inter_time1 - inter_time0}")
+        
+        reduced_conflicts = reduce_conflicts(conflicts,pos)
+        inter_time12 = time.time()
+        print(f"Number of the reduced conflicts = {len(reduced_conflicts)}")
+        print(f"Time to reduce the conflicts: {inter_time12 - inter_time1}")
 
         # browse assertions and compute supports
         # returns a dictionnary with assertions indexes in the list as keys and as values lists of supports with the form [(table_name,id,degree)] 
@@ -98,7 +120,7 @@ def compute_cpi_repair(ontology_path: str, data_path: str, pos_path: str):
         cpi_repair = []
         
         all_items = len(test_assertions)
-        arguments = [(i, test_assertions, conflicts, supports, pos) for i in range(all_items)]
+        arguments = [(i, test_assertions, reduced_conflicts, supports, pos) for i in range(all_items)]
         # calling check_assertion with pool here iterates over the range of all_items, each assertion is identified with its index i and added from test_assertions if accepted
         with Pool() as pool:
             results = pool.map(check_assertion,arguments)

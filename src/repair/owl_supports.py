@@ -1,6 +1,7 @@
 from sqlite3 import Cursor
 import subprocess
 import time
+from repair.owl_dominance import dominates
 
 separation_query = "Q(AHMED, SKIKDA) <- BornIN(AHMED, SKIKDA)"
 
@@ -10,14 +11,13 @@ def rewrite_queries(queries: list, ontology_path: str):
     java_executable = 'java'
     # Path to your JAR file
     jar_file = 'libraries/Rapid2.jar'
-    # Create a temporary file to store the content
+    # Create a temporary file to store the queries
     temp_file_path = 'src/temp/temp_query_supports.txt'
     with open(temp_file_path, 'w') as temp_file:
         temp_file.writelines(query + '\n' for query in queries)
     try:
         # Run the JAR file with the temporary file path as an argument
         result_bytes = subprocess.check_output([java_executable, "-Xmx8g", '-jar', jar_file, "DU", "SHORT", ontology_path, temp_file_path])
-        #for line in result:print(result)
         result = result_bytes.decode('utf-8').strip()
         results = result.split('\n')
         for i in range(1,len(results)):
@@ -49,7 +49,7 @@ def run_sql_query(sql_query: str,table_name: str, cursor: Cursor):
             supports.append((table_name, row[0], row[1]))
     return supports
 
-def compute_all_supports(assertions: list, ontology_path: str, cursor: Cursor):
+def compute_all_supports(assertions: list, ontology_path: str, cursor: Cursor, pos_dict):
     # in this version we use a seperation query, in order to perform a single rewriting with Rapid2.jar, because multiple calls to it is bad for time complexity
     supports = {}
     queries = []
@@ -76,13 +76,15 @@ def compute_all_supports(assertions: list, ontology_path: str, cursor: Cursor):
             supports[assertions_counter] = []
             continue
         sql_query, table_name = generate_sql_query(query)
-        # 
         some_supports = run_sql_query(sql_query,table_name,cursor)
-        supports[assertions_counter] += some_supports
-        
+        for new_element in some_supports:
+            if not any(dominates(pos_dict, [support], [new_element]) for support in supports[assertions_counter]):
+                to_remove = {support for support in supports[assertions_counter] if dominates(pos_dict, [new_element], [support])}
+                if to_remove:
+                    supports[assertions_counter] = [x for x in supports[assertions_counter] if x not in to_remove]                
+                supports[assertions_counter].append(new_element)      
     time4 = time.time()
-    print(f"Time to generate and run all SQL queries {time4 - time3}, number of all the supports {sum((len(val) for val in supports.values()))}")
-    
+    print(f"Time to generate and run all SQL queries {time4 - time3}")
     return supports
 
 

@@ -1,8 +1,11 @@
+from concurrent.futures import ThreadPoolExecutor
 from sqlite3 import Cursor
+import sqlite3
 import subprocess
 import time
 from repair.owl_dominance import dominates
 
+data_path = "bench_prepa/dataset.01/University0_p_0.001_pos_1000.db"
 separation_query = "Q(AHMED, SKIKDA) <- BornIN(AHMED, SKIKDA)"
 
 def rewrite_queries(queries: list, ontology_path: str):
@@ -70,10 +73,13 @@ def compute_all_supports(assertions: list, ontology_path: str, cursor: Cursor, p
     
     assertions_counter = 0
     supports[assertions_counter] = []
+    sql_queries = {}
+    sql_queries[assertions_counter] = []
     for query in all_queries:
         if query == "BornIN(AHMED, SKIKDA)":
             assertions_counter += 1
             supports[assertions_counter] = []
+            sql_queries[assertions_counter] = []
             continue
         sql_query, table_name = generate_sql_query(query)
         some_supports = run_sql_query(sql_query,table_name,cursor)
@@ -82,11 +88,30 @@ def compute_all_supports(assertions: list, ontology_path: str, cursor: Cursor, p
                 to_remove = {support for support in supports[assertions_counter] if dominates(pos_dict, [new_element], [support])}
                 if to_remove:
                     supports[assertions_counter] = [x for x in supports[assertions_counter] if x not in to_remove]                
-                supports[assertions_counter].append(new_element)      
+                supports[assertions_counter].append(new_element)
     time4 = time.time()
     print(f"Time to generate and run all SQL queries {time4 - time3}")
     return supports
 
+def run_sql_queries_of_assertion(arguments):
+    sql_queries, assertions_counter, pos_dict = arguments
+    conn = sqlite3.connect(data_path)
+    cursor = conn.cursor()
+    try:
+        this_supports = []
+        for sql_query, table_name in sql_queries[assertions_counter]:
+            some_supports = run_sql_query(sql_query,table_name,cursor)
+            for new_element in some_supports:
+                if not any(dominates(pos_dict, [support], [new_element]) for support in this_supports):
+                    to_remove = {support for support in this_supports if dominates(pos_dict, [new_element], [support])}
+                    if to_remove:
+                        this_supports = [x for x in this_supports if x not in to_remove]                
+                    this_supports.append(new_element)
+        cursor.close()
+        conn.close()
+    except sqlite3.OperationalError as e:
+            print(f"Error: {e}.")
+    return this_supports, assertions_counter
 
 """def compute_supports(assertion : w_assertion, ontology_path: str, cursor: Cursor):
     assertion_name = assertion.get_assertion_name()

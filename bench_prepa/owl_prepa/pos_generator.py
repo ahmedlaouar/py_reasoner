@@ -1,4 +1,7 @@
 import random
+import sys
+
+sys.setrecursionlimit(10000)
 
 def generate_random_dag(num_nodes):
     graph = {}
@@ -12,6 +15,28 @@ def generate_random_dag(num_nodes):
 
     return graph
 
+def dfs(graph, start, visited=None, path=None):
+    if visited is None:
+        visited = set()
+    if path is None:
+        path = []
+
+    visited.add(start)
+    path.append(start)
+
+    for next_node in graph[start]:
+        if next_node not in visited:
+            dfs(graph, next_node, visited, path)
+
+    return visited
+
+def find_indirect_links(graph):
+    all_links = {}
+    for node in graph:
+        # Subtract 1 to exclude the node itself from its indirect links
+        all_links[node] = dfs(graph, node) - {node}
+    return all_links
+
 def save_dag_to_file(graph, filename):
     with open(filename, 'w') as file:
         for element in graph:
@@ -24,8 +49,9 @@ def save_dag_to_file(graph, filename):
 
 if __name__ == '__main__':
     # Generate a random DAG with "50", "500", "1000", "10000" nodes
-    num_nodes = 1000
+    num_nodes = 10000
     dag = generate_random_dag(num_nodes)
+    all_links = find_indirect_links(dag)
     # Save DAG to a text file
-    save_dag_to_file(dag, "bench_prepa/dataset.01/pos1000.txt")
-    print("DAG saved to bench_prepa/dataset.01/pos1000.txt")
+    save_dag_to_file(all_links, "bench_prepa/dataset.01/pos10000.txt")
+    print("DAG saved to bench_prepa/dataset.01/pos10000.txt")

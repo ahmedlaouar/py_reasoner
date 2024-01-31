@@ -1,7 +1,6 @@
 from sqlite3 import Cursor
 import subprocess
 import time
-from dl_lite.assertion import w_assertion
 
 separation_query = "Q(AHMED, SKIKDA) <- BornIN(AHMED, SKIKDA)"
 
@@ -17,7 +16,7 @@ def rewrite_queries(queries: list, ontology_path: str):
         temp_file.writelines(query + '\n' for query in queries)
     try:
         # Run the JAR file with the temporary file path as an argument
-        result_bytes = subprocess.check_output([java_executable, '-jar', jar_file, "DU", "SHORT", ontology_path, temp_file_path])
+        result_bytes = subprocess.check_output([java_executable, "-Xmx8g", '-jar', jar_file, "DU", "SHORT", ontology_path, temp_file_path])
         #for line in result:print(result)
         result = result_bytes.decode('utf-8').strip()
         results = result.split('\n')
@@ -50,17 +49,6 @@ def run_sql_query(sql_query: str,table_name: str, cursor: Cursor):
             supports.append((table_name, row[0], row[1]))
     return supports
 
-def run_sql_queries(sql_queries: list, cursor: Cursor):
-    supports = []
-    rows = []
-    for sql_query in sql_queries:
-        cursor.execute(sql_query)
-        rows.extend(cursor.fetchall())
-    if len(rows) != 0:
-        for row in rows:
-            supports.append(row[1])# was (table_name, row[0], row[1]) but I think table_name and id (row[0]) are not needed here, from a support we need just its degree to compare it to conflicts
-    return supports
-
 def compute_all_supports(assertions: list, ontology_path: str, cursor: Cursor):
     # in this version we use a seperation query, in order to perform a single rewriting with Rapid2.jar, because multiple calls to it is bad for time complexity
     supports = {}
@@ -75,10 +63,10 @@ def compute_all_supports(assertions: list, ontology_path: str, cursor: Cursor):
             queries.append(f"Q({individual0}) <- {assertion_name}({individual0})")
         queries.append(separation_query)
     time2 = time.time()
-    print(f"Time to generate all BCQs {time2 - time1}, number of BCQs {len(queries)}, example {queries[6]}")
+    print(f"Time to generate all BCQs {time2 - time1}, number of BCQs {len(queries)}")
     all_queries = rewrite_queries(queries,ontology_path)
     time3 = time.time()
-    print(f"Time to rewrite all BCQs {time3 - time2}, number of rewritings {len(all_queries)}, example {all_queries[6]}")
+    print(f"Time to rewrite all BCQs {time3 - time2}, number of rewritings {len(all_queries)}")
     
     assertions_counter = 0
     supports[assertions_counter] = []
@@ -93,7 +81,7 @@ def compute_all_supports(assertions: list, ontology_path: str, cursor: Cursor):
         supports[assertions_counter] += some_supports
         
     time4 = time.time()
-    print(f"Time to generate and run all SQL queries {time4 - time3}, number of all the supports {sum((len(val) for val in supports.values()))}, example {supports[6]}")
+    print(f"Time to generate and run all SQL queries {time4 - time3}, number of all the supports {sum((len(val) for val in supports.values()))}")
     
     return supports
 

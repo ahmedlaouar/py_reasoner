@@ -2,50 +2,21 @@ import sqlite3
 import sys
 import time
 from repair.owl_assertions_generator import generate_assertions
-from repair.owl_conflicts import compute_conflicts
+from repair.owl_conflicts import compute_conflicts, reduce_conflicts
+from repair.owl_dominance import dominates
 from repair.owl_supports import compute_all_supports
 from multiprocessing import Pool
 
-def read_pos(file_path: str):
+def rea_pos(file_path :str):
     with open(file_path, 'r') as file:
         lines = file.readlines()
-        n = len(lines)
-
-        # Create an n x n matrix of zeros
-        pos_matrix = [[0 for _ in range(n+1)] for _ in range(n+1)]
-
-        # Assign 1 to specific indices
+        pos_dict = {}
         for line in lines:
             tokens = [token for token in line.split()]
             weight = int(tokens[0])
-            successors = [int(x) for x in tokens[1:-1]]
-            
-            for successor in successors:
-                pos_matrix[weight][successor] = 1
-
-    return pos_matrix
-
-def is_dominated(conflict, conflicts, pos_mat):
-    for element in conflicts:
-        if element == conflict:
-            continue
-        if (is_strictly_preferred(pos_mat, element[0], conflict[0]) or is_strictly_preferred(pos_mat, element[0], conflict[1])) and (is_strictly_preferred(pos_mat, element[1], conflict[0]) or is_strictly_preferred(pos_mat, element[1], conflict[1])):
-            return True
-    return False
-
-def reduce_conflicts(conflicts: list, pos_mat):
-    # this function looks for intra dominance between conflicts, if its the case, only the dominating should be taken into account
-    reduced_conflicts = []
-    for conflict in conflicts:
-        if not is_dominated(conflict, conflicts, pos_mat):
-            reduced_conflicts.append(conflict)
-    return reduced_conflicts
-
-def is_strictly_preferred(pos_mat, support, conflict_member) -> bool:
-    # a test if support is strictly preferred to conflict_member
-    if pos_mat[support[2]][conflict_member[2]] == 1 and pos_mat[conflict_member[2]][support[2]] != 1:
-        return True
-    return False
+            successors = [int(x) for x in tokens[1:]]
+            pos_dict[weight] = successors
+    return pos_dict
 
 def print_progress_bar(iteration, total, bar_length=50):
     percent = ("{0:.1f}").format(100 * (iteration / float(total)))
@@ -61,7 +32,8 @@ def check_assertion(args):
     for conflict in conflicts:
         conflict_supported = False
         for support in supports[i]:
-            if is_strictly_preferred(pos, support, conflict[0]) or is_strictly_preferred(pos, support, conflict[1]):
+            if dominates(pos, [support], conflict):
+            #if is_strictly_preferred(pos, support, conflict[0]) or is_strictly_preferred(pos, support, conflict[1]):
                 conflict_supported = True
                 break
         if not conflict_supported:
@@ -72,7 +44,8 @@ def check_assertion(args):
 def compute_cpi_repair(ontology_path: str, data_path: str, pos_path: str):
     
     # read pos set from file
-    pos = read_pos(pos_path)
+    pos_dict = rea_pos(pos_path)
+    
     conn = sqlite3.connect(data_path)
     cursor = conn.cursor()
     try:
@@ -85,8 +58,8 @@ def compute_cpi_repair(ontology_path: str, data_path: str, pos_path: str):
             cursor.execute(f"SELECT COUNT(*) FROM {table[0]}")
             count = cursor.fetchone()[0]
             total_rows += count
-
         print(f"The size of the ABox is {total_rows}.")
+
         # first, generate the possible assertions of (cl(ABox))
         # returns a list of dl_lite.assertion.w_assertion
         start_time = time.time()
@@ -96,15 +69,15 @@ def compute_cpi_repair(ontology_path: str, data_path: str, pos_path: str):
         print(f"Time to compute the generated assertions: {inter_time0 - start_time}")
         
         test_assertions = all_assertions[:10000]
-        #print("testing with the first 10000 assertions")
-        # compute the conflicts 
-        # conflicts are of the form ((table1name, id, degree),(table2name, id, degree))
-        conflicts = compute_conflicts(ontology_path,cursor)
+        print(f"testing with {len(test_assertions)} assertions")
+        
+        # compute the conflicts, conflicts are of the form ((table1name, id, degree),(table2name, id, degree))
+        conflicts = compute_conflicts(ontology_path,cursor,pos_dict)
         inter_time1 = time.time()
         print(f"Number of the conflicts = {len(conflicts)}")
         print(f"Time to compute the conflicts: {inter_time1 - inter_time0}")
         
-        reduced_conflicts = reduce_conflicts(conflicts,pos)
+        reduced_conflicts = reduce_conflicts(conflicts,pos_dict)
         inter_time12 = time.time()
         print(f"Number of the reduced conflicts = {len(reduced_conflicts)}")
         print(f"Time to reduce the conflicts: {inter_time12 - inter_time1}")
@@ -120,27 +93,14 @@ def compute_cpi_repair(ontology_path: str, data_path: str, pos_path: str):
         cpi_repair = []
         
         all_items = len(test_assertions)
-        arguments = [(i, test_assertions, reduced_conflicts, supports, pos) for i in range(all_items)]
+        arguments = [(i, test_assertions, reduced_conflicts, supports, pos_dict) for i in range(all_items)]
+        
         # calling check_assertion with pool here iterates over the range of all_items, each assertion is identified with its index i and added from test_assertions if accepted
         with Pool() as pool:
-            results = pool.map(check_assertion,arguments)
-        cpi_repair = [result for result in results if result is not None]
-        """for i in range(all_items):            
-            accepted = True
-            #if all(any(is_strictly_preferred(pos, support, conflict_member) for support in supports[i] for conflict_member in conflict) for conflict in conflicts): cpi_repair.append(all_assertions[i])
-            for conflict in conflicts:
-                conflict_supported = False
-                for support in supports[i]:
-                    if is_strictly_preferred(pos, support, conflict[0]) or is_strictly_preferred(pos, support, conflict[1]):
-                        conflict_supported = True
-                        break
-                if not conflict_supported:
-                    accepted = False
-                    break
-            if accepted :
-                cpi_repair.append(all_assertions[i])
-            print_progress_bar(i + 1, all_items)"""
+            results = pool.map(check_assertion,arguments)          
 
+        cpi_repair = [result for result in results if result is not None]
+        
         print("\n")
         inter_time3 = time.time()
         print(f"Size of the cpi_repair = {len(cpi_repair)}")

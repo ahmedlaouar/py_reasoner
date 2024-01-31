@@ -119,23 +119,13 @@ def compute_conflicts(ontology_path :str, cursor: Cursor, pos_dict):
     #to_remove = []
     for query in all_queries:
         sql_query, table1, table2 = generate_sql_query(query)
-        #conflicts += run_sql_query(sql_query, cursor, table1, table2)
-        # the following is a test
         results = run_sql_query(sql_query, cursor, table1, table2)        
         for result in results:
-            result_dominated = False
-            for conflict in conflicts:
-                if dominates(pos_dict, conflict, result):
-                    result_dominated = True
-                    break
-            if not result_dominated:
-                to_remove = []              
-                for conflict in conflicts:
-                    if dominates(pos_dict, result, conflict):
-                        to_remove.append(conflict)
-                conflicts = [x for x in conflicts if x not in to_remove]
-                conflicts.append(result)                
-    #print(conflicts[0])
+            if not any(dominates(pos_dict,conflict,result) for conflict in conflicts):                    
+                to_remove = [conflict for conflict in conflicts if dominates(pos_dict,result,conflict)]
+                if to_remove:
+                    conflicts = [x for x in conflicts if x not in to_remove]
+                conflicts.append(result)
     return conflicts
 
 def reduce_conflicts(conflicts: list, pos_dict):

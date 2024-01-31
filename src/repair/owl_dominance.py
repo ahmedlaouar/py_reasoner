@@ -6,6 +6,7 @@ def is_strictly_preferred(pos_dict, member1, member2) -> bool:
 
 def dominates(pos_dict, subset1: list, subset2: list) -> bool:
     # returns True if subset1 dominates subset2 (each element of subset1 is_strictly_preferred to at least an element of subset2)
+    # takes a list for both subset1 and subset2, if you have one element (eg: support) pass it as a list [support]
     for member1 in subset1:
         dominates_at_least_one = False        
         for member2 in subset2:

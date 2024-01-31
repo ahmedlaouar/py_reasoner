@@ -37,6 +37,25 @@ def find_indirect_links(graph):
         all_links[node] = dfs(graph, node) - {node}
     return all_links
 
+def dfs_iterative(graph, start):
+    visited = set()
+    stack = [start]
+
+    while stack:
+        vertex = stack.pop()
+        if vertex not in visited:
+            visited.add(vertex)
+            # Add unvisited adjacent nodes; reverse is used to maintain order similar to recursion
+            stack.extend(reversed([node for node in graph[vertex] if node not in visited]))
+    return visited
+
+def find_indirect_links_iterative(graph):
+    indirect_links = {}
+    for node in graph:
+        # Subtract 1 to exclude the node itself from its indirect links
+        indirect_links[node] = dfs_iterative(graph, node) - {node}
+    return indirect_links
+
 def save_dag_to_file(graph, filename):
     with open(filename, 'w') as file:
         for element in graph:

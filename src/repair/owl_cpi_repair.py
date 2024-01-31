@@ -109,5 +109,7 @@ def compute_cpi_repair(ontology_path: str, data_path: str, pos_path: str):
         #for assertion in cpi_repair:
         #    print(assertion)
         print(f"Total time of execution = {inter_time3 - start_time}")
+        cursor.close()
+        conn.close()
     except sqlite3.OperationalError as e:
             print(f"Error: {e}.")

@@ -1,6 +1,7 @@
 from sqlite3 import Cursor
 import rdflib
 import subprocess
+from repair.owl_dominance import dominates
 
 ontology_path = 'ontologies/univ-bench/lubm-ex-20_disjoint.owl'
 
@@ -78,7 +79,6 @@ def generate_sql_query(query_str):
     # this function generates a sql query from a conjunctive query, it assumes the query to have just 2 atoms
     # it returns the sql_query alongside table names to faciliate construction of conlicts
     query = query_str.replace(' ', '').replace('),', '), ').split()
-    # split query into two sides
     first, second = query[:2]        
     # tokenize each side and remove commas and parenthesis
     first_tokens = [token for token in first.replace(',', ' , ').replace('(', ' ( ').replace(')', ' ) ').split() if token not in [',', '(', ')']]
@@ -90,8 +90,7 @@ def generate_sql_query(query_str):
     # Generate query according to matches
     sql_query = f"SELECT t1.id,t1.degree,t2.id,t2.degree FROM {first_tokens[0]} t1 JOIN {second_tokens[0]} t2 ON"
     for (index0,index1) in matching_indexes:
-        sql_query += " t1.individual"+str(index0)+" = t2.individual"+str(index1)+" and"
-    # remove last trailing "and"
+        sql_query += " t1.individual"+str(index0)+" = t2.individual"+str(index1)+" and" # remove last trailing "and"
     sql_query = sql_query.rsplit(' ', 1)[0]
     return sql_query, first_tokens[0], second_tokens[0]
 
@@ -103,10 +102,10 @@ def run_sql_query(sql_query:str,cursor: Cursor, table1:str, table2:str):
     rows = cursor.fetchall()
     if len(rows) != 0:
         for row in rows:
-            conflicts.append(((table1, row[0], row[1]),(table2, row[2], row[3])))      
+            conflicts.append([(table1, row[0], row[1]),(table2, row[2], row[3])])      
     return conflicts
 
-def compute_conflicts(ontology_path :str, cursor: Cursor):
+def compute_conflicts(ontology_path :str, cursor: Cursor, pos_dict):
     conflicts = []
     # analyze ontology and return disjointWith and propertyDisjointWith as negative axioms
     negative_axioms = get_negative_axioms(ontology_path)
@@ -117,10 +116,39 @@ def compute_conflicts(ontology_path :str, cursor: Cursor):
     # "all_queries" are the result of rewriting all "queries"
     all_queries = []
     all_queries = rewrite_all_queries(queries,ontology_path)
-    #for query in queries:
-    #    all_queries += rewrite_query(query,ontology_path)
-    # generate sql query from each conjunctive query
+    #to_remove = []
     for query in all_queries:
         sql_query, table1, table2 = generate_sql_query(query)
-        conflicts += run_sql_query(sql_query, cursor, table1, table2)
+        #conflicts += run_sql_query(sql_query, cursor, table1, table2)
+        # the following is a test
+        results = run_sql_query(sql_query, cursor, table1, table2)        
+        for result in results:
+            result_dominated = False
+            for conflict in conflicts:
+                if dominates(pos_dict, conflict, result):
+                    result_dominated = True
+                    break
+            if not result_dominated:
+                to_remove = []              
+                for conflict in conflicts:
+                    if dominates(pos_dict, result, conflict):
+                        to_remove.append(conflict)
+                conflicts = [x for x in conflicts if x not in to_remove]
+                conflicts.append(result)                
+    #print(conflicts[0])
     return conflicts
+
+def reduce_conflicts(conflicts: list, pos_dict):
+    # this function looks for intra dominance between conflicts, if its the case, only the dominating should be taken into account
+    reduced_conflicts = []
+    for conflict1 in conflicts:
+        conflict1_dominated = False
+        for conflict2 in conflicts:
+            if conflict1 == conflict2:
+                continue
+            if dominates(pos_dict, conflict2, conflict1):
+               conflict1_dominated = True
+               break
+        if not conflict1_dominated:
+            reduced_conflicts.append(conflict1)
+    return reduced_conflicts

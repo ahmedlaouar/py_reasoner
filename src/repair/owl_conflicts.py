@@ -1,4 +1,5 @@
 from sqlite3 import Cursor
+import time
 import rdflib
 import subprocess
 from repair.owl_dominance import dominates
@@ -142,3 +143,47 @@ def reduce_conflicts(conflicts: list, pos_dict):
         if not conflict1_dominated:
             reduced_conflicts.append(conflict1)
     return reduced_conflicts
+
+def generate_sql_query_with_condition(query_str:str, successors: list):
+    query = query_str.replace(' ', '').replace('),', '), ').split()
+    first, second = query[:2]        
+    # tokenize each side and remove commas and parenthesis
+    first_tokens = [token for token in first.replace(',', ' , ').replace('(', ' ( ').replace(')', ' ) ').split() if token not in [',', '(', ')']]
+    second_tokens= [token for token in second.replace(',', ' , ').replace('(', ' ( ').replace(')', ' ) ').split() if token not in [',', '(', ')']]
+    # find matching elements between first and second tokens
+    matching_indexes = [(i, j) for i, item1 in enumerate(first_tokens[1:]) for j, item2 in enumerate(second_tokens[1:]) if item1 == item2]
+    # Generate query according to matches
+    sql_query = f"SELECT t1.id,t1.degree,t2.id,t2.degree FROM {first_tokens[0]} t1 JOIN {second_tokens[0]} t2 ON"
+    for (index0,index1) in matching_indexes:
+        sql_query += " t1.individual"+str(index0)+" = t2.individual"+str(index1)+" and" 
+    sql_query = sql_query.rsplit(' ', 1)[0] # remove last trailing "and"
+    if len(successors) != 0:
+        successors_str = "("
+        for successor in successors:
+            successors_str += str(successor)+","
+        successors_str = successors_str[:-1]
+        successors_str += ")"
+        sql_query += f" WHERE t1.degree NOT IN {successors_str} AND t2.degree NOT IN {successors_str};"    
+    return sql_query
+
+def get_all_row_queries(ontology_path :str):
+    # analyze ontology and return disjointWith and propertyDisjointWith as negative axioms
+    negative_axioms = get_negative_axioms(ontology_path)
+    # "queries" are generated from each negative axiom in the TBox
+    queries = []
+    for axiom in negative_axioms:
+        queries.append(generate_query(axiom))
+    # "all_queries" are the result of rewriting all "queries"
+    all_queries = []
+    all_queries = rewrite_all_queries(queries,ontology_path)
+    return all_queries
+
+def check_conflicting_subset(all_queries: list, cursor: Cursor, successors: list):
+    # returns True if there is at least one conflict (an answer to querying with list of strictly less certain degrees)
+    for query in all_queries:
+        sql_query = generate_sql_query_with_condition(query, successors)
+        cursor.execute(sql_query)
+        rows = cursor.fetchall()
+        if len(rows) != 0:
+            return True
+    return False

@@ -93,3 +93,19 @@ def generate_assertions(ontology_path: str,cursor: Cursor):
                     all_assertions_to_check.append(assertion)
     
     return all_assertions_to_check
+
+def get_all_abox_assertions(tables: list,cursor: Cursor):
+    all_assertions = []
+    for table in tables:
+        sql_query = f"SELECT * FROM {table[0]};"
+        cursor.execute(sql_query)
+        results = cursor.fetchall()
+        if len(results) != 0:
+            for result in results:
+                if len(result) == 3:
+                    assertion = w_assertion(table[0],result[1],weight=result[2])
+                    all_assertions.append(assertion)
+                if len(result) == 4:
+                    assertion = w_assertion(table[0],result[1],result[2],weight=result[3])
+                    all_assertions.append(assertion)
+    return all_assertions

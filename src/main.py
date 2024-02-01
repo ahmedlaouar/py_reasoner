@@ -4,6 +4,7 @@ from dl_lite.assertion import w_assertion
 from repair.owl_assertions_generator import generate_assertions
 from repair.owl_conflicts import compute_conflicts
 from repair.owl_cpi_repair import compute_cpi_repair
+from repair.owl_pi_repair import compute_pi_repair
 
 def conflicts_helper(ontology_path,data_path) :
     conn = sqlite3.connect(data_path)
@@ -46,4 +47,6 @@ if __name__ == "__main__":
     
     pos_path = "bench_prepa/dataset.01/pos1000.txt"
 
-    compute_cpi_repair(ontology_path,data_path,pos_path)
+    compute_pi_repair(ontology_path,data_path,pos_path)
+
+    #compute_cpi_repair(ontology_path,data_path,pos_path)

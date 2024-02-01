@@ -10,7 +10,7 @@ def generate_random_dag(num_nodes):
         graph[i] = []
 
         for j in range(i+1, num_nodes):
-            if random.random() < 0.9 :
+            if random.random() < 0.1 :
                 graph[i].append(j)
 
     return graph
@@ -68,9 +68,9 @@ def save_dag_to_file(graph, filename):
 
 if __name__ == '__main__':
     # Generate a random DAG with "50", "500", "1000", "10000" nodes
-    num_nodes = 500
+    num_nodes = 1000
     dag = generate_random_dag(num_nodes)
     all_links = find_indirect_links(dag)
     # Save DAG to a text file
-    save_dag_to_file(all_links, "bench_prepa/dataset.01/pos500.txt")
-    print("DAG saved to bench_prepa/dataset.01/pos500.txt")
+    save_dag_to_file(all_links, "bench_prepa/dataset.01/pos1000.txt")
+    print("DAG saved to bench_prepa/dataset.01/pos1000.txt")

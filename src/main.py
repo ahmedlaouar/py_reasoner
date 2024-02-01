@@ -43,10 +43,10 @@ def conflicts_helper(ontology_path,data_path) :
 if __name__ == "__main__":
     ontology_path = "ontologies/univ-bench/lubm-ex-20_disjoint.owl"
     
-    data_path = "bench_prepa/dataset.01/University0_p_0.001_pos_1000.db"
+    data_path = "bench_prepa/dataset.01/University0_p_0.001_pos_500.db"
     
-    pos_path = "bench_prepa/dataset.01/pos1000.txt"
+    pos_path = "bench_prepa/dataset.01/pos500.txt"
 
     compute_pi_repair(ontology_path,data_path,pos_path)
 
-    #compute_cpi_repair(ontology_path,data_path,pos_path)
+    compute_cpi_repair(ontology_path,data_path,pos_path)

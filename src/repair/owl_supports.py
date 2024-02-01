@@ -73,13 +73,10 @@ def compute_all_supports(assertions: list, ontology_path: str, cursor: Cursor, p
     
     assertions_counter = 0
     supports[assertions_counter] = []
-    sql_queries = {}
-    sql_queries[assertions_counter] = []
     for query in all_queries:
         if query == "BornIN(AHMED, SKIKDA)":
             assertions_counter += 1
             supports[assertions_counter] = []
-            sql_queries[assertions_counter] = []
             continue
         sql_query, table_name = generate_sql_query(query)
         some_supports = run_sql_query(sql_query,table_name,cursor)

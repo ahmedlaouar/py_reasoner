@@ -34,7 +34,7 @@ def compute_pi_repair(ontology_path: str, data_path: str, pos_path: str):
     pos_dict = read_pos(pos_path)
     ABox_name = data_path.split("/")[-1]
     TBox_name = ontology_path.split("/")[-1]
-    print(f"Computing Cpi-repair for the ABox: {ABox_name} and the TBox: {TBox_name}")
+    print(f"Computing pi-repair for the ABox: {ABox_name} and the TBox: {TBox_name}")
 
     conn = sqlite3.connect(data_path)
     cursor = conn.cursor()
@@ -95,9 +95,11 @@ def compute_pi_repair(ontology_path: str, data_path: str, pos_path: str):
             print_progress_bar(test_assertions.index(assertion),len(test_assertions))"""
 
         inter_time3 = time.time()
-        print()
+        #print()
         print(f"Size of the pi_repair = {len(pi_repair)}")
         print(f"Time to compute the pi_repair: {inter_time3 - inter_time1}")
+
+        print(f"Total time of execution: {inter_time3 - start_time}")
 
         cursor.close()
         conn.close()

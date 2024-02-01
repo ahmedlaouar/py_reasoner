@@ -33,7 +33,6 @@ def check_assertion(args):
         conflict_supported = False
         for support in supports[i]:
             if dominates(pos, [support], conflict):
-            #if is_strictly_preferred(pos, support, conflict[0]) or is_strictly_preferred(pos, support, conflict[1]):
                 conflict_supported = True
                 break
         if not conflict_supported:

@@ -45,7 +45,7 @@ if __name__ == "__main__":
     
     data_path = "bench_prepa/dataset.01/University0_p_0.001_pos_1000.db"
     
-    pos_path = "bench_prepa/dataset.01/pos1000.txt"
+    pos_path = "bench_prepa/dataset.01/DAGs_with_ranks/pos_ranks_1000.txt"
 
     compute_pi_repair(ontology_path,data_path,pos_path)
 

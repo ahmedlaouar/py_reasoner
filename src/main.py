@@ -43,9 +43,9 @@ def conflicts_helper(ontology_path,data_path) :
 if __name__ == "__main__":
     ontology_path = "ontologies/univ-bench/lubm-ex-20_disjoint.owl"
     
-    data_path = "bench_prepa/dataset.01/University0_p_0.001_pos_1000.db"
+    data_path = "bench_prepa/dataset.01/University0_p_0.001_pos_500.db"
     
-    pos_path = "bench_prepa/dataset.01/DAGs_with_ranks/pos_ranks_1000.txt"
+    pos_path = "bench_prepa/dataset.01/DAGs_with_bnlearn/pos500_melancon.txt"
 
     compute_pi_repair(ontology_path,data_path,pos_path)
 

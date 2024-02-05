@@ -22,10 +22,10 @@ save_dag_to_file <- function(graph, filename) {
 library(bnlearn)
 
 # Set the number of nodes in the graph
-num_nodes <- 500
+num_nodes <- 500 - 1
 
 # Generate node labels
-node_labels <- paste0(1:num_nodes)
+node_labels <- paste0(0:num_nodes)
 
 # Generate a random DAG
 # nodes: list of nodes. method (used algorithm): ordered (similar to randomDAG of pcalg python), ic-dag, melancon. prob: for ordered algo, probability of each arc burn.in: number of iterations for ic-dag and melancon.   

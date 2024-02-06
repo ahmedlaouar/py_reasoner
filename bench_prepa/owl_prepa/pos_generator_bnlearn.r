@@ -25,7 +25,7 @@ if(!requireNamespace("bnlearn", quietly = TRUE)) {
 library(bnlearn)
 
 # Set the number of nodes in the graph
-num_nodes <- 1000 - 1
+num_nodes <- 500 - 1
 
 # Generate node labels
 node_labels <- paste0(0:num_nodes)
@@ -35,10 +35,10 @@ node_labels <- paste0(0:num_nodes)
 
 # random_dag <- random.graph(nodes = node_labels, method= "ordered", prob = 0.75)
 # random_dag <- random.graph(nodes = node_labels, method= "melancon")
-random_dag <- random.graph(nodes = node_labels, method = "melancon", burn.in = 6*100000)
+random_dag <- random.graph(nodes = node_labels, method = "ic-dag")
 
 
-file_name = "bench_prepa/dataset.01/DAGs_with_bnlearn/pos1000_melancon_inc_.txt"
+file_name = "bench_prepa/dataset.01/DAGs_with_bnlearn/ic-dag_method/pos500_ic-dag.txt"
 
 save_dag_to_file(random_dag, file_name)
 #print(random_dag)

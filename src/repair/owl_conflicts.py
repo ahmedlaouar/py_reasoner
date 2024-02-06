@@ -1,10 +1,7 @@
 from sqlite3 import Cursor
-import time
 import rdflib
 import subprocess
 from repair.owl_dominance import dominates
-
-ontology_path = 'ontologies/univ-bench/lubm-ex-20_disjoint.owl'
 
 def get_OntologyURI(graph):    
     test = [x for x, y, z in graph.triples((None, rdflib.RDF.type, rdflib.OWL.Ontology))]

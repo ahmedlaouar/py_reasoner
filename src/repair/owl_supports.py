@@ -1,11 +1,8 @@
-from concurrent.futures import ThreadPoolExecutor
 from sqlite3 import Cursor
-import sqlite3
 import subprocess
 import time
 from repair.owl_dominance import dominates
 
-data_path = "bench_prepa/dataset.01/University0_p_0.001_pos_1000.db"
 separation_query = "Q(AHMED, SKIKDA) <- BornIN(AHMED, SKIKDA)"
 
 def rewrite_queries(queries: list, ontology_path: str):
@@ -90,7 +87,7 @@ def compute_all_supports(assertions: list, ontology_path: str, cursor: Cursor, p
     print(f"Time to generate and run all SQL queries {time4 - time3}")
     return supports
 
-def run_sql_queries_of_assertion(arguments):
+"""def run_sql_queries_of_assertion(arguments):
     sql_queries, assertions_counter, pos_dict = arguments
     conn = sqlite3.connect(data_path)
     cursor = conn.cursor()
@@ -108,7 +105,7 @@ def run_sql_queries_of_assertion(arguments):
         conn.close()
     except sqlite3.OperationalError as e:
             print(f"Error: {e}.")
-    return this_supports, assertions_counter
+    return this_supports, assertions_counter"""
 
 """def compute_supports(assertion : w_assertion, ontology_path: str, cursor: Cursor):
     assertion_name = assertion.get_assertion_name()

@@ -1,9 +1,6 @@
-
-
 from sqlite3 import Cursor
 import subprocess
 from rdflib import Graph, RDF, OWL
-
 from dl_lite.assertion import w_assertion
 
 speration_query = "Q(AHMED, SKIKDA) <- BornIN(AHMED, SKIKDA)"

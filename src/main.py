@@ -46,8 +46,8 @@ if __name__ == "__main__":
     
     pos_path = "bench_prepa/dataset.01/DAGs_with_bnlearn/melancon_method/pos1000_melancon.txt"
 
-    results1 = compute_pi_repair(ontology_path,data_path,pos_path)
+    #results1 = compute_pi_repair(ontology_path,data_path,pos_path)
 
-    results2 = compute_cpi_repair(ontology_path,data_path,pos_path)
+    #results2 = compute_cpi_repair(ontology_path,data_path,pos_path)
 
     results3 = compute_cpi_repair_enhanced(ontology_path,data_path,pos_path)

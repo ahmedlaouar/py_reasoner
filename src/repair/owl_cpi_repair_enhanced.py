@@ -5,7 +5,7 @@ from repair.owl_assertions_generator import generate_assertions, get_all_abox_as
 from repair.owl_conflicts import compute_conflicts
 from repair.owl_cpi_repair import compute_cpi_repair_raw
 from repair.owl_pi_repair import compute_pi_repair_raw
-from repair.owl_supports import compute_all_supports
+from repair.owl_supports import compute_all_supports, compute_all_supports_check
 from repair.utils import read_pos
 
 def compute_cpi_repair_enhanced(ontology_path: str, data_path: str, pos_path: str):
@@ -69,7 +69,7 @@ def compute_cpi_repair_enhanced(ontology_path: str, data_path: str, pos_path: st
 
         # browse assertions and compute supports
         # returns a dictionnary with assertions indexes in the list as keys and as values lists of supports with the form [(table_name,id,degree)] 
-        supports = compute_all_supports(left_to_check, ontology_path, cursor, pos_dict)
+        supports, cl_pi_repair = compute_all_supports_check(left_to_check, ontology_path, cursor, pos_dict, pi_repair)
         inter_time3 = time.time()
         supports_size = sum((len(val) for val in supports.values()))
         print(f"Number of all the computed supports: {supports_size}")
@@ -77,15 +77,19 @@ def compute_cpi_repair_enhanced(ontology_path: str, data_path: str, pos_path: st
         exe_results.append(supports_size)
         exe_results.append(inter_time3 - inter_time2)
 
+        left_to_check = left_to_check - cl_pi_repair
+
+        print(f"Size of cl_pi_repair: {len(cl_pi_repair)}")
         cpi_repair = compute_cpi_repair_raw(left_to_check, conflicts, supports, pos_dict)
         inter_time4 = time.time()
-        print(f"Size of the cpi_repair: {len(cpi_repair) + len(pi_repair)}")
+        print(f"Size of the cpi_repair: {len(cpi_repair) + len(pi_repair) + len(cl_pi_repair)}")
         print(f"Time to compute the cpi_repair: {inter_time4 - inter_time3}")
         exe_results.append(len(cpi_repair))
         exe_results.append(inter_time4 - inter_time3)
 
         print(f"Total time of execution: {inter_time4 - start_time}")
         exe_results.append(inter_time4 - start_time)
+
 
         cursor.close()
         conn.close()

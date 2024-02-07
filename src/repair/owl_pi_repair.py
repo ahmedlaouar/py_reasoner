@@ -16,7 +16,7 @@ def check_assertion(args):
     return assertion
 
 def compute_pi_repair(ontology_path: str, data_path: str, pos_path: str):
-    exe_results = []
+    exe_results = {}
 
     # read pos set from file
     pos_dict = read_pos(pos_path)
@@ -38,23 +38,23 @@ def compute_pi_repair(ontology_path: str, data_path: str, pos_path: str):
             count = cursor.fetchone()[0]
             total_rows += count
         print(f"Size of the ABox: {total_rows}.")
-        exe_results.append(total_rows)
+        exe_results["Abox size"] = total_rows
         
         start_time = time.time()
         assertions = get_all_abox_assertions(tables,cursor)
         inter_time0 = time.time()
         print(f"Number of the generated assertions: {len(assertions)}")
         print(f"Time to compute the generated assertions: {inter_time0 - start_time}")
-        exe_results.append(len(assertions))
-        exe_results.append((inter_time0 - start_time))
+        exe_results["ABox assertions"] = len(assertions)
+        exe_results["Time to load ABox assertions"] = (inter_time0 - start_time)
 
         # compute the conflicts, conflicts are of the form ((table1name, id, degree),(table2name, id, degree))
         conflicts = compute_conflicts(ontology_path,cursor,pos_dict)
         inter_time1 = time.time()
         print(f"Number of the conflicts: {len(conflicts)}")
         print(f"Time to compute the conflicts: {inter_time1 - inter_time0}")
-        exe_results.append(len(conflicts))
-        exe_results.append((inter_time1 - inter_time0))
+        exe_results["Conflict set size"] = len(conflicts)
+        exe_results["Time to conflicts"] = (inter_time1 - inter_time0)
 
         test_assertions = assertions#[:1000]
         print(f"testing with {len(test_assertions)} assertions")
@@ -65,11 +65,11 @@ def compute_pi_repair(ontology_path: str, data_path: str, pos_path: str):
         inter_time3 = time.time()
         print(f"Size of the pi_repair: {len(pi_repair)}")
         print(f"Time to compute the pi_repair: {inter_time3 - inter_time1}")
-        exe_results.append(len(pi_repair))
-        exe_results.append(inter_time3 - inter_time1)
+        exe_results["pi_repair size"] = len(pi_repair)
+        exe_results["Time to pi_repair"] = inter_time3 - inter_time1
 
         print(f"Total time of execution: {inter_time3 - start_time}")
-        exe_results.append(inter_time3 - start_time)
+        exe_results["pi_repair total time"] = inter_time3 - start_time
 
         cursor.close()
         conn.close()

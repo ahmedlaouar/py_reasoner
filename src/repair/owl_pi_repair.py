@@ -60,12 +60,8 @@ def compute_pi_repair(ontology_path: str, data_path: str, pos_path: str):
         print(f"testing with {len(test_assertions)} assertions")
         inter_time1 = time.time()
 
-        # The following checking way is supposed to be improved and can be parallelized
-        arguments = [(conflicts, pos_dict, assertion) for assertion in test_assertions]
-        with Pool() as pool:
-            results = pool.map(check_assertion, arguments)
-        pi_repair = [result for result in results if result is not None]
-
+        pi_repair = compute_pi_repair_raw(assertions, conflicts, pos_dict)
+        
         inter_time3 = time.time()
         print(f"Size of the pi_repair: {len(pi_repair)}")
         print(f"Time to compute the pi_repair: {inter_time3 - inter_time1}")
@@ -86,5 +82,5 @@ def compute_pi_repair_raw(assertions, conflicts, pos_dict):
     arguments = [(conflicts, pos_dict, assertion) for assertion in assertions]
     with Pool() as pool:
         results = pool.map(check_assertion, arguments)
-    pi_repair = [result for result in results if result is not None]
+    pi_repair = set([result for result in results if result is not None])
     return pi_repair

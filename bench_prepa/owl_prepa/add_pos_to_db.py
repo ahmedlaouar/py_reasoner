@@ -25,13 +25,13 @@ def add_pos_to_db(data_path:str, pos_path:str):
 
 if __name__ == "__main__":
     #data_path = "bench_prepa/dataset.01/University0_p_0.001_pos_50.db"
-    #data_path = "bench_prepa/dataset.01/University0_p_0.001_pos_500.db"
-    data_path = "bench_prepa/dataset.01/University0_p_0.001_pos_1000.db"
+    data_path = "bench_prepa/dataset.01/University0_p_0.001_pos_500.db"
+    #data_path = "bench_prepa/dataset.01/University0_p_0.001_pos_1000.db"
     #data_path = "bench_prepa/dataset.01/University0_p_0.001_pos_10000.db"
 
     #pos_path = "bench_prepa/dataset.01/pos50.txt"
-    #pos_path = "bench_prepa/dataset.01/pos500.txt"
-    pos_path = "bench_prepa/dataset.01/pos1000.txt"
+    pos_path = "bench_prepa/dataset.01/DAGs_with_bnlearn/ordered_method/pos500_prob_0.75.txt"
+    #pos_path = "bench_prepa/dataset.01/pos1000.txt"
     #pos_path = "bench_prepa/dataset.01/pos10000.txt"
     add_pos_to_db(data_path, pos_path)
     print(f"Added {pos_path} to {data_path}")

@@ -1,9 +1,11 @@
 from multiprocessing import Pool
 import sqlite3
 import time
-from repair.owl_assertions_generator import generate_assertions, generate_not_abox_assertions, get_all_abox_assertions
+from repair.owl_assertions_generator import generate_assertions, get_all_abox_assertions
 from repair.owl_conflicts import compute_conflicts
+from repair.owl_cpi_repair import compute_cpi_repair_raw
 from repair.owl_pi_repair import compute_pi_repair_raw
+from repair.owl_supports import compute_all_supports
 from repair.utils import read_pos
 
 def compute_cpi_repair_enhanced(ontology_path: str, data_path: str, pos_path: str):
@@ -39,11 +41,10 @@ def compute_cpi_repair_enhanced(ontology_path: str, data_path: str, pos_path: st
         exe_results.append((inter_time0 - start_time))
 
         all_assertions = generate_assertions(ontology_path, cursor)
-        print(f"Number of the generated assertions: {len(all_assertions)}")
 
-        remaining_assertions2 = list(set(all_assertions) - set(abox_assertions))
+        generated_assertions = all_assertions - abox_assertions
         inter_time1 = time.time()
-        print(f"Number of the generated assertions: {len(remaining_assertions2)}")
+        print(f"Number of new generated assertions: {len(generated_assertions)}")
         print(f"Time to compute the generated assertions: {inter_time1 - inter_time0}")
 
         # compute the conflicts, conflicts are of the form ((table1name, id, degree),(table2name, id, degree))
@@ -62,9 +63,32 @@ def compute_cpi_repair_enhanced(ontology_path: str, data_path: str, pos_path: st
         exe_results.append(len(pi_repair))
         exe_results.append(inter_time2 - inter_time1)
 
+        # check if the rest is in cpi-repair
+        left_to_check = all_assertions - pi_repair
+        print(f"The number of assertions left to check: {len(left_to_check)}")
 
-    
+        # browse assertions and compute supports
+        # returns a dictionnary with assertions indexes in the list as keys and as values lists of supports with the form [(table_name,id,degree)] 
+        supports = compute_all_supports(left_to_check, ontology_path, cursor, pos_dict)
+        inter_time3 = time.time()
+        supports_size = sum((len(val) for val in supports.values()))
+        print(f"Number of all the computed supports: {supports_size}")
+        print(f"Time to compute all the supports of all the assertions: {inter_time3 - inter_time2}")
+        exe_results.append(supports_size)
+        exe_results.append(inter_time3 - inter_time2)
 
+        cpi_repair = compute_cpi_repair_raw(left_to_check, conflicts, supports, pos_dict)
+        inter_time4 = time.time()
+        print(f"Size of the cpi_repair: {len(cpi_repair) + len(pi_repair)}")
+        print(f"Time to compute the cpi_repair: {inter_time4 - inter_time3}")
+        exe_results.append(len(cpi_repair))
+        exe_results.append(inter_time4 - inter_time3)
+
+        print(f"Total time of execution: {inter_time4 - start_time}")
+        exe_results.append(inter_time4 - start_time)
+
+        cursor.close()
+        conn.close()
     except sqlite3.OperationalError as e:
             print(f"Error: {e}.")
     

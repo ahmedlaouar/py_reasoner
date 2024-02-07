@@ -45,7 +45,7 @@ def generate_sql_query(query: str):
 
 def generate_assertions(ontology_path: str,cursor: Cursor):
     # this function reads through the ontology classes and properties (concepts and roles) and finds if they have individuals with which they can be derived from the data (ABox)
-    all_assertions_to_check = []
+    all_assertions_to_check = set()
     graph = Graph()
     graph.parse (ontology_path, format='application/rdf+xml')
 
@@ -67,9 +67,9 @@ def generate_assertions(ontology_path: str,cursor: Cursor):
             for result in results:
                 if len(result) == 1:
                     assertion = w_assertion(concepts[assertions_counter],result[0])
-                    all_assertions_to_check.append(assertion)
+                    all_assertions_to_check.add(assertion)
     
-    roles = [prop_uri.split('#')[-1] for prop_uri in graph.subjects(predicate=RDF.type, object=OWL.ObjectProperty)]
+    roles = [prop_uri.split('#')[-1] for prop_uri in graph.subjects(predicate=RDF.type, object=OWL.ObjectProperty)] + [data_uri.split('#')[-1] for data_uri in graph.subjects(predicate=RDF.type, object=OWL.DatatypeProperty)]
     role_queries = []
     for role_name in roles:
         role_queries.append(f"Q(?0,?1) <- {role_name}(?0,?1)")
@@ -87,12 +87,12 @@ def generate_assertions(ontology_path: str,cursor: Cursor):
             for result in results:
                 if len(result) == 2:
                     assertion = w_assertion(roles[assertions_counter],result[0],result[1])
-                    all_assertions_to_check.append(assertion)
+                    all_assertions_to_check.add(assertion)
     
     return all_assertions_to_check
 
 def get_all_abox_assertions(tables: list,cursor: Cursor):
-    all_assertions = []
+    all_assertions = set()
     for table in tables:
         sql_query = f"SELECT * FROM {table[0]};"
         cursor.execute(sql_query)
@@ -101,62 +101,8 @@ def get_all_abox_assertions(tables: list,cursor: Cursor):
             for result in results:
                 if len(result) == 3:
                     assertion = w_assertion(table[0],result[1],weight=result[2])
-                    all_assertions.append(assertion)
+                    all_assertions.add(assertion)
                 if len(result) == 4:
                     assertion = w_assertion(table[0],result[1],result[2],weight=result[3])
-                    all_assertions.append(assertion)
+                    all_assertions.add(assertion)
     return all_assertions
-
-def generate_not_abox_assertions(ontology_path: str,cursor: Cursor):
-    # this function reads through the ontology classes and properties (concepts and roles) and finds if they have individuals with which they can be derived from the data (ABox)
-    all_assertions_to_check = []
-    graph = Graph()
-    graph.parse (ontology_path, format='application/rdf+xml')
-
-    concepts = [class_uri.split('#')[-1] for class_uri in graph.subjects(predicate=RDF.type, object=OWL.Class)]
-    concept_queries = []    
-    for concept_name in concepts:
-        concept_queries.append(f"Q(?0) <- {concept_name}(?0)")
-        concept_queries.append(speration_query)
-    all_concept_queries = rewrite_queries(concept_queries,ontology_path)
-    assertions_counter = 0
-    for cq_query in all_concept_queries:
-        if cq_query == "BornIN(AHMED, SKIKDA)":
-            assertions_counter += 1
-            continue
-        whole_query = "Q(?0) <- "+cq_query
-        if whole_query in concept_queries:
-            continue
-        sql_query = generate_sql_query(cq_query)
-        cursor.execute(sql_query)
-        results = cursor.fetchall()
-        if len(results) != 0:
-            for result in results:
-                if len(result) == 1:
-                    assertion = w_assertion(concepts[assertions_counter],result[0])
-                    all_assertions_to_check.append(assertion)
-    
-    roles = [prop_uri.split('#')[-1] for prop_uri in graph.subjects(predicate=RDF.type, object=OWL.ObjectProperty)]
-    role_queries = []
-    for role_name in roles:
-        role_queries.append(f"Q(?0,?1) <- {role_name}(?0,?1)")
-        role_queries.append(speration_query)
-    all_role_queries = rewrite_queries(role_queries,ontology_path)    
-    assertions_counter = 0
-    for cq_query in all_role_queries:
-        if cq_query == "BornIN(AHMED, SKIKDA)":
-            assertions_counter += 1
-            continue
-        whole_query = "Q(?0,?1) <- "+cq_query
-        if whole_query in role_queries:
-            continue
-        sql_query = generate_sql_query(cq_query)
-        cursor.execute(sql_query)
-        results = cursor.fetchall()
-        if len(results) != 0:
-            for result in results:
-                if len(result) == 2:
-                    assertion = w_assertion(roles[assertions_counter],result[0],result[1])
-                    all_assertions_to_check.append(assertion)
-    
-    return all_assertions_to_check

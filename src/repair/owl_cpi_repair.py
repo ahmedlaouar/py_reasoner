@@ -7,7 +7,7 @@ from repair.owl_supports import compute_all_supports
 from multiprocessing import Pool
 from repair.utils import read_pos
 
-def check_assertion(args):
+"""def check_assertion(args):
     i, all_assertions, conflicts, supports, pos = args
     accepted = True
     for conflict in conflicts:
@@ -19,7 +19,21 @@ def check_assertion(args):
         if not conflict_supported:
             accepted = False    
     if accepted :
-        return all_assertions[i]
+        return all_assertions[i]"""
+    
+def check_assertion(args):
+    assertion, conflicts, supports, pos_dict = args
+    accepted = True
+    for conflict in conflicts:
+        conflict_supported = False
+        for support in supports:
+            if dominates(pos_dict, [support], conflict):
+                conflict_supported = True
+                break
+        if not conflict_supported:
+            accepted = False    
+    if accepted :
+        return assertion
 
 def compute_cpi_repair(ontology_path: str, data_path: str, pos_path: str):
     exe_results = []
@@ -75,16 +89,7 @@ def compute_cpi_repair(ontology_path: str, data_path: str, pos_path: str):
         exe_results.append(supports_size)
         exe_results.append(inter_time2 - inter_time1)
 
-        cpi_repair = []
-        
-        nbr_items = len(test_assertions)
-        arguments = [(i, test_assertions, conflicts, supports, pos_dict) for i in range(nbr_items)]
-        
-        # calling check_assertion with pool here iterates over the range of nbr_items, each assertion is identified with its index i and added from test_assertions if accepted
-        with Pool() as pool:
-            results = pool.map(check_assertion,arguments)          
-
-        cpi_repair = [result for result in results if result is not None]
+        cpi_repair = compute_cpi_repair_raw(test_assertions, conflicts, supports, pos_dict)
         
         inter_time3 = time.time()
         print(f"Size of the cpi_repair: {len(cpi_repair)}")
@@ -100,3 +105,10 @@ def compute_cpi_repair(ontology_path: str, data_path: str, pos_path: str):
             print(f"Error: {e}.")
 
     return exe_results
+
+def compute_cpi_repair_raw(assertions, conflicts, supports, pos_dict):
+    arguments = [(assertion, conflicts, supports[assertion], pos_dict) for assertion in assertions]
+    with Pool() as pool:
+        results = pool.map(check_assertion,arguments)
+    cpi_repair = set([result for result in results if result is not None])
+    return cpi_repair

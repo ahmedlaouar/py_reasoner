@@ -25,7 +25,7 @@ if(!requireNamespace("bnlearn", quietly = TRUE)) {
 library(bnlearn)
 
 # Set the number of nodes in the graph
-num_nodes <- 1000 - 1
+num_nodes <- 5000 - 1
 
 # Generate node labels
 node_labels <- paste0(0:num_nodes)
@@ -33,12 +33,12 @@ node_labels <- paste0(0:num_nodes)
 # Generate a random DAG
 # nodes: list of nodes. method (used algorithm): ordered (similar to randomDAG of pcalg python), ic-dag, melancon. prob: for ordered algo, probability of each arc burn.in: number of iterations for ic-dag and melancon.   
 
-# random_dag <- random.graph(nodes = node_labels, method= "ordered", prob = 0.75)
+random_dag <- random.graph(nodes = node_labels, method= "ordered", prob = 0.5)
 # random_dag <- random.graph(nodes = node_labels, method= "melancon")
-random_dag <- random.graph(nodes = node_labels, method = "ic-dag", burn.in=6*500000)
+# random_dag <- random.graph(nodes = node_labels, method = "ic-dag", burn.in=6*500000)
 
 
-file_name = "bench_prepa/dataset.01/DAGs_with_bnlearn/ic-dag_method/pos1000_ic-dag.txt"
+file_name = "bench_prepa/dataset.01/DAGs_with_bnlearn/ordered_method/pos5000_prob_0.5.txt"
 
 save_dag_to_file(random_dag, file_name)
 #print(random_dag)

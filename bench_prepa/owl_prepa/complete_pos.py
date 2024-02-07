@@ -39,8 +39,8 @@ def save_dag_to_file(graph, filename):
             file.write(pos_line)
 
 if __name__ == '__main__':
-    input_filename = "bench_prepa/dataset.01/DAGs_with_bnlearn/pos1000_melancon_inc_.txt"
-    output_filename = "bench_prepa/dataset.01/DAGs_with_bnlearn/pos1000_melancon.txt"
+    input_filename = "bench_prepa/dataset.01/DAGs_with_bnlearn/ordered_method/pos5000_prob_0.5.txt"
+    output_filename = "bench_prepa/dataset.01/DAGs_with_bnlearn/ordered_method/pos5000_prob_0.5.txt"
     incomplete_graph = read_pos(input_filename)
     graph = find_indirect_links_iterative(incomplete_graph)
 

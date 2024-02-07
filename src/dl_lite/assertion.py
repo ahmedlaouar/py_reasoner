@@ -24,8 +24,7 @@ class assertion:
             return "{}({})".format(self.__assertion_name,self.__individual_1)
         
     def __eq__(self, __value: object) -> bool:
-        if self.get_assertion_name() == __value.get_assertion_name() and self.get_individuals() == __value.get_individuals():
-            return True
+        return self.get_assertion_name() == __value.get_assertion_name() and self.get_individuals() == __value.get_individuals()
 
 class w_assertion(assertion):
     def __init__(self, assertion_name, individual_1, individual_2 = None, weight=-1):
@@ -45,7 +44,7 @@ class w_assertion(assertion):
             return "{}({}),{}".format(self.get_assertion_name(),self.get_individuals()[0],self.__weight)
         
     def __eq__(self, __value: object) -> bool:
-        return super().__eq__(__value) and self.get_assertion_weight() == __value.get_assertion_weight()
+        return super().__eq__(__value)# and self.get_assertion_weight() == __value.get_assertion_weight()
     
     def __hash__(self):
-        return hash((self.get_assertion_name(),self.get_individuals()[0],self.get_individuals()[1],self.get_assertion_weight()))
+        return hash((self.get_assertion_name(),self.get_individuals()[0],self.get_individuals()[1]))#,self.get_assertion_weight()

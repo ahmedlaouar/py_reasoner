@@ -54,7 +54,8 @@ def compute_all_supports(assertions: list, ontology_path: str, cursor: Cursor, p
     supports = {}
     queries = []
     time1 = time.time()
-    for assertion in assertions:
+    assertions_list = list(assertions)
+    for assertion in assertions_list:
         assertion_name = assertion.get_assertion_name()
         individual0, individual1 = assertion.get_individuals()
         if individual1 != None:
@@ -69,20 +70,22 @@ def compute_all_supports(assertions: list, ontology_path: str, cursor: Cursor, p
     print(f"Time to rewrite all BCQs {time3 - time2}, number of rewritings {len(all_queries)}")
     
     assertions_counter = 0
-    supports[assertions_counter] = []
+    supports[assertions_list[assertions_counter]] = set()
     for query in all_queries:
         if query == "BornIN(AHMED, SKIKDA)":
             assertions_counter += 1
-            supports[assertions_counter] = []
+            if assertions_counter == len(assertions_list):
+                break
+            supports[assertions_list[assertions_counter]] = set()
             continue
         sql_query, table_name = generate_sql_query(query)
         some_supports = run_sql_query(sql_query,table_name,cursor)
         for new_element in some_supports:
-            if not any(dominates(pos_dict, [support], [new_element]) for support in supports[assertions_counter]):
-                to_remove = {support for support in supports[assertions_counter] if dominates(pos_dict, [new_element], [support])}
+            if not any(dominates(pos_dict, [support], [new_element]) for support in supports[assertions_list[assertions_counter]]):
+                to_remove = {support for support in supports[assertions_list[assertions_counter]] if dominates(pos_dict, [new_element], [support])}
                 if to_remove:
-                    supports[assertions_counter] = [x for x in supports[assertions_counter] if x not in to_remove]                
-                supports[assertions_counter].append(new_element)
+                    supports[assertions_list[assertions_counter]] = supports[assertions_list[assertions_counter]] - to_remove
+                supports[assertions_list[assertions_counter]].add(new_element)
     time4 = time.time()
     print(f"Time to generate and run all SQL queries {time4 - time3}")
     return supports

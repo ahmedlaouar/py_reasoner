@@ -42,12 +42,12 @@ def conflicts_helper(ontology_path,data_path) :
 if __name__ == "__main__":
     ontology_path = "ontologies/univ-bench/lubm-ex-20_disjoint.owl"
     
-    data_path = "bench_prepa/dataset.01/University0_p_0.001_pos_500.db"
+    data_path = "bench_prepa/dataset.01/University0_p_0.001_pos_1000.db"
     
-    pos_path = "bench_prepa/dataset.01/DAGs_with_bnlearn/ordered_method/pos500_prob_0.75.txt"
+    pos_path = "bench_prepa/dataset.01/DAGs_with_bnlearn/melancon_method/pos1000_melancon.txt"
 
-    #results1 = compute_pi_repair(ontology_path,data_path,pos_path)
+    results1 = compute_pi_repair(ontology_path,data_path,pos_path)
 
-    #results2 = compute_cpi_repair(ontology_path,data_path,pos_path)
+    results2 = compute_cpi_repair(ontology_path,data_path,pos_path)
 
     results3 = compute_cpi_repair_enhanced(ontology_path,data_path,pos_path)

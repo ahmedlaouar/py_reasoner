@@ -62,12 +62,11 @@ if __name__ == "__main__":
         ABox_name = data_path.split("/")[-1]
         TBox_name = ontology_path.split("/")[-1]
 
+        result = results1 + results2 + results3
+        result_str = ",".join(str(e) for e in result)
+
         with open(results_path, 'a') as file:
             file.write('\n')
             file.write(f"Execution with: the ABox: {ABox_name} and the TBox: {TBox_name} with the POS: {pos_name}")
-
-        for result in [results1, results2, results3]:
-            for key,value in result.items():
-                with open(results_path, 'a') as file:
-                    file.write('\n')
-                    file.write(key+" : "+value)
+            file.write('\n')
+            file.write(result_str)

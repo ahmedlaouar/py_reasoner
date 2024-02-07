@@ -1,6 +1,7 @@
 from sqlite3 import Cursor
 import subprocess
 import time
+from dl_lite.assertion import w_assertion
 from repair.owl_dominance import dominates
 
 separation_query = "Q(AHMED, SKIKDA) <- BornIN(AHMED, SKIKDA)"
@@ -49,7 +50,7 @@ def run_sql_query(sql_query: str,table_name: str, cursor: Cursor):
             supports.append((table_name, row[0], row[1]))
     return supports
 
-def compute_all_supports(assertions: list, ontology_path: str, cursor: Cursor, pos_dict):
+def compute_all_supports(assertions, ontology_path: str, cursor: Cursor, pos_dict):
     # in this version we use a seperation query, in order to perform a single rewriting with Rapid2.jar, because multiple calls to it is bad for time complexity
     supports = {}
     queries = []
@@ -89,3 +90,55 @@ def compute_all_supports(assertions: list, ontology_path: str, cursor: Cursor, p
     time4 = time.time()
     print(f"Time to generate and run all SQL queries {time4 - time3}")
     return supports
+
+def compute_all_supports_check(assertions, ontology_path: str, cursor: Cursor, pos_dict, pi_repair):
+    # in this version we verify if a support of an assetion is in pi_repair, if so, assertion is accepted in cpi directly
+    supports = {}
+    queries = []
+    time1 = time.time()
+    assertions_list = list(assertions)
+    for assertion in assertions_list:
+        assertion_name = assertion.get_assertion_name()
+        individual0, individual1 = assertion.get_individuals()
+        if individual1 != None:
+            queries.append(f"Q({individual0},{individual1}) <- {assertion_name}({individual0},{individual1})")
+        else:
+            queries.append(f"Q({individual0}) <- {assertion_name}({individual0})")
+        queries.append(separation_query)
+    time2 = time.time()
+    print(f"Time to generate all BCQs {time2 - time1}, number of BCQs {len(queries)}")
+    all_queries = rewrite_queries(queries,ontology_path)
+    time3 = time.time()
+    print(f"Time to rewrite all BCQs {time3 - time2}, number of rewritings {len(all_queries)}")
+    
+    cl_pi_repair = set()
+    cqueries = {}
+    indexes = [i for i, query in enumerate(all_queries) if query == "BornIN(AHMED, SKIKDA)"]
+
+    current = 0
+    for i, sep in enumerate(indexes):
+        cqueries[assertions_list[i]] = all_queries[current:sep]
+        current = sep + 1
+    
+    print(f"Queries separated in {time.time() - time3}")
+
+    for assertion,cqueries_list in cqueries.items():
+        supports[assertion] = set()
+        for query in cqueries_list:
+            sql_query, table_name = generate_sql_query(query)
+            some_supports = run_sql_query(sql_query,table_name,cursor)
+            if len(some_supports) != 0:
+                temp_assertion = w_assertion(table_name, assertion.get_individuals()[0], assertion.get_individuals()[1])
+                if temp_assertion in pi_repair:
+                    cl_pi_repair.add(assertion)
+                    break               
+                for new_element in some_supports:
+                    if not any(dominates(pos_dict, [support], [new_element]) for support in supports[assertion]):
+                        to_remove = {support for support in supports[assertion] if dominates(pos_dict, [new_element], [support])}
+                        if to_remove:
+                            supports[assertion] = supports[assertion] - to_remove
+                        supports[assertion].add(new_element)
+
+    time4 = time.time()
+    print(f"Time to generate and run all SQL queries {time4 - time3}")
+    return supports, cl_pi_repair

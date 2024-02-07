@@ -81,3 +81,10 @@ def compute_pi_repair(ontology_path: str, data_path: str, pos_path: str):
             print(f"Error: {e}.")
     
     return exe_results
+
+def compute_pi_repair_raw(assertions, conflicts, pos_dict):
+    arguments = [(conflicts, pos_dict, assertion) for assertion in assertions]
+    with Pool() as pool:
+        results = pool.map(check_assertion, arguments)
+    pi_repair = [result for result in results if result is not None]
+    return pi_repair

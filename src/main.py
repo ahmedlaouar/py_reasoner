@@ -2,6 +2,7 @@ import sqlite3
 import time
 from repair.owl_conflicts import compute_conflicts
 from repair.owl_cpi_repair import compute_cpi_repair
+from repair.owl_cpi_repair_enhanced import compute_cpi_repair_enhanced
 from repair.owl_pi_repair import compute_pi_repair
 
 def conflicts_helper(ontology_path,data_path) :
@@ -45,6 +46,8 @@ if __name__ == "__main__":
     
     pos_path = "bench_prepa/dataset.01/DAGs_with_bnlearn/ordered_method/pos500_prob_0.75.txt"
 
-    results1 = compute_pi_repair(ontology_path,data_path,pos_path)
+    #results1 = compute_pi_repair(ontology_path,data_path,pos_path)
 
-    results2 = compute_cpi_repair(ontology_path,data_path,pos_path)
+    #results2 = compute_cpi_repair(ontology_path,data_path,pos_path)
+
+    results3 = compute_cpi_repair_enhanced(ontology_path,data_path,pos_path)

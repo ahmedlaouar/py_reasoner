@@ -22,7 +22,7 @@ def check_assertion(args):
         return assertion
 
 def compute_cpi_repair(ontology_path: str, data_path: str, pos_path: str):
-    exe_results = {}
+    exe_results = []
     # read pos set from file
     pos_dict = read_pos(pos_path)
     pos_name = pos_path.split("/")[-1]
@@ -43,7 +43,6 @@ def compute_cpi_repair(ontology_path: str, data_path: str, pos_path: str):
             count = cursor.fetchone()[0]
             total_rows += count
         print(f"Size of the ABox is {total_rows}.")
-        exe_results["Abox size"] = total_rows
         
         # first, generate the possible assertions of (cl(ABox)), returns a list of dl_lite.assertion.w_assertion
         start_time = time.time()
@@ -51,8 +50,8 @@ def compute_cpi_repair(ontology_path: str, data_path: str, pos_path: str):
         inter_time0 = time.time()
         print(f"Number of the generated assertions: {len(all_assertions)}")
         print(f"Time to compute the generated assertions: {inter_time0 - start_time}")
-        exe_results["All assertions"] = len(all_assertions)
-        exe_results["Time to load all assertions"] = (inter_time0 - start_time)
+        exe_results.append(len(all_assertions))
+        exe_results.append(inter_time0 - start_time)
 
         test_assertions = all_assertions#[:10000]
         print(f"testing with {len(test_assertions)} assertions")
@@ -62,8 +61,6 @@ def compute_cpi_repair(ontology_path: str, data_path: str, pos_path: str):
         inter_time1 = time.time()
         print(f"Number of conflicts: {len(conflicts)}")
         print(f"Time to compute the conflicts: {inter_time1 - inter_time0}")
-        exe_results["Conflict set size"] = len(conflicts)
-        exe_results["Time to conflicts"] = (inter_time1 - inter_time0)
         
         # browse assertions and compute supports
         # returns a dictionnary with assertions indexes in the list as keys and as values lists of supports with the form [(table_name,id,degree)] 
@@ -72,19 +69,19 @@ def compute_cpi_repair(ontology_path: str, data_path: str, pos_path: str):
         supports_size = sum((len(val) for val in supports.values()))
         print(f"Number of all the computed supports: {supports_size}")
         print(f"Time to compute all the supports of all the assertions: {inter_time2 - inter_time1}")
-        exe_results["Supports size"] = supports_size
-        exe_results["Time to all supports"] = inter_time2 - inter_time1
+        exe_results.append(supports_size)
+        exe_results.append(inter_time2 - inter_time1)
 
         cpi_repair = compute_cpi_repair_raw(test_assertions, conflicts, supports, pos_dict)
         
         inter_time3 = time.time()
         print(f"Size of the cpi_repair: {len(cpi_repair)}")
         print(f"Time to compute the cpi_repair: {inter_time3 - inter_time2}")
-        exe_results["cpi_repair size"] = len(cpi_repair)
-        exe_results["Time to cpi_repair"] = inter_time3 - inter_time2
+        exe_results.append(len(cpi_repair))
+        exe_results.append(inter_time3 - inter_time2)
         
         print(f"Total time of execution: {inter_time3 - start_time}")
-        exe_results["cpi_repair total time"] = inter_time3 - start_time
+        exe_results.append(inter_time3 - start_time)
         cursor.close()
         conn.close()
     except sqlite3.OperationalError as e:

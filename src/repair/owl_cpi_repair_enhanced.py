@@ -49,19 +49,18 @@ def compute_cpi_repair_enhanced(ontology_path: str, data_path: str, pos_path: st
 
         # compute the conflicts, conflicts are of the form ((table1name, id, degree),(table2name, id, degree))
         conflicts = compute_conflicts(ontology_path,cursor,pos_dict)
-        inter_time1 = time.time()
+        inter_time2 = time.time()
         print(f"Number of the conflicts: {len(conflicts)}")
         print(f"Time to compute the conflicts: {inter_time1 - inter_time0}")
-        exe_results.append(len(conflicts))
-        exe_results.append((inter_time1 - inter_time0))
+        exe_results["Conflict set size"] = len(conflicts)
+        exe_results["Time to conflicts"] = (inter_time2 - inter_time1)
 
         # compute the pi_repair
         pi_repair = compute_pi_repair_raw(abox_assertions, conflicts, pos_dict)
         inter_time2 = time.time()
         print(f"Size of the pi_repair: {len(pi_repair)}")
         print(f"Time to compute the pi_repair: {inter_time2 - inter_time1}")
-        exe_results["Conflict set size"] = len(conflicts)
-        exe_results["Time to conflicts"] = (inter_time2 - inter_time1)
+        
 
         # check if the rest is in cpi-repair
         left_to_check = all_assertions - pi_repair

@@ -43,3 +43,9 @@ class w_assertion(assertion):
             return "{}({},{}),{}".format(self.get_assertion_name(),self.get_individuals()[0],self.get_individuals()[1],self.__weight)
         else:
             return "{}({}),{}".format(self.get_assertion_name(),self.get_individuals()[0],self.__weight)
+        
+    def __eq__(self, __value: object) -> bool:
+        return super().__eq__(__value) and self.get_assertion_weight() == __value.get_assertion_weight()
+    
+    def __hash__(self):
+        return hash((self.get_assertion_name(),self.get_individuals()[0],self.get_individuals()[1],self.get_assertion_weight()))

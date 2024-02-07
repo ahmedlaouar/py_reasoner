@@ -41,15 +41,10 @@ def compute_cpi_repair_enhanced(ontology_path: str, data_path: str, pos_path: st
         all_assertions = generate_assertions(ontology_path, cursor)
         print(f"Number of the generated assertions: {len(all_assertions)}")
 
-        remaining_assertions = generate_not_abox_assertions(ontology_path,cursor)
-        print("Generated!")
-        #remaining_assertions = [assertion for assertion in all_assertions if assertion not in set(abox_assertions)]
-        #remaining_assertions = list(set(all_assertions) - set(abox_assertions))
+        remaining_assertions2 = list(set(all_assertions) - set(abox_assertions))
         inter_time1 = time.time()
-        print(f"Number of the generated assertions: {len(remaining_assertions)}")
+        print(f"Number of the generated assertions: {len(remaining_assertions2)}")
         print(f"Time to compute the generated assertions: {inter_time1 - inter_time0}")
-        exe_results.append(len(remaining_assertions))
-        exe_results.append((inter_time0 - start_time))        
 
         # compute the conflicts, conflicts are of the form ((table1name, id, degree),(table2name, id, degree))
         conflicts = compute_conflicts(ontology_path,cursor,pos_dict)

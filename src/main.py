@@ -1,10 +1,10 @@
 import sqlite3
 import time
-from bench_prepa.owl_prepa.add_pos_to_db import add_pos_to_db
 from repair.owl_conflicts import compute_conflicts
 from repair.owl_cpi_repair import compute_cpi_repair
 from repair.owl_cpi_repair_enhanced import compute_cpi_repair_enhanced
 from repair.owl_pi_repair import compute_pi_repair
+from repair.utils import add_pos_to_db
 
 def conflicts_helper(ontology_path,data_path) :
     conn = sqlite3.connect(data_path)

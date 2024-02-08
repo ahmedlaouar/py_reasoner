@@ -45,14 +45,17 @@ if __name__ == "__main__":
 
     ontology_path = "ontologies/univ-bench/lubm-ex-20_disjoint.owl"
     
-    data_path = "bench_prepa/dataset.01/University0_p_0.001_pos_500.db"
+    data_path = "bench_prepa/dataset.01/University0_p_0.001.db"
 
-    results_path = "bench_prepa/dataset.01/execution_results.txt"
-    
-    #pos_list = ["bench_prepa/dataset.01/DAGs_with_bnlearn/ordered_method/pos500_prob_1.txt","bench_prepa/dataset.01/DAGs_with_bnlearn/ordered_method/pos500_prob_0.75.txt","bench_prepa/dataset.01/DAGs_with_bnlearn/ordered_method/pos500_prob_0.5.txt","bench_prepa/dataset.01/DAGs_with_bnlearn/ordered_method/pos500_prob_0.25.txt"]
-    pos_list = ["bench_prepa/dataset.01/DAGs_with_bnlearn/ordered_method/pos500_prob_0.75.txt"]
-    for pos_path in pos_list:
-        #add_pos_to_db(data_path, pos_path)
+    results_path = "bench_prepa/dataset.01/execution_results_0.1.txt"
+
+    pos_dir_path = "bench_prepa/dataset.01/DAGs_with_bnlearn/melancon_method/"
+    pos_list = ["pos50_melancon.txt", "pos500_melancon.txt", "pos1000_melancon.txt"]
+
+    for pos in pos_list:
+        pos_path = pos_dir_path + pos
+
+        add_pos_to_db(data_path, pos_path)
 
         results1 = compute_pi_repair(ontology_path,data_path,pos_path)
 

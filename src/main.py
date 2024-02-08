@@ -1,5 +1,6 @@
 import sqlite3
 import time
+from dl_lite.assertion import w_assertion
 from repair.owl_conflicts import compute_conflicts
 from repair.owl_cpi_repair import compute_cpi_repair
 from repair.owl_cpi_repair_enhanced import compute_cpi_repair_enhanced
@@ -41,16 +42,17 @@ def conflicts_helper(ontology_path,data_path) :
     conn.close()
 
 if __name__ == "__main__":
+
     ontology_path = "ontologies/univ-bench/lubm-ex-20_disjoint.owl"
     
-    data_path = "bench_prepa/dataset.01/University0_p_0.001_pos_1000.db"
+    data_path = "bench_prepa/dataset.01/University0_p_0.001_pos_500.db"
 
     results_path = "bench_prepa/dataset.01/execution_results.txt"
     
-    pos_list = ["bench_prepa/dataset.01/DAGs_with_bnlearn/ordered_method/pos1000_prob_1.txt","bench_prepa/dataset.01/DAGs_with_bnlearn/ordered_method/pos1000_prob_0.75.txt","bench_prepa/dataset.01/DAGs_with_bnlearn/ordered_method/pos1000_prob_0.5.txt","bench_prepa/dataset.01/DAGs_with_bnlearn/ordered_method/pos1000_prob_0.25.txt"]
-
+    #pos_list = ["bench_prepa/dataset.01/DAGs_with_bnlearn/ordered_method/pos500_prob_1.txt","bench_prepa/dataset.01/DAGs_with_bnlearn/ordered_method/pos500_prob_0.75.txt","bench_prepa/dataset.01/DAGs_with_bnlearn/ordered_method/pos500_prob_0.5.txt","bench_prepa/dataset.01/DAGs_with_bnlearn/ordered_method/pos500_prob_0.25.txt"]
+    pos_list = ["bench_prepa/dataset.01/DAGs_with_bnlearn/ordered_method/pos500_prob_0.75.txt"]
     for pos_path in pos_list:
-        add_pos_to_db(data_path, pos_path)
+        #add_pos_to_db(data_path, pos_path)
 
         results1 = compute_pi_repair(ontology_path,data_path,pos_path)
 

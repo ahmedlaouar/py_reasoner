@@ -58,11 +58,9 @@ def compute_all_supports(assertions, ontology_path: str, cursor: Cursor, pos_dic
     assertions_list = list(assertions)
     for assertion in assertions_list:
         assertion_name = assertion.get_assertion_name()
-        individual0, individual1 = assertion.get_individuals()
-        if individual1 != None:
-            queries.append(f"Q({individual0},{individual1}) <- {assertion_name}({individual0},{individual1})")
-        else:
-            queries.append(f"Q({individual0}) <- {assertion_name}({individual0})")
+        individuals = [ind for ind in assertion.get_individuals() if ind is not None]
+        query_format = f"Q({', '.join(individuals)}) <- {assertion_name}({', '.join(individuals)})"
+        queries.append(query_format)
         queries.append(separation_query)
     time2 = time.time()
     print(f"Time to generate all BCQs {time2 - time1}, number of BCQs {len(queries)}")
@@ -92,18 +90,15 @@ def compute_all_supports(assertions, ontology_path: str, cursor: Cursor, pos_dic
     return supports
 
 def compute_all_supports_check(assertions, ontology_path: str, cursor: Cursor, pos_dict, pi_repair):
-    # in this version we verify if a support of an assetion is in pi_repair, if so, assertion is accepted in cpi directly
-    supports = {}
+    # in this version we verify if a support of an assetion is in pi_repair, if so, assertion is accepted in cpi directly    
     queries = []
     time1 = time.time()
     assertions_list = list(assertions)
     for assertion in assertions_list:
         assertion_name = assertion.get_assertion_name()
-        individual0, individual1 = assertion.get_individuals()
-        if individual1 != None:
-            queries.append(f"Q({individual0},{individual1}) <- {assertion_name}({individual0},{individual1})")
-        else:
-            queries.append(f"Q({individual0}) <- {assertion_name}({individual0})")
+        individuals = [ind for ind in assertion.get_individuals() if ind is not None]
+        query_format = f"Q({', '.join(individuals)}) <- {assertion_name}({', '.join(individuals)})"
+        queries.append(query_format)
         queries.append(separation_query)
     time2 = time.time()
     print(f"Time to generate all BCQs {time2 - time1}, number of BCQs {len(queries)}")
@@ -111,20 +106,20 @@ def compute_all_supports_check(assertions, ontology_path: str, cursor: Cursor, p
     time3 = time.time()
     print(f"Time to rewrite all BCQs {time3 - time2}, number of rewritings {len(all_queries)}")
     
-    cl_pi_repair = set()
     cqueries = {}
-    indexes = [i for i, query in enumerate(all_queries) if query == "BornIN(AHMED, SKIKDA)"]
-
-    current = 0
-    for i, sep in enumerate(indexes):
-        cqueries[assertions_list[i]] = all_queries[current:sep]
-        current = sep + 1
+    start_index = 0
+    for assertion in assertions_list:
+        end_index = all_queries.index("BornIN(AHMED, SKIKDA)", start_index)
+        cqueries[assertion] = all_queries[start_index:end_index]
+        start_index = end_index + 1
     
     print(f"Queries separated in {time.time() - time3}")
-
-    for assertion,cqueries_list in cqueries.items():
+    
+    cl_pi_repair = set()
+    supports = {}
+    for assertion in cqueries.keys():
         supports[assertion] = set()
-        for query in cqueries_list:
+        for query in cqueries[assertion]:
             sql_query, table_name = generate_sql_query(query)
             some_supports = run_sql_query(sql_query,table_name,cursor)
             if len(some_supports) != 0:

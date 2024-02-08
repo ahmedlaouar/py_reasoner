@@ -1,6 +1,6 @@
 def is_strictly_preferred(pos_dict, member1, member2) -> bool:
     # a test if member1 is strictly preferred to member2 in the pos, member1 and member2 is either a conflict member or a support (assertion) in the form (table1name, id, degree)
-    if member2[2] in pos_dict[member1[2]] and member1[2] not in pos_dict[member2[2]] :
+    if member2[-1] in pos_dict[member1[-1]] and member1[-1] not in pos_dict[member2[-1]] :
         return True
     return False
 

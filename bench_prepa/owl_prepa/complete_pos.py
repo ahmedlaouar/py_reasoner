@@ -1,3 +1,5 @@
+from pathlib import Path
+
 def read_pos(file_path :str):
     with open(file_path, 'r') as file:
         lines = file.readlines()
@@ -39,11 +41,32 @@ def save_dag_to_file(graph, filename):
             file.write(pos_line)
 
 if __name__ == '__main__':
-    input_filename = "bench_prepa/dataset.01/DAGs_with_bnlearn/ordered_method/pos500_prob_1.txt"
-    output_filename = "bench_prepa/dataset.01/DAGs_with_bnlearn/ordered_method/pos500_prob_1.txt"
+    relative_path = 'bench_prepa/dataset.01/DAGs_with_bnlearn/ordered_method'
+    directory_path = Path(relative_path)
+
+    for folder_path in directory_path.iterdir():
+        inter_directory = relative_path + "/" + folder_path.name
+        sub_dir_path = Path(inter_directory)
+        # List all files in the directory
+        for file_path in sub_dir_path.iterdir():
+
+            input_filename = inter_directory+"/"+file_path.name
+            output_filename = inter_directory+"/"+file_path.name
+            print(f"Reading from {input_filename}")
+            incomplete_graph = read_pos(input_filename)
+            graph = find_indirect_links_iterative(incomplete_graph)
+            print(f"Writing in {output_filename}")
+            # Save DAG to a text file
+            save_dag_to_file(graph, output_filename)
+            print(f"DAG saved to {output_filename}")
+"""
+    input_filename = "bench_prepa/dataset.01/DAGs_with_bnlearn/melancon_method/pos50_melancon.txt"
+    output_filename = "bench_prepa/dataset.01/DAGs_with_bnlearn/melancon_method/pos50_melancon.txt"
+    print(f"Reading from {input_filename}")
     incomplete_graph = read_pos(input_filename)
     graph = find_indirect_links_iterative(incomplete_graph)
-
+    print(f"Writing in {output_filename}")
     # Save DAG to a text file
     save_dag_to_file(graph, output_filename)
     print(f"DAG saved to {output_filename}")
+"""

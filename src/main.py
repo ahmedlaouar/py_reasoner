@@ -49,8 +49,8 @@ if __name__ == "__main__":
 
     results_path = "bench_prepa/dataset.01/execution_results_0.1.txt"
 
-    pos_dir_path = "bench_prepa/dataset.01/DAGs_with_bnlearn/melancon_method/"
-    pos_list = ["pos50_melancon.txt", "pos500_melancon.txt", "pos1000_melancon.txt"]
+    pos_dir_path = "bench_prepa/dataset.01/DAGs_with_bnlearn/ordered_method/pos1000/"
+    pos_list = ["pos1000_prob_0.1.txt",  "pos1000_prob_0.3.txt",  "pos1000_prob_0.5.txt",  "pos1000_prob_0.7.txt", "pos1000_prob_0.9.txt", "pos1000_prob_0.2.txt", "pos1000_prob_0.4.txt", "pos1000_prob_0.6.txt", "pos1000_prob_0.8.txt", "pos1000_prob_1.0.txt"]
 
     for pos in pos_list:
         pos_path = pos_dir_path + pos

@@ -1,6 +1,9 @@
 import random
 import sqlite3
 
+def generate_weights(pos_size: int) -> list:
+    return list(range(0,pos_size))
+
 def read_pos(file_path :str):
     with open(file_path, 'r') as file:
         lines = file.readlines()

@@ -45,12 +45,12 @@ if __name__ == "__main__":
 
     ontology_path = "ontologies/univ-bench/lubm-ex-20_disjoint.owl"
     
-    data_path = "bench_prepa/dataset.01/University0_p_0.001.db"
+    data_path = "bench_prepa/dataset.01/University0_p_0.005.db"
 
     results_path = "bench_prepa/dataset.01/execution_results_0.1.txt"
 
-    pos_dir_path = "bench_prepa/dataset.01/DAGs_with_bnlearn/ordered_method/pos5000/"
-    pos_list = ["pos5000_prob_0.8.txt", "pos5000_prob_1.0.txt"]
+    pos_dir_path = "bench_prepa/dataset.01/DAGs_with_bnlearn/ordered_method/pos500/"
+    pos_list = ["pos500_prob_0.5.txt", "pos500_prob_0.6.txt", "pos500_prob_0.7.txt", "pos500_prob_0.8.txt", "pos500_prob_0.9.txt", "pos500_prob_1.0.txt"]
 
     for pos in pos_list:
         pos_path = pos_dir_path + pos

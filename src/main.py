@@ -1,3 +1,4 @@
+from pathlib import Path
 import sqlite3
 import time
 from dl_lite.assertion import w_assertion
@@ -15,29 +16,38 @@ if __name__ == "__main__":
 
     results_path = "bench_prepa/dataset.01/execution_results_0.1.txt"
 
-    pos_dir_path = "bench_prepa/dataset.01/DAGs_with_bnlearn/ordered_method/pos1000/"
-    pos_list = ["pos1000_prob_0.9.txt"]
+    relative_path = "bench_prepa/dataset.01/DAGs_with_bnlearn/ordered_method/"
+    pos_dir_paths = ["pos1000/", "pos2500/", "pos5000/", "pos750/", "pos500/"]
 
-    for pos in pos_list:
-        pos_path = pos_dir_path + pos
+    pos_list = ["prob_1.0.txt", "prob_0.9", "prob_0.8", "prob_0.7", "prob_0.6", "prob_0.5"]
+    
 
-        #add_pos_to_db(data_path, pos_path)
+    for pos_dir_path in pos_dir_paths:
+        
+        for pos in pos_list:
+            try: 
+                pos_path = relative_path + pos_dir_path + pos
 
-        #results1 = compute_pi_repair(ontology_path,data_path,pos_path)
+                add_pos_to_db(data_path, pos_path)
 
-        #results2 = compute_cpi_repair(ontology_path,data_path,pos_path)
+                results1 = compute_pi_repair(ontology_path,data_path,pos_path)
 
-        results3 = compute_cpi_repair_enhanced(ontology_path,data_path,pos_path)
+                results2 = compute_cpi_repair(ontology_path,data_path,pos_path)
 
-        """pos_name = pos_path.split("/")[-1]
-        ABox_name = data_path.split("/")[-1]
-        TBox_name = ontology_path.split("/")[-1]
+                results3 = compute_cpi_repair_enhanced(ontology_path,data_path,pos_path)
 
-        result = results1 + results2 + results3
-        result_str = ",".join(str(e) for e in result)
+                pos_name = pos_path.split("/")[-1]
+                ABox_name = data_path.split("/")[-1]
+                TBox_name = ontology_path.split("/")[-1]
 
-        with open(results_path, 'a') as file:
-            file.write('\n')
-            file.write(f"Execution with: the ABox: {ABox_name} and the TBox: {TBox_name} with the POS: {pos_name}")
-            file.write('\n')
-            file.write(result_str)"""
+                result = results1 + results2 + results3
+                result_str = ",".join(str(e) for e in result)
+
+                with open(results_path, 'a') as file:
+                    file.write('\n')
+                    file.write(f"Execution with: the ABox: {ABox_name} and the TBox: {TBox_name} with the POS: {pos_name}")
+                    file.write('\n')
+                    file.write(result_str)
+            except FileNotFoundError as e:
+                print(f"File {pos_path} not found!")
+                continue

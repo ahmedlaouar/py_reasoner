@@ -2,7 +2,7 @@ import random
 import sqlite3
 
 def generate_weights(pos_size: int) -> list:
-    return list(range(0,pos_size))
+    return list(range(pos_size,0,-1))
 
 def read_pos(file_path :str):
     with open(file_path, 'r') as file:
@@ -26,12 +26,14 @@ def add_pos_to_db(data_path:str, pos_path:str):
     cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
     tables = cursor.fetchall()
 
+    weights = generate_weights(lines_number)
+
     for table in tables:
         cursor.execute(f"SELECT COUNT(*) FROM {table[0]}")
         count = cursor.fetchone()[0]
         for i in range(1,count+1):
-            degree = random.choice(range(lines_number))
-            cursor.execute(f"UPDATE {table[0]} SET degree = ? WHERE id = ?", (degree, i))
+            degree = random.choices(range(lines_number), weights=weights, k=1)
+            cursor.execute(f"UPDATE {table[0]} SET degree = ? WHERE id = ?", (degree[0], i))
     
     conn.commit()
     conn.close()

@@ -5,7 +5,7 @@ from repair.owl_assertions_generator import generate_assertions, get_all_abox_as
 from repair.owl_conflicts import compute_conflicts
 from repair.owl_cpi_repair import compute_cpi_repair_raw
 from repair.owl_pi_repair import compute_pi_repair_raw
-from repair.owl_supports import compute_all_supports, compute_all_supports_check
+from repair.owl_supports import compute_all_supports_enhanced, compute_cl_pi_repair
 from repair.utils import read_pos
 
 def compute_cpi_repair_enhanced(ontology_path: str, data_path: str, pos_path: str):
@@ -39,7 +39,7 @@ def compute_cpi_repair_enhanced(ontology_path: str, data_path: str, pos_path: st
 
         all_assertions = generate_assertions(ontology_path, cursor)
 
-        generated_assertions = all_assertions - abox_assertions
+        generated_assertions = all_assertions - set(abox_assertions)
         inter_time1 = time.time()
         print(f"Number of new generated assertions: {len(generated_assertions)}")
         print(f"Time to compute the generated assertions: {inter_time1 - inter_time0}")
@@ -63,26 +63,32 @@ def compute_cpi_repair_enhanced(ontology_path: str, data_path: str, pos_path: st
         left_to_check = all_assertions - pi_repair
         print(f"The number of assertions left to check: {len(left_to_check)}")
 
+        cl_pi_repair = compute_cl_pi_repair(ontology_path, pi_repair)
+        print(f"Size of cl_pi_repair: {len(cl_pi_repair)}")
+        exe_results.append(len(cl_pi_repair))
+        
+        left_to_check = left_to_check - cl_pi_repair
+        
         # browse assertions and compute supports
         # returns a dictionnary with assertions indexes in the list as keys and as values lists of supports with the form [(table_name,id,degree)] 
-        supports, cl_pi_repair = compute_all_supports_check(left_to_check, ontology_path, cursor, pos_dict, pi_repair)
+        supports = compute_all_supports_enhanced(left_to_check, ontology_path, cursor, pos_dict)
+        supports_size = sum((len(val) for val in supports.values()))
+        print(f"Number of all the computed supports before filtering: {supports_size}")
+        supports = {key: value for key, value in supports.items() if len(value) > 1}
+
         inter_time3 = time.time()
         supports_size = sum((len(val) for val in supports.values()))
         print(f"Number of all the computed supports: {supports_size}")
-        print(f"Time to compute all the supports of all the assertions: {inter_time3 - inter_time2}")
-
-        left_to_check = left_to_check - cl_pi_repair
-
-        print(f"Size of cl_pi_repair: {len(cl_pi_repair)}")
-        exe_results.append(len(cl_pi_repair))
-
+        print(f"Time to compute all the supports of all the assertions: {inter_time3 - inter_time2}")        
+        
+        left_to_check = set(supports.keys())
         cpi_repair = compute_cpi_repair_raw(left_to_check, conflicts, supports, pos_dict)
         inter_time4 = time.time()
         print(f"Size of the cpi_repair: {len(cpi_repair) + len(pi_repair) + len(cl_pi_repair)}")
         print(f"Time to compute the cpi_repair: {inter_time4 - inter_time3}")
         exe_results.append(len(cpi_repair) + len(pi_repair) + len(cl_pi_repair))
         exe_results.append(inter_time4 - inter_time3)
-
+        
         print(f"Total time of execution: {inter_time4 - start_time}")
         exe_results.append(inter_time4 - start_time)
 

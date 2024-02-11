@@ -7,7 +7,7 @@ if __name__ == "__main__":
 
     ontology_path = "ontologies/univ-bench/lubm-ex-20_disjoint.owl"
     
-    data_path = "bench_prepa/dataset.01/University0_p_0.001.db"
+    data_path = "bench_prepa/dataset.01/University0_p_0.005.db"
 
     results_path = "bench_prepa/dataset.01/execution_results_0.2.txt"
 
@@ -31,13 +31,13 @@ if __name__ == "__main__":
 
                 results3 = compute_cpi_repair_enhanced(ontology_path,data_path,pos_path)
 
-                pos_name = pos_path.split("/")[-2] + pos_path.split("/")[-1]
+                pos_name = pos_path.split("/")[-2] +"_"+ pos_path.split("/")[-1]
                 ABox_name = data_path.split("/")[-1]
                 TBox_name = ontology_path.split("/")[-1]
 
                 result = results1 + results2 + results3
                 
-                result_str = str(ABox_name)+","+str(TBox_name)+","+str(pos_name)
+                result_str = str(ABox_name)+","+str(TBox_name)+","+str(pos_name)+","
                 
                 result_str += ",".join(str(e) for e in result)
 

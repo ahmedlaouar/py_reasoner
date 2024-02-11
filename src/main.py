@@ -1,8 +1,3 @@
-from pathlib import Path
-import sqlite3
-import time
-from dl_lite.assertion import w_assertion
-from repair.owl_conflicts import compute_conflicts
 from repair.owl_cpi_repair import compute_cpi_repair
 from repair.owl_cpi_repair_enhanced import compute_cpi_repair_enhanced
 from repair.owl_pi_repair import compute_pi_repair
@@ -14,12 +9,12 @@ if __name__ == "__main__":
     
     data_path = "bench_prepa/dataset.01/University0_p_0.001.db"
 
-    results_path = "bench_prepa/dataset.01/execution_results_0.1.txt"
+    results_path = "bench_prepa/dataset.01/execution_results_0.2.txt"
 
     relative_path = "bench_prepa/dataset.01/DAGs_with_bnlearn/ordered_method/"
     pos_dir_paths = ["pos1000/", "pos2500/", "pos5000/", "pos750/", "pos500/"]
 
-    pos_list = ["prob_1.0.txt", "prob_0.9", "prob_0.8", "prob_0.7", "prob_0.6", "prob_0.5"]
+    pos_list = ["prob_1.0.txt", "prob_0.9.txt", "prob_0.8.txt", "prob_0.7.txt", "prob_0.6.txt", "prob_0.5.txt"]
     
 
     for pos_dir_path in pos_dir_paths:
@@ -36,16 +31,17 @@ if __name__ == "__main__":
 
                 results3 = compute_cpi_repair_enhanced(ontology_path,data_path,pos_path)
 
-                pos_name = pos_path.split("/")[-1]
+                pos_name = pos_path.split("/")[-2] + pos_path.split("/")[-1]
                 ABox_name = data_path.split("/")[-1]
                 TBox_name = ontology_path.split("/")[-1]
 
                 result = results1 + results2 + results3
-                result_str = ",".join(str(e) for e in result)
+                
+                result_str = str(ABox_name)+","+str(TBox_name)+","+str(pos_name)
+                
+                result_str += ",".join(str(e) for e in result)
 
                 with open(results_path, 'a') as file:
-                    file.write('\n')
-                    file.write(f"Execution with: the ABox: {ABox_name} and the TBox: {TBox_name} with the POS: {pos_name}")
                     file.write('\n')
                     file.write(result_str)
             except FileNotFoundError as e:

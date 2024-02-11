@@ -45,36 +45,33 @@ def compute_cpi_repair(ontology_path: str, data_path: str, pos_path: str):
         print(f"Size of the ABox is {total_rows}.")
         
         # first, generate the possible assertions of (cl(ABox)), returns a list of dl_lite.assertion.w_assertion
-        start_time = time.time()
+        start_time = round(time.time(), 3)
         all_assertions = generate_assertions(ontology_path,cursor)
-        inter_time0 = time.time()
+        inter_time0 = round(time.time(), 3)
         print(f"Number of the generated assertions: {len(all_assertions)}")
         print(f"Time to compute the generated assertions: {inter_time0 - start_time}")
         exe_results.append(len(all_assertions))
-        exe_results.append(inter_time0 - start_time)
-
-        test_assertions = all_assertions#[:10000]
-        print(f"testing with {len(test_assertions)} assertions")
+        exe_results.append(inter_time0 - start_time)        
         
         # compute the conflicts, conflicts are of the form ((table1name, id, degree),(table2name, id, degree))
         conflicts = compute_conflicts(ontology_path,cursor,pos_dict)
-        inter_time1 = time.time()
+        inter_time1 = round(time.time(), 3)
         print(f"Number of conflicts: {len(conflicts)}")
         print(f"Time to compute the conflicts: {inter_time1 - inter_time0}")
         
         # browse assertions and compute supports
         # returns a dictionnary with assertions indexes in the list as keys and as values lists of supports with the form [(table_name,id,degree)] 
-        supports = compute_all_supports(test_assertions,ontology_path, cursor, pos_dict)
-        inter_time2 = time.time()
+        supports = compute_all_supports(all_assertions,ontology_path, cursor, pos_dict)
+        inter_time2 = round(time.time(), 3)
         supports_size = sum((len(val) for val in supports.values()))
         print(f"Number of all the computed supports: {supports_size}")
         print(f"Time to compute all the supports of all the assertions: {inter_time2 - inter_time1}")
         exe_results.append(supports_size)
         exe_results.append(inter_time2 - inter_time1)
 
-        cpi_repair = compute_cpi_repair_raw(test_assertions, conflicts, supports, pos_dict)
+        cpi_repair = compute_cpi_repair_raw(all_assertions, conflicts, supports, pos_dict)
         
-        inter_time3 = time.time()
+        inter_time3 = round(time.time(), 3)
         print(f"Size of the cpi_repair: {len(cpi_repair)}")
         print(f"Time to compute the cpi_repair: {inter_time3 - inter_time2}")
         exe_results.append(len(cpi_repair))

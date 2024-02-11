@@ -40,9 +40,9 @@ def compute_pi_repair(ontology_path: str, data_path: str, pos_path: str):
         print(f"Size of the ABox: {total_rows}.")
         exe_results.append(total_rows)
         
-        start_time = time.time()
+        start_time = round(time.time(), 3)
         assertions = get_all_abox_assertions(tables,cursor)
-        inter_time0 = time.time()
+        inter_time0 = round(time.time(), 3)
         print(f"Number of the generated assertions: {len(assertions)}")
         print(f"Time to compute the generated assertions: {inter_time0 - start_time}")
         
@@ -50,19 +50,17 @@ def compute_pi_repair(ontology_path: str, data_path: str, pos_path: str):
 
         # compute the conflicts, conflicts are of the form ((table1name, id, degree),(table2name, id, degree))
         conflicts = compute_conflicts(ontology_path,cursor,pos_dict)
-        inter_time1 = time.time()
+        inter_time1 = round(time.time(), 3)
         print(f"Number of the conflicts: {len(conflicts)}")
         print(f"Time to compute the conflicts: {inter_time1 - inter_time0}")
         exe_results.append(len(conflicts))
         exe_results.append(inter_time1 - inter_time0)
-
-        test_assertions = assertions#[:1000]
-        print(f"testing with {len(test_assertions)} assertions")
-        inter_time1 = time.time()
+        
+        inter_time1 = round(time.time(), 3)
 
         pi_repair = compute_pi_repair_raw(assertions, conflicts, pos_dict)
         
-        inter_time3 = time.time()
+        inter_time3 = round(time.time(), 3)
         print(f"Size of the pi_repair: {len(pi_repair)}")
         print(f"Time to compute the pi_repair: {inter_time3 - inter_time1}")
         exe_results.append(len(pi_repair))

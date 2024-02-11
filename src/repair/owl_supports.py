@@ -59,7 +59,7 @@ def compute_all_supports(assertions, ontology_path: str, cursor: Cursor, pos_dic
     # in this version we use a seperation query, in order to perform a single rewriting with Rapid2.jar, because multiple calls to it is bad for time complexity
 
     queries = []
-    time1 = time.time()
+    
     assertions_list = list(assertions)
     for assertion in assertions_list:
         assertion_name = assertion.get_assertion_name()
@@ -67,11 +67,8 @@ def compute_all_supports(assertions, ontology_path: str, cursor: Cursor, pos_dic
         query_format = f"Q({', '.join(individuals)}) <- {assertion_name}({', '.join(individuals)})"
         queries.append(query_format)
         queries.append(separation_query)
-    time2 = time.time()
-    print(f"Time to generate all BCQs {time2 - time1}, number of BCQs {len(queries)}")
+    
     all_queries = rewrite_queries(queries,ontology_path)
-    time3 = time.time()
-    print(f"Time to rewrite all BCQs {time3 - time2}, number of rewritings {len(all_queries)}")
     
     cqueries = {}
     start_index = 0
@@ -93,8 +90,7 @@ def compute_all_supports(assertions, ontology_path: str, cursor: Cursor, pos_dic
                         if to_remove:
                             supports[assertion] = supports[assertion] - to_remove
                         supports[assertion].add(new_element)
-    time4 = time.time()
-    print(f"Time to generate and run all SQL queries {time4 - time3}")
+    
     return supports
 
 def compute_all_supports_enhanced(assertions, ontology_path: str, cursor: Cursor, pos_dict):

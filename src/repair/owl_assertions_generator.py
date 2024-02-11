@@ -3,7 +3,7 @@ import subprocess
 from rdflib import Graph, RDF, OWL
 from dl_lite.assertion import w_assertion
 
-speration_query = "Q(AHMED, SKIKDA) <- BornIN(AHMED, SKIKDA)"
+separation_query = "Q(AHMED, SKIKDA) <- BornIN(AHMED, SKIKDA)"
 
 def rewrite_queries(queries: list, ontology_path: str):
     all_queries = []    
@@ -53,7 +53,7 @@ def generate_assertions(ontology_path: str,cursor: Cursor):
     concept_queries = []    
     for concept_name in concepts:
         concept_queries.append(f"Q(?0) <- {concept_name}(?0)")
-        concept_queries.append(speration_query)
+        concept_queries.append(separation_query)
     all_concept_queries = rewrite_queries(concept_queries,ontology_path)
     assertions_counter = 0
     for cq_query in all_concept_queries:
@@ -73,7 +73,7 @@ def generate_assertions(ontology_path: str,cursor: Cursor):
     role_queries = []
     for role_name in roles:
         role_queries.append(f"Q(?0,?1) <- {role_name}(?0,?1)")
-        role_queries.append(speration_query)
+        role_queries.append(separation_query)
     all_role_queries = rewrite_queries(role_queries,ontology_path)    
     assertions_counter = 0
     for cq_query in all_role_queries:
@@ -92,7 +92,7 @@ def generate_assertions(ontology_path: str,cursor: Cursor):
     return all_assertions_to_check
 
 def get_all_abox_assertions(tables: list,cursor: Cursor):
-    all_assertions = set()
+    all_assertions = []
     for table in tables:
         sql_query = f"SELECT * FROM {table[0]};"
         cursor.execute(sql_query)
@@ -101,8 +101,8 @@ def get_all_abox_assertions(tables: list,cursor: Cursor):
             for result in results:
                 if len(result) == 3:
                     assertion = w_assertion(table[0],result[1],weight=result[2])
-                    all_assertions.add(assertion)
+                    all_assertions.append(assertion)
                 if len(result) == 4:
                     assertion = w_assertion(table[0],result[1],result[2],weight=result[3])
-                    all_assertions.add(assertion)
+                    all_assertions.append(assertion)
     return all_assertions

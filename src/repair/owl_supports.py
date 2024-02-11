@@ -1,6 +1,8 @@
 from sqlite3 import Cursor
 import subprocess
 import time
+
+from rdflib import OWL, RDF, Graph
 from dl_lite.assertion import w_assertion
 from repair.owl_dominance import dominates
 
@@ -95,10 +97,9 @@ def compute_all_supports(assertions, ontology_path: str, cursor: Cursor, pos_dic
     print(f"Time to generate and run all SQL queries {time4 - time3}")
     return supports
 
-def compute_all_supports_check(assertions, ontology_path: str, cursor: Cursor, pos_dict, pi_repair):
+def compute_all_supports_enhanced(assertions, ontology_path: str, cursor: Cursor, pos_dict):
     # in this version we verify if a support of an assetion is in pi_repair, if so, assertion is accepted in cpi directly    
     queries = []
-    time1 = time.time()
     assertions_list = list(assertions)
     for assertion in assertions_list:
         assertion_name = assertion.get_assertion_name()
@@ -106,11 +107,7 @@ def compute_all_supports_check(assertions, ontology_path: str, cursor: Cursor, p
         query_format = f"Q({', '.join(individuals)}) <- {assertion_name}({', '.join(individuals)})"
         queries.append(query_format)
         queries.append(separation_query)
-    time2 = time.time()
-    print(f"Time to generate all BCQs {time2 - time1}, number of BCQs {len(queries)}")
     all_queries = rewrite_queries(queries,ontology_path)
-    time3 = time.time()
-    print(f"Time to rewrite all BCQs {time3 - time2}, number of rewritings {len(all_queries)}")
     
     cqueries = {}
     start_index = 0
@@ -119,30 +116,81 @@ def compute_all_supports_check(assertions, ontology_path: str, cursor: Cursor, p
         cqueries[assertion] = all_queries[start_index:end_index]
         start_index = end_index + 1
     
-    print(f"Queries separated in {time.time() - time3}")
+    # This filtering step assumes that an assertion is present only once with one weight in the database, so if a query of an assertion has only one rewriting it will return one element from the sql DB
+    cqueries = {key: value for key, value in cqueries.items() if len(value) > 1}
     
-    cl_pi_repair = set()
     supports = {}
     for assertion in cqueries.keys():
         supports[assertion] = set()
-        in_cl = False
         for query in cqueries[assertion]:            
             sql_query, table_name = generate_sql_query(query)
             some_supports = run_sql_query(sql_query,table_name,cursor)
             if len(some_supports) != 0:            
                 for new_element in some_supports:
-                    temp_assertion = w_assertion(new_element[0], new_element[1], new_element[2], new_element[3])
-                    if temp_assertion in pi_repair:
-                        cl_pi_repair.add(assertion)
-                        in_cl = True
-                        break
                     if not any(dominates(pos_dict, [support], [new_element]) for support in supports[assertion]):
                         to_remove = {support for support in supports[assertion] if dominates(pos_dict, [new_element], [support])}
                         if to_remove:
                             supports[assertion] = supports[assertion] - to_remove
                         supports[assertion].add(new_element)
-                if in_cl: break
 
-    time4 = time.time()
-    print(f"Time to generate and run all SQL queries {time4 - time3}")
-    return supports, cl_pi_repair
+    return supports
+
+def compute_cl_pi_repair(ontology_path: str, pi_repair):
+    graph = Graph()
+    graph.parse (ontology_path, format='application/rdf+xml')
+
+    cl_pi_repair = set()
+
+    concepts = [class_uri.split('#')[-1] for class_uri in graph.subjects(predicate=RDF.type, object=OWL.Class)]
+    concept_queries = []
+    for concept_name in concepts:
+        concept_queries.append(f"Q(?0) <- {concept_name}(?0)")
+        concept_queries.append(separation_query)
+    all_concept_queries = rewrite_queries(concept_queries,ontology_path)
+
+    ref_queries = {}
+    start_index = 0
+    for concept in concepts:
+        end_index = all_concept_queries.index("BornIN(AHMED, SKIKDA)", start_index)
+        ref_queries[concept] = all_concept_queries[start_index:end_index]
+        start_index = end_index + 1
+
+    for assertion in pi_repair:
+        for concept in ref_queries:
+            if assertion.get_assertion_name() == concept: continue
+            for query in ref_queries[concept]:
+                tokens = [token for token in query.replace(',', ' , ').replace('(', ' ( ').replace(')', ' ) ').split() if token not in [',', '(', ')']]
+                if assertion.get_assertion_name() == tokens[0]:
+                    if tokens[1] == "?0": 
+                        temp_assertion = w_assertion(concept,assertion.get_individuals()[0],weight=assertion.get_assertion_weight())
+                    elif tokens[2] == "?0":
+                        temp_assertion = w_assertion(concept,assertion.get_individuals()[1],weight=assertion.get_assertion_weight())
+                    cl_pi_repair.add(temp_assertion)
+
+    roles = [prop_uri.split('#')[-1] for prop_uri in graph.subjects(predicate=RDF.type, object=OWL.ObjectProperty)] + [data_uri.split('#')[-1] for data_uri in graph.subjects(predicate=RDF.type, object=OWL.DatatypeProperty)]
+    role_queries = []
+    for role_name in roles:
+        role_queries.append(f"Q(?0,?1) <- {role_name}(?0,?1)")
+        role_queries.append(separation_query)
+    all_role_queries = rewrite_queries(role_queries,ontology_path)
+    ref_queries = {}
+    start_index = 0
+    for role in roles:
+        end_index = all_role_queries.index("BornIN(AHMED, SKIKDA)", start_index)
+        ref_queries[role] = all_role_queries[start_index:end_index]
+        start_index = end_index + 1
+
+    for assertion in pi_repair:
+        for role in ref_queries:
+            if assertion.get_assertion_name() == role: continue
+            for query in ref_queries[role]:
+                tokens = [token for token in query.replace(',', ' , ').replace('(', ' ( ').replace(')', ' ) ').split() if token not in [',', '(', ')']]
+                if len(tokens) < 3 : continue
+                if assertion.get_assertion_name() == tokens[0]:
+                    if tokens[1] == "?0":
+                        temp_assertion = w_assertion(role,assertion.get_individuals()[0],assertion.get_individuals()[1],weight=assertion.get_assertion_weight())
+                    elif tokens[2] == "?0":
+                        temp_assertion = w_assertion(role,assertion.get_individuals()[1],assertion.get_individuals()[0],weight=assertion.get_assertion_weight())
+                    cl_pi_repair.add(temp_assertion)
+    
+    return cl_pi_repair

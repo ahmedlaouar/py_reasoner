@@ -2,7 +2,7 @@ import random
 import sqlite3
 
 def generate_weights(pos_size: int) -> list:
-    return list(range(pos_size,0,-1))
+    return list(range(pos_size*100,0,-100))
 
 def read_pos(file_path :str):
     with open(file_path, 'r') as file:

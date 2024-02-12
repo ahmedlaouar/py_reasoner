@@ -7,7 +7,7 @@ if __name__ == "__main__":
 
     ontology_path = "ontologies/univ-bench/lubm-ex-80_disjoint.owl"
     
-    data_path = "bench_prepa/dataset.1.0/university1_p_0.0005.db"
+    data_path = "bench_prepa/dataset.1.0/university1_lubm-ex-80.db"
 
     results_path = "bench_prepa/dataset.01/execution_results_1.0.txt"
 

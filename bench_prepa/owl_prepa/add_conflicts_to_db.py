@@ -150,11 +150,11 @@ def add_conflicts(ontology_path, cursor, p):
                         cursor.execute(f"INSERT INTO {first_tokens[0]} (individual0) VALUES (?)", (row[0],))
 
 if __name__ == "__main__":
-    owl_file = "ontologies/univ-bench/lubm-ex-80_disjoint.owl" 
-    db_file = "bench_prepa/dataset.1.0/university1_p_0.01.db"
+    owl_file = "ontologies/univ-bench/lubm-ex-20_disjoint.owl" 
+    db_file = "bench_prepa/dataset.01/University0_p_0.0005.db"
 
     # set probability p to create multiple conflicting ABoxes "0.0005", "0.001", "0.005", "0.01"
-    p = 0.01
+    p = 0.0005
     conn = sqlite3.connect(db_file)
     cursor = conn.cursor()
     try:

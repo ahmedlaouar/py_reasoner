@@ -5,16 +5,16 @@ from repair.utils import add_pos_to_db
 
 if __name__ == "__main__":
 
-    ontology_path = "ontologies/univ-bench/lubm-ex-80_disjoint.owl"
+    ontology_path = "ontologies/univ-bench/lubm-ex-20_disjoint.owl"
     
-    data_path = "bench_prepa/dataset.1.0/university1_lubm-ex-80.db"
+    data_path = "bench_prepa/dataset.01/University0_p_0.0005.db"
 
-    results_path = "bench_prepa/dataset.01/execution_results_1.0.txt"
+    results_path = "bench_prepa/dataset.01/execution_results_0.2.txt"
 
     relative_path = "bench_prepa/DAGs/DAGs_with_bnlearn/ordered_method/"
-    pos_dir_paths = ["pos1000/"] # , "pos2500/", "pos5000/", "pos750/", "pos500/"
+    pos_dir_paths = ["pos1000/", "pos2500/", "pos5000/", "pos750/", "pos500/"] # 
 
-    pos_list = ["prob_0.8.txt"] # "prob_1.0.txt", "prob_0.9.txt", "prob_0.8.txt", "prob_0.7.txt", "prob_0.6.txt", "prob_0.5.txt"
+    pos_list = ["prob_0.8.txt", "prob_1.0.txt", "prob_0.9.txt", "prob_0.8.txt", "prob_0.7.txt", "prob_0.6.txt", "prob_0.5.txt", "prob_0.4.txt", "prob_0.3.txt"] # 
     
 
     for pos_dir_path in pos_dir_paths:

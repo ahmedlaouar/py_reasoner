@@ -78,9 +78,9 @@ def insert_data(graph, db_file):
     conn.close()
 
 if __name__ == "__main__":
-    owl_file = "ontologies/univ-bench/lubm-ex-20_disjoint.owl"  # Replace with your OWL file path
-    db_file = "bench_prepa/dataset.01/University0.db"  # Replace with your desired SQLite database file path
-    owl_data_file = "bench_prepa/dataset.01/University0.owl"
+    owl_file = "ontologies/univ-bench/lubm-ex-80_disjoint.owl"
+    db_file = "bench_prepa/dataset.1.0/university1_lubm-ex-80.db"
+    owl_data_file = "bench_prepa/dataset.1.0/university1_lubm-ex-80.owl"
 
     empty_database(db_file)
     graph = parse_ontology(owl_file)

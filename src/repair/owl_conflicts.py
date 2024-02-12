@@ -126,6 +126,25 @@ def compute_conflicts(ontology_path :str, cursor: Cursor, pos_dict):
                 conflicts.append(result)
     return conflicts
 
+def compute_conflicts_naive(ontology_path :str, cursor: Cursor):
+    conflicts = []
+    # analyze ontology and return disjointWith and propertyDisjointWith as negative axioms
+    negative_axioms = get_negative_axioms(ontology_path)
+    # "queries" are generated from each negative axiom in the TBox
+    queries = []
+    for axiom in negative_axioms:
+        queries.append(generate_query(axiom))
+    # "all_queries" are the result of rewriting all "queries"
+    all_queries = []
+    all_queries = rewrite_all_queries(queries,ontology_path)
+    #to_remove = []
+    for query in all_queries:
+        sql_query, table1, table2 = generate_sql_query(query)
+        results = run_sql_query(sql_query, cursor, table1, table2)        
+        for result in results:
+            conflicts.append(result)
+    return conflicts
+
 def reduce_conflicts(conflicts: list, pos_dict):
     # this function looks for intra dominance between conflicts, if its the case, only the dominating should be taken into account
     reduced_conflicts = []

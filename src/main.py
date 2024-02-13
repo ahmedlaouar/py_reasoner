@@ -7,9 +7,9 @@ if __name__ == "__main__":
 
     ontology_path = "ontologies/univ-bench/lubm-ex-20_disjoint.owl"
     
-    data_path = "bench_prepa/dataset.01/University0_p_0.0005.db"
+    data_path = "bench_prepa/dataset.01/University0_p_0.00015.db"
 
-    results_path = "bench_prepa/dataset.01/execution_results_0.2.txt"
+    results_path = "bench_prepa/dataset.01/execution_results_0.4.txt"
 
     relative_path = "bench_prepa/DAGs/DAGs_with_bnlearn/ordered_method/"
     pos_dir_paths = ["pos1000/", "pos2500/", "pos5000/", "pos750/", "pos500/"] # 

@@ -163,7 +163,7 @@ def compute_cl_pi_repair(ontology_path: str, pi_repair):
                         temp_assertion = w_assertion(concept,assertion.get_individuals()[1],weight=assertion.get_assertion_weight())
                     cl_pi_repair.add(temp_assertion)
 
-    roles = [prop_uri.split('#')[-1] for prop_uri in graph.subjects(predicate=RDF.type, object=OWL.ObjectProperty)] + [data_uri.split('#')[-1] for data_uri in graph.subjects(predicate=RDF.type, object=OWL.DatatypeProperty)]
+    roles = [prop_uri.split('#')[-1] for prop_uri in graph.subjects(predicate=RDF.type, object=OWL.ObjectProperty)] #+ [data_uri.split('#')[-1] for data_uri in graph.subjects(predicate=RDF.type, object=OWL.DatatypeProperty)]
     role_queries = []
     for role_name in roles:
         role_queries.append(f"Q(?0,?1) <- {role_name}(?0,?1)")

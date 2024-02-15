@@ -39,9 +39,9 @@ def create_database(graph, db_file):
         cursor.execute(f"CREATE TABLE IF NOT EXISTS {table_name} (id INTEGER PRIMARY KEY, individual0 TEXT, individual1 TEXT, degree INT)")
 
     # Create tables for data properties
-    for data_uri in graph.subjects(predicate=RDF.type, object=OWL.DatatypeProperty):
-        table_name = data_uri.split('#')[-1]
-        cursor.execute(f"CREATE TABLE IF NOT EXISTS {table_name} (id INTEGER PRIMARY KEY, individual0 TEXT, individual1 TEXT, degree INT)")
+    #for data_uri in graph.subjects(predicate=RDF.type, object=OWL.DatatypeProperty):
+    #    table_name = data_uri.split('#')[-1]
+    #    cursor.execute(f"CREATE TABLE IF NOT EXISTS {table_name} (id INTEGER PRIMARY KEY, individual0 TEXT, individual1 TEXT, degree INT)")
 
     conn.commit()
     conn.close()
@@ -65,7 +65,7 @@ def insert_data(graph, db_file):
                 table_name = str(o).split('#')[-1]
                 
                 cursor.execute(f"INSERT INTO {table_name} (individual0) VALUES (?)", (str(s),))
-            else:
+            else :
                 #ObjectProperty parsing
                 table_name = str(p).split('#')[-1]
                 cursor.execute(f"INSERT INTO {table_name} (individual0, individual1) VALUES (?, ?)", (str(s), str(o)))
@@ -79,8 +79,8 @@ def insert_data(graph, db_file):
 
 if __name__ == "__main__":
     owl_file = "ontologies/univ-bench/lubm-ex-20_disjoint.owl"
-    db_file = "bench_prepa/dataset.0.3/university15_lubm-ex-20.db"
-    owl_data_file = "bench_prepa/dataset.0.3/university15_lubm-ex-20.owl"
+    db_file = "bench_prepa/dataset_1_university/University0.db"
+    owl_data_file = "bench_prepa/dataset_1_university/University0.owl"
 
     empty_database(db_file)
     graph = parse_ontology(owl_file)

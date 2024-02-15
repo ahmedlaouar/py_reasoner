@@ -153,7 +153,7 @@ if __name__ == "__main__":
     owl_file = "ontologies/univ-bench/lubm-ex-20_disjoint.owl" 
     db_file = "bench_prepa/dataset_1_university/University0_p_0.000005.db"
 
-    # set probability p to create multiple conflicting ABoxes "0.0005", "0.001", "0.005", "0.01"
+    # set probability p to create multiple conflicting ABoxes "0.00005", "0.00001", "0.000005", 0.0000075
     p = 0.000005
     conn = sqlite3.connect(db_file)
     cursor = conn.cursor()

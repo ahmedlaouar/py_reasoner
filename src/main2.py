@@ -1,30 +1,66 @@
+import sqlite3
+import time
+from repair.owl_conflicts import compute_conflicts_naive
 from repair.owl_cpi_repair import compute_cpi_repair
 from repair.owl_cpi_repair_enhanced import compute_cpi_repair_enhanced
 from repair.owl_pi_repair import compute_pi_repair
 from repair.utils import add_pos_to_db
 
+def conflicts_helper(ontology_path,data_path) :
+    conn = sqlite3.connect(data_path)
+    cursor = conn.cursor()
+
+    # Get the list of tables
+    cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
+    tables = cursor.fetchall()
+
+    # Count rows in each table and sum them
+    total_rows = 0
+    for table in tables:
+        cursor.execute(f"SELECT COUNT(*) FROM {table[0]}")
+        count = cursor.fetchone()[0]
+        total_rows += count
+
+    print(f"The size of the ABox is {total_rows}.")
+
+    start_time = time.time()
+    try:
+        conflicts = compute_conflicts_naive(ontology_path,cursor)
+    except sqlite3.OperationalError as e:
+            print(f"Error: {e}.")
+    end_time = time.time()
+
+    print(f"Size of the conflicts is {len(conflicts)}")
+
+    print(f"Time to compute conflicts is {end_time - start_time}")
+
+    #for conflict in conflicts:
+    #    print(conflict)
+
+    conn.commit()
+    conn.close()
+
 if __name__ == "__main__":
 
     ontology_path = "ontologies/univ-bench/lubm-ex-20_disjoint.owl"
+
+    data_paths = ["bench_prepa/dataset_1_university/University0_p_0.000005.db", "bench_prepa/dataset_1_university/University0_p_0.000001.db", "bench_prepa/dataset_1_university/University0_p_0.0000001.db"]# "bench_prepa/dataset.01/University0_p_0.0005.db", "bench_prepa/dataset.01/University0_p_0.001.db", "bench_prepa/dataset.01/University0_p_0.005.db", "bench_prepa/dataset.01/University0_p_0.00015.db"] # 
     
-    #data_path = "bench_prepa/dataset.0.2/University5_p_0.0005.db"
-
-    data_paths = ["bench_prepa/dataset.01/University0_p_0.0005.db", "bench_prepa/dataset.01/University0_p_0.001.db", "bench_prepa/dataset.01/University0_p_0.005.db"] # , "bench_prepa/dataset.01/University0_p_0.00015.db"
-
-    results_path = "bench_prepa/dataset.01/execution_results_0.3.txt"
-
-    relative_path = "bench_prepa/DAGs/DAGs_direct_method/"
-    # pos_dir_paths = ["pos1000/", "pos2500/", "pos5000/", "pos750/", "pos500/"] # 
-
-    pos_list = ["pos10000.txt"] #, "pos10000_prob_0.75.txt" 
+    relative_path = "bench_prepa/DAGs/DAGs_with_bnlearn/ordered_method/"
     
+    pos_dir_paths = ["pos1000/", "pos2500/", "pos5000/", "pos750/", "pos500/"] # 
+
+    results_path = "bench_prepa/dataset.01/execution_results_1.txt"
+
+    pos_list = ["prob_0.8.txt", "prob_1.0.txt", "prob_0.9.txt", "prob_0.8.txt", "prob_0.7.txt", "prob_0.6.txt", "prob_0.5.txt", "prob_0.4.txt", "prob_0.3.txt"] # 
+
     for data_path in data_paths:
-
-        #for pos_dir_path in pos_dir_paths:
             
+        for pos_dir_path in pos_dir_paths:
+        
             for pos in pos_list:
                 try: 
-                    pos_path = relative_path + pos
+                    pos_path = relative_path + pos_dir_path + pos
 
                     add_pos_to_db(data_path, pos_path)
 

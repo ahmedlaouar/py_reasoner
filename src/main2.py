@@ -34,6 +34,8 @@ def conflicts_helper(ontology_path,data_path) :
 
     print(f"Time to compute conflicts is {end_time - start_time}")
 
+    print(f"Percent of conflicts w.r.t. the size of the ABox: {len(conflicts)*100/total_rows}")
+
     #for conflict in conflicts:
     #    print(conflict)
 
@@ -43,14 +45,16 @@ def conflicts_helper(ontology_path,data_path) :
 if __name__ == "__main__":
 
     ontology_path = "ontologies/univ-bench/lubm-ex-20_disjoint.owl"
-
-    data_paths = ["bench_prepa/dataset_1_university/University0_p_0.000005.db", "bench_prepa/dataset_1_university/University0_p_0.000006.db", "bench_prepa/dataset_1_university/University0_p_0.00001.db"]# "bench_prepa/dataset.01/University0_p_0.0005.db", "bench_prepa/dataset.01/University0_p_0.001.db", "bench_prepa/dataset.01/University0_p_0.005.db", "bench_prepa/dataset.01/University0_p_0.00015.db"] # 
+    # "bench_prepa/dataset_1_university/University0_p_0.00015.db", "bench_prepa/dataset_1_university/University0_p_0.00001.db", , "bench_prepa/dataset_1_university/University0_p_0.001.db"
+    
+    # "bench_prepa/dataset_1_university/University0_p_0.0005.db", "bench_prepa/dataset_1_university/University0_p_0.00005.db", 
+    data_paths = ["bench_prepa/dataset_1_university/University0_p_0.000005.db", "bench_prepa/dataset_1_university/University0_p_0.000006.db"]
     
     #for data_path in data_paths:
     #    conflicts_helper(ontology_path, data_path)
     relative_path = "bench_prepa/DAGs/DAGs_with_bnlearn/ordered_method/"
     
-    pos_dir_paths = ["pos1000/", "pos2500/", "pos500/", "pos750/", "pos5000/"] # 
+    pos_dir_paths = ["pos100/", "pos250/", "pos50/"] # , "pos750/", "pos5000/"
 
     results_path = "bench_prepa/dataset.01/execution_results_1.txt"
 
@@ -62,7 +66,7 @@ if __name__ == "__main__":
         
             for pos in pos_list:
                 try: 
-                    pos_path = relative_path + pos_dir_path + pos
+                    pos_path = relative_path + pos_dir_path + pos_dir_path.split("/")[0] + "_" + pos
 
                     add_pos_to_db(data_path, pos_path)
 

@@ -46,8 +46,8 @@ if __name__ == "__main__":
 
     ontology_path = "ontologies/univ-bench/lubm-ex-20_disjoint.owl"
     
-    # "bench_prepa/dataset.0.2/University5_p_0.0001.db", "bench_prepa/dataset.0.2/University5_p_0.00001.db", 
-    data_paths = ["bench_prepa/dataset.0.2/University5_p_0.000005.db"]
+    # , "bench_prepa/dataset.0.2/University5_p_0.00001.db", "bench_prepa/dataset.0.2/University5_p_0.000005.db"
+    data_paths = ["bench_prepa/dataset.0.2/University5_p_0.0001.db"]
     
     #for data_path in data_paths:
     #    conflicts_helper(ontology_path, data_path)

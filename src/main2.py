@@ -46,14 +46,14 @@ if __name__ == "__main__":
 
     ontology_path = "ontologies/univ-bench/lubm-ex-20_disjoint.owl"
     
-    # , "bench_prepa/dataset.0.2/University5_p_0.00001.db", "bench_prepa/dataset.0.2/University5_p_0.000005.db"
-    data_paths = ["bench_prepa/dataset.0.2/University5_p_0.0001.db"]
+    # , "bench_prepa/dataset.0.2/University5_p_0.0001.db", "bench_prepa/dataset.0.2/University5_p_0.00001.db", "bench_prepa/dataset.0.2/University5_p_0.000005.db"
+    data_paths = ["bench_prepa/dataset.0.2/University5_p_0.00005.db"] #,"bench_prepa/dataset.0.2/University5_p_0.0005.db" 
     
     #for data_path in data_paths:
     #    conflicts_helper(ontology_path, data_path)
     relative_path = "bench_prepa/DAGs/DAGs_with_bnlearn/ordered_method/"
     
-    pos_dir_paths = ["pos1000/", "pos2500/", "pos500/" , "pos750/"] #"pos100/", "pos250/", "pos50/", , "pos5000/"
+    pos_dir_paths = ["pos1000/", "pos2500/", "pos5000/"] #"pos100/", "pos250/", "pos50/", "pos5000/", "pos750/"
 
     results_path = "bench_prepa/dataset.01/execution_results_5.txt"
 

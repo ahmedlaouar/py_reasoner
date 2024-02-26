@@ -47,8 +47,8 @@ if __name__ == "__main__":
     ontology_path = "ontologies/univ-bench/lubm-ex-20_disjoint.owl"
     
     # "bench_prepa/dataset.0.2/University5_p_0.00005.db", "bench_prepa/dataset.0.2/University5_p_0.0005.db", "bench_prepa/dataset.0.2/University5_p_0.0001.db", "bench_prepa/dataset.0.2/University5_p_0.00001.db", "bench_prepa/dataset.0.2/University5_p_0.000005.db"
-    data_paths = ["bench_prepa/dataset_1_university/University0_p_0.00001.db"] 
-    # "bench_prepa/dataset_1_university/University0_p_0.000005.db", "bench_prepa/dataset_1_university/University0_p_0.000006.db",  
+    data_paths = ["bench_prepa/dataset_1_university/University0_p_0.00005.db", "bench_prepa/dataset_1_university/University0_p_0.00015.db"] 
+    # "bench_prepa/dataset_1_university/University0_p_0.000005.db", "bench_prepa/dataset_1_university/University0_p_0.00001.db", , "bench_prepa/dataset_1_university/University0_p_0.0005.db"
     
     #for data_path in data_paths:
     #    conflicts_helper(ontology_path, data_path)
@@ -56,7 +56,7 @@ if __name__ == "__main__":
     
     pos_dir_paths = ["pos100/", "pos500/", "pos1000/"] #"pos100/", "pos250/", "pos50/", "pos5000/", "pos750/"
 
-    results_path = "bench_prepa/dataset.01/execution_results_2.txt"
+    results_path = "bench_prepa/dataset.01/execution_results_3.txt"
 
     pos_list = ["prob_0.1.txt", "prob_0.2.txt", "prob_0.3.txt", "prob_0.4.txt", "prob_0.5.txt", "prob_0.6.txt", "prob_0.7.txt", "prob_0.8.txt", "prob_0.9.txt", "prob_1.0.txt"] # 
 

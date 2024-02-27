@@ -26,14 +26,14 @@ def add_pos_to_db(data_path:str, pos_path:str):
     cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
     tables = cursor.fetchall()
 
-    weights = generate_weights(lines_number)
+    #weights = generate_weights(lines_number)
 
     for table in tables:
         cursor.execute(f"SELECT COUNT(*) FROM {table[0]}")
         count = cursor.fetchone()[0]
         for i in range(1,count+1):
-            degree = random.choices(range(lines_number), weights=weights, k=1)
-            cursor.execute(f"UPDATE {table[0]} SET degree = ? WHERE id = ?", (degree[0], i))
+            degree = random.choice(range(lines_number))
+            cursor.execute(f"UPDATE {table[0]} SET degree = ? WHERE id = ?", (degree, i))
     
     conn.commit()
     conn.close()

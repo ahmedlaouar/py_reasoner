@@ -97,12 +97,64 @@ def drop_not_participating_in_closure(data_path, ontology_path):
     except sqlite3.OperationalError as e:
             print(f"Error: {e}.")
 
+def reset_table_ids(cursor, table_name):
+    """
+    Reset the IDs for the specified table.
+    """
+    # Fetching the column names except for the ID column
+    cursor.execute(f"PRAGMA table_info({table_name})")
+    columns = [info[1] for info in cursor.fetchall() if info[1].lower() != 'id']
+    columns_joined = ', '.join(columns)
+    
+    # Creating a new table with the same schema but without data
+    cursor.execute(f"CREATE TABLE {table_name}_new AS SELECT * FROM {table_name} WHERE 1=0")
+    
+    # Inserting data into the new table with resequenced IDs
+    cursor.execute(f"INSERT INTO {table_name}_new ({columns_joined}) SELECT {columns_joined} FROM {table_name}")
+    
+    # Dropping the original table
+    cursor.execute(f"DROP TABLE {table_name}")
+    
+    # Renaming the new table to the original table name
+    cursor.execute(f"ALTER TABLE {table_name}_new RENAME TO {table_name}")
+
+def reset_all_ids(db_path):
+    """
+    Reset IDs for all tables in the database.
+    """
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    
+    try:
+        # Getting all table names
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
+        tables = [row[0] for row in cursor.fetchall()]
+        
+        for table in tables:
+            print(f"Resetting IDs for {table}...")
+            reset_table_ids(cursor, table)
+            # Recreating the autoincrement property for the ID column, if necessary
+            #cursor.execute(f"UPDATE SQLITE_SEQUENCE SET seq = (SELECT MAX(id) FROM {table}) WHERE name = '{table}'")
+            print(f"Finished resetting IDs for {table}.")
+        
+        conn.commit()
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        conn.rollback()
+    finally:
+        conn.close()
+
 if __name__ == "__main__":
     data_path = "bench_prepa/dataset_small_u1/University0.db"
     ontology_path = "ontologies/univ-bench/lubm-ex-20_disjoint.owl"
     
     #drop_not_participating_in_closure(data_path, ontology_path)
 
-    target_row_count = 10000
-    batch_size = 1000  # Number of rows to delete per batch, adjust based on your needs
-    reduce_database_size(data_path, target_row_count, batch_size)
+    #target_row_count = 10000
+    #batch_size = 1000  # Number of rows to delete per batch, adjust based on your needs
+    #reduce_database_size(data_path, target_row_count, batch_size)
+
+    data_paths = ["bench_prepa/dataset_small_u1/university0.5_p_0.000005.db", "bench_prepa/dataset_small_u1/university0.5_p_0.00001.db", "bench_prepa/dataset_small_u1/university0.5_p_0.00005.db", "bench_prepa/dataset_small_u1/university0.5_p_0.0005.db", "bench_prepa/dataset_small_u1/university0.5_p_0.001.db"]
+
+    for db_path in data_paths:
+        reset_all_ids(db_path)

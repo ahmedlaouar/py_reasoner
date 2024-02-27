@@ -50,15 +50,15 @@ if __name__ == "__main__":
     # "bench_prepa/dataset_1_university/University0_p_0.000005.db", "bench_prepa/dataset_1_university/University0_p_0.00001.db", "bench_prepa/dataset_1_university/University0_p_0.00005.db", "bench_prepa/dataset_1_university/University0_p_0.00015.db", "bench_prepa/dataset_1_university/University0_p_0.0005.db"
     data_paths = ["bench_prepa/dataset_small_u1/university0.5_p_0.000005.db", "bench_prepa/dataset_small_u1/university0.5_p_0.00001.db", "bench_prepa/dataset_small_u1/university0.5_p_0.00005.db", "bench_prepa/dataset_small_u1/university0.5_p_0.0005.db", "bench_prepa/dataset_small_u1/university0.5_p_0.001.db"] 
     
-    for data_path in data_paths:
-        conflicts_helper(ontology_path, data_path)
-    """relative_path = "bench_prepa/DAGs/DAGs_with_bnlearn/ordered_method/"
+    #for data_path in data_paths:
+    #    conflicts_helper(ontology_path, data_path)
+    relative_path = "bench_prepa/DAGs/DAGs_with_bnlearn/ordered_method/"
     
-    pos_dir_paths = ["pos500/"] #"pos100/", "pos250/", "pos50/", "pos5000/", "pos750/", "pos750/", "pos2500/"
+    pos_dir_paths = ["pos250/"] #  "pos50/", "pos100/", , "pos500/", "pos5000/", "pos750/", "pos750/", "pos2500/"
 
-    results_path = "bench_prepa/dataset.01/execution_results_4.txt"
+    results_path = "bench_prepa/dataset.01/execution_results_smaller_u1_0.5.txt"
 
-    pos_list = [ "prob_0.5.txt"] # "prob_0.1.txt", "prob_0.2.txt", "prob_0.3.txt", "prob_0.4.txt", , "prob_0.6.txt", "prob_0.7.txt", "prob_0.8.txt", "prob_0.9.txt"
+    pos_list = ["prob_0.1.txt", "prob_0.2.txt", "prob_0.3.txt", "prob_0.4.txt", "prob_0.5.txt", "prob_0.6.txt", "prob_0.7.txt", "prob_0.8.txt", "prob_0.9.txt"] #
 
     for data_path in data_paths:
             
@@ -91,4 +91,4 @@ if __name__ == "__main__":
                         file.write(result_str)
                 except FileNotFoundError as e:
                     print(f"File {pos_path} not found!")
-                    continue"""
+                    continue

@@ -47,18 +47,18 @@ if __name__ == "__main__":
     ontology_path = "ontologies/univ-bench/lubm-ex-20_disjoint.owl"
     
     # "bench_prepa/dataset.0.2/University5_p_0.00005.db", "bench_prepa/dataset.0.2/University5_p_0.0005.db", "bench_prepa/dataset.0.2/University5_p_0.0001.db", "bench_prepa/dataset.0.2/University5_p_0.00001.db", "bench_prepa/dataset.0.2/University5_p_0.000005.db"
-    data_paths = ["bench_prepa/dataset_1_university/University0_p_0.00005.db"] 
-    # "bench_prepa/dataset_1_university/University0_p_0.000005.db", "bench_prepa/dataset_1_university/University0_p_0.00001.db", , "bench_prepa/dataset_1_university/University0_p_0.00015.db", "bench_prepa/dataset_1_university/University0_p_0.0005.db"
+    data_paths = ["bench_prepa/dataset_1_university/University0_p_0.000005.db", "bench_prepa/dataset_1_university/University0_p_0.00001.db", "bench_prepa/dataset_1_university/University0_p_0.00005.db", "bench_prepa/dataset_1_university/University0_p_0.00015.db", "bench_prepa/dataset_1_university/University0_p_0.0005.db"] 
+    #  
     
     #for data_path in data_paths:
     #    conflicts_helper(ontology_path, data_path)
     relative_path = "bench_prepa/DAGs/DAGs_with_bnlearn/ordered_method/"
     
-    pos_dir_paths = ["pos250/", "pos750/", "pos2500/"] #"pos100/", "pos250/", "pos50/", "pos5000/", "pos750/"
+    pos_dir_paths = ["pos500/"] #"pos100/", "pos250/", "pos50/", "pos5000/", "pos750/", "pos750/", "pos2500/"
 
-    results_path = "bench_prepa/dataset.01/execution_results_3.txt"
+    results_path = "bench_prepa/dataset.01/execution_results_4.txt"
 
-    pos_list = ["prob_0.1.txt", "prob_0.2.txt", "prob_0.3.txt", "prob_0.4.txt", "prob_0.5.txt", "prob_0.6.txt", "prob_0.7.txt", "prob_0.8.txt", "prob_0.9.txt"] # 
+    pos_list = [ "prob_0.5.txt"] # "prob_0.1.txt", "prob_0.2.txt", "prob_0.3.txt", "prob_0.4.txt", , "prob_0.6.txt", "prob_0.7.txt", "prob_0.8.txt", "prob_0.9.txt"
 
     for data_path in data_paths:
             
@@ -72,7 +72,7 @@ if __name__ == "__main__":
 
                     results1 = compute_pi_repair(ontology_path,data_path,pos_path)
 
-                    #results2 = compute_cpi_repair(ontology_path,data_path,pos_path)
+                    results2 = compute_cpi_repair(ontology_path,data_path,pos_path)
 
                     results3 = compute_cpi_repair_enhanced(ontology_path,data_path,pos_path)
 
@@ -80,7 +80,7 @@ if __name__ == "__main__":
                     ABox_name = data_path.split("/")[-1]
                     TBox_name = ontology_path.split("/")[-1]
 
-                    result = results1  + results3 #+ results2
+                    result = results1 + results2 + results3 #
                     
                     result_str = str(ABox_name)+","+str(TBox_name)+","+str(pos_name)+","
                     

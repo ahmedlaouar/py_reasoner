@@ -66,7 +66,10 @@ def compute_cpi_repair_enhanced(ontology_path: str, data_path: str, pos_path: st
         cl_pi_repair = compute_cl_pi_repair(ontology_path, pi_repair)
         print(f"Size of cl_pi_repair: {len(cl_pi_repair)}")
         exe_results.append(len(cl_pi_repair))
-        
+        inter_time21 = round(time.time(), 3)
+        print(f"Time to compute the cl_pi_repair: {inter_time21 - inter_time2}")
+        exe_results.append(inter_time21 - inter_time2)
+
         left_to_check = left_to_check - cl_pi_repair
         
         # browse assertions and compute supports
@@ -79,7 +82,8 @@ def compute_cpi_repair_enhanced(ontology_path: str, data_path: str, pos_path: st
         inter_time3 = round(time.time(), 3)
         supports_size = sum((len(val) for val in supports.values()))
         print(f"Number of all the computed supports: {supports_size}")
-        print(f"Time to compute all the supports of all the assertions: {inter_time3 - inter_time2}")        
+        print(f"Time to compute all the supports of all the assertions: {inter_time3 - inter_time21}")
+        exe_results.append(inter_time3 - inter_time21)
         
         left_to_check = set(supports.keys())
         cpi_repair = compute_cpi_repair_raw(left_to_check, conflicts, supports, pos_dict)

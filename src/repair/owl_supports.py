@@ -55,6 +55,38 @@ def run_sql_query(sql_query: str,table_name: str, cursor: Cursor):
                 supports.append((table_name, row[1], row[2], row[3]))
     return supports
 
+def compute_all_supports_naive(assertions, ontology_path: str, cursor: Cursor):
+    queries = []    
+    assertions_list = list(assertions)
+    for assertion in assertions_list:
+        assertion_name = assertion.get_assertion_name()
+        individuals = [ind for ind in assertion.get_individuals() if ind is not None]
+        query_format = f"Q({', '.join(individuals)}) <- {assertion_name}({', '.join(individuals)})"
+        queries.append(query_format)
+        queries.append(separation_query)
+    
+    all_queries = rewrite_queries(queries,ontology_path)
+    
+    cqueries = {}
+    start_index = 0
+    for assertion in assertions_list:
+        end_index = all_queries.index("BornIN(AHMED, SKIKDA)", start_index)
+        cqueries[assertion] = all_queries[start_index:end_index]
+        start_index = end_index + 1
+
+    supports = {}
+    for assertion in cqueries.keys():
+        supports[assertion] = set()
+        for query in cqueries[assertion]:            
+            sql_query, table_name = generate_sql_query(query)
+            some_supports = run_sql_query(sql_query,table_name,cursor)
+            if len(some_supports) != 0:            
+                for new_element in some_supports:
+                    temp_assertion = w_assertion(new_element[0], new_element[1], new_element[2], new_element[3])
+                    supports[assertion].add(temp_assertion)
+    
+    return supports
+
 def compute_all_supports(assertions, ontology_path: str, cursor: Cursor, pos_dict):
     # in this version we use a seperation query, in order to perform a single rewriting with Rapid2.jar, because multiple calls to it is bad for time complexity
 

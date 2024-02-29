@@ -55,11 +55,11 @@ if __name__ == "__main__":
     #    conflicts_helper(ontology_path, data_path)
     relative_path = "bench_prepa/DAGs/DAGs_with_bnlearn/ordered_method/"
     
-    pos_dir_paths = ["pos100/", "pos500/"] #  "pos50/", , "pos250/", "pos750/", "pos1000/", "pos2500/", "pos5000/"
+    pos_dir_paths = ["pos100/"] #  "pos50/", , "pos500/", "pos250/", "pos750/", "pos1000/", "pos2500/", "pos5000/"
 
-    results_path = "bench_prepa/dataset.01/execution_results_pos_u1.txt"
+    results_path = "bench_prepa/dataset.01/execution_results_small_posets_u1.txt"
 
-    pos_list = ["prob_0.4.txt"] # "prob_0.1.txt", "prob_0.2.txt", "prob_0.3.txt", , "prob_0.5.txt", "prob_0.6.txt", "prob_0.7.txt", "prob_0.8.txt", "prob_0.9.txt"
+    pos_list = ["prob_0.01.txt", "prob_0.02.txt", "prob_0.03.txt", "prob_0.04.txt", "prob_0.05.txt", "prob_0.06.txt", "prob_0.07.txt", "prob_0.08.txt", "prob_0.09.txt"] # "prob_0.1.txt", "prob_0.2.txt", "prob_0.3.txt", "prob_0.4.txt", "prob_0.5.txt", "prob_0.6.txt", "prob_0.7.txt", "prob_0.8.txt", "prob_0.9.txt" 
 
     for data_path in data_paths:
             

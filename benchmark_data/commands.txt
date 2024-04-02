@@ -1,5 +1,0 @@
-/bin/python3 src/py_reasoner.py compute_cpi_repair -t /src/test_examples/example1/first_tbox.txt -a /src/test_examples/example1/first_abox.txt -p /src/test_examples/example1/first_full_pos.txt
-/bin/python3 src/py_reasoner.py compute_cpi_repair -t /benchmark_data/data/ontology0.txt -a /benchmark_data/data/dataset_medium.txt -p /benchmark_data/data/random_dag_2023053117.txt
-/bin/python3 src/py_reasoner.py compute_cpi_repair -t /benchmark_data/data/ontology0.txt -a /benchmark_data/data/dataset_medium.txt -p /benchmark_data/data/random_dag_1000_2023060109.txt
-/bin/python3 src/py_reasoner.py compute_cpi_repair -t /benchmark_data/data/ontology_2023053117_0.txt -a /benchmark_data/data/dataset_2023053117.txt -p /benchmark_data/data/random_dag_2023053117.txt
-/bin/python3 src/py_reasoner.py compute_cpi_repair -t /benchmark_data/data/ontology_2023053117_0.txt -a /benchmark_data/data/dataset_2023053117.txt -p /benchmark_data/data/random_dag_1000_2023060109.txt

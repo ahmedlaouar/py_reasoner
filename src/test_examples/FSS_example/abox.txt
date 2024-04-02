@@ -1,8 +1,0 @@
-BEGINABOX
-B(a);1;
-A(b);2;
-B(b);3;
-D(a);4;
-C(a);5;
-E(a);6;
-ENDABOX

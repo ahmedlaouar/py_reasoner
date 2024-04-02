@@ -1,6 +1,0 @@
-BEGINTBOX
-Manager < Staff
-Sales < Staff
-Manager < NOT EXISTS Edit
-Sales < NOT EXISTS Sign
-ENDTBOX

@@ -1,147 +1,119 @@
-# Py_reasoner: a DL-Lite reasoner to compute possibilistic repairs and answer queries.
+# Guide for the experimentation study of the $C\pi$-repair
 
-## Description
+This is a guide for data preparation and result reproduction for the implementation of the closure-based partially orered possibilsitic repair ($C\pi$-repair)[1].
 
-Lightweights ontologies are used for efficient query answering and belongs to the Ontology Based Data Access (OBDA) paradigm. 
-DL-Lite is one of the most important fragments of Description Logics, here we focus on [__DL-Lite_R__](https://link.springer.com/article/10.1007/s10817-007-9078-x), which underlies the OWL2-QL language.
+This implementation needs three main ingredients:
 
-The conceptual knowledge of the ontology (i.e., the TBox) is usually assumed to be coherent. However, the dataset (i.e., the ABox) may potentially be inconsistent with respect to the TBox, making the whole ontology inconsistent.
-This leads to the necessity of computing data repairs in order to safely evaluate queries.
+- An ontology: a [__DL-Lite_R__](https://link.springer.com/article/10.1007/s10817-007-9078-x) TBox.
+- A database: a data set representing the ABox, may contain conflicts.
+- A partially ordered set: represents the set of weights to be associated with the database elements, it expresses partial order independently from the ABox.
 
-The main focus of this work is a subset of methods for data repairs that operates in the context of possibilistic Knowledge Bases and more generally on weighted KBs.  
-[__Possiblistic DL-Lite__](https://link.springer.com/chapter/10.1007/978-3-642-40381-1_27) extends the expressive power of DL-Lite to deal with possibilistic uncertain information without increasing the computational cost. 
-In this context, multiple ABox repairs have been proposed, mainly for totally ordered KBs[1] and partially ordered KBs[2].
+## Libraries and tools
 
-### Goals
+- Python.
+- The [__RDFLib__](https://github.com/RDFLib/rdflib): a python library to read from the OWL ontology.
+- Rapid: a DL-Lite query-rewriting tool [4]. It can be found within the [__Combo__](https://home.uni-leipzig.de/clu/) project and also within the systems studied in the [__ForBackBench__](https://github.com/georgeKon/ForBackBench/tree/main) benchmarking framework (for Chasing Vs Query Rewriting).
+- SQLite3 relational database engine.
+- The [__bnlearn__](https://www.bnlearn.com/) R package[6]: to generate random Directed Acyclic Graphs (DAGs) which represent partially ordered sets of weights.
 
-The aim of this project is to
-- Provide the implementation of the partially ordered possibilistic repair called the $\pi$-repair, then extend it to more general cases. 
-- Provide a benchmarking study for possibilistic repairs in general and the ones that apply to partial orders in particular. The involved methods are exact repairing semantics that can be computed in polynomial time, but an experimental and algorithmic study is required to show the applicability of such methods (a demonstration of reasonable computation time and space complexity in similar to real life study cases). 
-- Another goal is to adapt some famous ontology benchmarking dataset to this context in order to allow for comparative studies. 
-- Morover, providing a useful tool to test the tractable methods in the DL-Lite framework is a plus for the OBDA community.
+Note: the Rapid tool is build with java, hence, a java instalation must be present in order to be able to make calls to this tool.
 
-We want to implement the backend **engine** for the available tractable inconsistency-tolerant semantics in order to apply our work to scalable inconsistent KBs.
+## The ontology
 
+In the experiments, we used the [__DL-Lite_R__](https://link.springer.com/article/10.1007/s10817-007-9078-x) version of the modified LUBM benchmark (LUBM $^{\exists}_{20}$), which was presented in [5]. It is available within the [__Combo__](https://home.uni-leipzig.de/clu/) project. 
 
-### Requirements
+This version of the ontology does not contain any disjointness (or negative) axioms, namely owl:disjointWith and owl:propertyDisjointWith axioms. We manually added 18 different negative axioms, which lead to 4561 negative axioms in the negative closure of the TBox. Since the TBox is assumed to be coherent in this type of experiments, we used a fixed ontology and focused on varying data.
 
-To run this project, all you need is **python3** interpreter and **git**.
+## The data
 
-### Install
+The data was generated from the ontology, using the Extended University Data Generator v0.1 (EUDG), which is a part of the [__Combo__](https://home.uni-leipzig.de/clu/) project. This tool is written in java.
 
-**Clone** the repository, the main file is named "py_reasonr.py" this README serves also as a tutorial, a list of the main functionnalities is given below alongside the "commnads.txt" file containing a list of useful commands to run the available data examples on your CLI.
+The EUDG tool generates a consistent (free of conflicts) dataset, in the form of an owl file. we start by using the functions in "bench_prepa/owl_prepa/owl_data_to_db.py" to transform the data to a sqlite database. We generated three different sizes for the datasets: $9156$, $75671$ and $463349$ assertions.
 
-### Notation
+Then conflicts are randomly added to the data as follows. For each negative axiom inferred from the ontology, individuals present in a concept assertion are added to a contradicting assertion with probability $p$, and individuals present in a role assertion are added to a contradicting assertion with probability $p/2$. We used increasing values for $p$ to obtain five different ratios of inconsistency for each ABox. Values in {$5*10^{-6}$, $10^{-5}$, $5*10^{-5}$, $10^{-4}$, $5*10^{-4}$} were used, different values may be used for different ABoxes to introduce certain levels of inconsistency. Functions in "bench_prepa/owl_prepa/add_conflicts_to_db.py" were used to add the conflicts.
 
-The used examples of ontologies are saved in 3 different types of files, a file containing the TBox or the ontology, a file containing the ABox or the dataset and a file containing a Partially Ordered Set (POS) to represent the partial preorder over the assertions in the ABox. 
+## Partially ordered sets (POSets)
 
-Note that the data is represented in its raw (or native) format in this first version, it is easier to start from here and test the implementation on randomly generated data (some simulation scenarios). After that, we can provide the support for an (xml/owl) parsing to be able to test it against adaptations of the well-known benchmarking datasets.
+In order to represent the partial order defined over the dataset, we associate weights to the assertions. These weights belong to a partially ordered set. We opted for random Directed Acyclic Graphs to represent these sets. We used the [__bnlearn__](https://www.bnlearn.com/) R package to generate different types of DAGs, the goal is to capture different situations of POSets. In a DAG, the number of nodes indicate the size of the POSet (number of weights) to be associated with the assertions, an arc between two assertions indicate the preference relation and the absence of an arc in both directions between two nodes encodes incomparability. The probability of having an arc represents the density of the DAG, a more dense DAG has less incomparabilities and is closer to a totally ordered set, a DAG with all possible arcs represent a totally ordered set. 
 
-Consider the following toy scenario of a security policy of a sales company to illustrate the notation and the implementation. this scenario is based on the Concepts $\small\textsf{Manager}$, $\small\textsf{Sales}$, $\small\textsf{Staff}$ which represent employees affiliations, and $\small\textsf{Reports}$ which represents file categories. 
+The code to generate the DAGs is available in "bench_prepa/owl_prepa/pos_generator_bnlearn.r". Generated DAGs vary in size from {$50,100,250,500,750,1000,2500$} and in the probability of having an arc between two nodes which is varied from [$0.1, \dots,0.9$]. Each generated DAG is saved in a txt file, where in each line, a source node is associated to the target nodes to which its arcs are pointing. Functions in "bench_prepa/owl_prepa/complete_pos.py" are used to add all indirect arcs explicitly to the generated file.
 
-- The TBox file: contains a set of positive and negative axioms, positive axioms indicate concept and role inclusions while negative axioms indicate disjoint concepts and roles.
+Before any execution of the repairing algorithms, weights from a specified DAG are randomly assigned to the assertions (tuples in the database). The function "add_pos_to_db(data_path:str, pos_path:str)" from "src/repair/utils.py" makes this step.
 
-The following is a raw example of the file containing the TBox:
- ```
-BEGINTBOX
-Manager < Staff
-Sales < Staff
-Manager < NOT EXISTS Edit
-Sales < NOT EXISTS Sign
-ENDTBOX
-```
+The POSet is read into a dictionnary, where each node points to all its direct and indirect less preferred nodes, this makes the preferrence checking process equivalent to reading values of a given key from a dictionnary.
 
-Manager < Staff and Sales < Staff translate the DL-Lite concept inclusion axioms $\small\textsf{Manager} \sqsubseteq \small\textsf{Staff}$ and $\small\textsf{Sales} \sqsubseteq \small\textsf{Staff}$ respectively and indicate that a $\small\textsf{Manager}$ is a $\small\textsf{Staff}$ and a $\small\textsf{Sales}$ is a $\small\textsf{Staff}$.
+## The $\pi$-repair
+The $\pi$-repair can be computed using the function "compute_pi_repair(ontology_path: str, data_path: str, pos_path: str)" in "src/repair/owl_pi_repair.py". It takes paths to the ontology, the database file of the ABox and the POSet. The resulting repair is a "set()" of assertions. 
 
-The negative axioms Manager < NOT EXISTS Edit and Sales < NOT EXISTS Sign indicate disjoint concepts and translate $\small\textsf{Manager} \sqsubseteq \neg \exists \small\textsf{Edit}$ and $\small\textsf{Sales} \sqsubseteq \neg \exists \small\textsf{Sign}$ respectively. This means that for the roles $\small\textsf{Edit}$ and $\small\textsf{Sign}$ respectively, the projection on the first individual (indicated by the existential quantifier $\exists$) is disjoint with the concepts $\small\textsf{Manager}$ and $\small\textsf{Sales}$ respectively.
+This function makes calls to the following functions:
 
- - The ABox file: contains a set of assertions of the form B(a) or R(a,b) (concept assertions and role assertions) and an integer value representing the weight associated with assertion, seperated with a semicolon ';'. 
+- "get_all_abox_assertions()" from "src/repair/owl_assertions_generator.py": this function read all the assertions in the provided sqlite database and returns them as objects of the class "assertion" from "src/dl_lite/assertion.py"
+- "compute_conflicts()" from "src/repair/owl_conflicts.py": this function reads all the negative axioms of the ontology, generate a conjunctive query (CQ) for each, rewrites the query using the Rapid tool (it makes a single external java call), the resulting CQs are transformed to sql queries and executed on the sqlite datbase. The results of the querying here are conflicts of the form "((table1name, id, degree),(table2name, id, degree))". This is the minimal form we can get about an assertion in the database, since the most important information are the degrees of the assertions in a conflict.
+- "compute_pi_repair_raw()" iterates over all the assertions and verifies if each assertion is at least more certain than an element of each conflict to return it in the resulting repair. Function "dominates()" from "src/repair/owl_dominance.py" makes the strict order checking. Note that we used "multiprocessing.Pool()" to parallelize the loop.
 
- The following is a raw example of an ABox:
- ```
-BEGINABOX
-Reports(F78);1;
-Manager(Bob);2;
-Sales(Bob);3;
-Sign(Bob,F78);4;
-Edit(Bob,F78);5;
-ENDABOX 
-```
+## The $C\pi$-repair
+The $C\pi$-repair can be computed either using the function "compute_cpi_repair(ontology_path: str, data_path: str, pos_path: str)" from "src/repair/owl_cpi_repair.py" or the function "compute_cpi_repair_enhanced(ontology_path: str, data_path: str, pos_path: str)" from "src/repair/owl_cpi_repair_enhanced.py".
 
- - The POS file: this files contains the Partially Ordered Set associated with the ABox, it contains a set of semicolon seperated values (integers). The first element of each line represent a weight to be associated with some assertions of the ABox, the following elements are all its possible successors (or stricltly less certain values). We made this choice of storing all the successors instead of storing just the direct ones to avoid using a recursive function each time to check if a weight is strictly preferred to another, instead the POS is loaded to an adjacency matrix and the checking is equal to one access to the matrix. This is better because the used methods make all of checking and because the values are simply integers, the size of the matrix is small even with larger number of POS elements. Note that equivalence is represnted by two assertions being associated with the same weight from the POS, hence, no equivalent weights are present in the POS. Also, it POS can be seen as a directed acyclic graph DAG.
+### The naive $C\pi$-repair
+The function "compute_cpi_repair(ontology_path: str, data_path: str, pos_path: str)" from "src/repair/owl_cpi_repair.py" makes calls to the folowing functions:
 
- The following is a raw example of a POS associated with the ABox given above, it represents the relations 1 > 2 > 4 and 1 > 3 > 5 :
+- "generate_assertions()" from "src/repair/owl_assertions_generator.py": this funtion computes the deductive closure of the ABox under classical semantics. It generates a query for each concept and role name in the ontology, rewrites the query to obtain all its candidate supports. It executes the queries on the sqlite database, the answers are associates with the initial concept or role name, before creating an assertion for each result.
+- In the same way above, it calls the function "compute_conflicts()" from "src/repair/owl_conflicts.py" to get all the conflicts of the ABox.
+- It takes each generated assertion and computes its supports, using the function "compute_all_supports()" from "src/repair/owl_supports.py". This function creates an instance checking query for each assertion, rewrites the query to get the instance checking queries of its supports. It then transforms the queries into sql queries before executing them on the sqlite database. For the queries with True as result, a support of the assertion is returned.
+- Having all the conflicts and the supports, for each assertion "compute_cpi_repair_raw()" checks if for each conflict, at least one of its supports dominates the conflict. Function "dominates()" from "src/repair/owl_dominance.py" makes the dominance checking. Note that we used "multiprocessing.Pool()" to parallelize the loop.
 
- ```
-1;2;3;4;5
-2;4;
-3;5;
-4;
-5; 
-```
+The resulting repair is a "set()" of assertions. 
 
-### Current test datasets 
+### The enhanced $C\pi$-repair
+In this version, the function "compute_cpi_repair_enhanced(ontology_path: str, data_path: str, pos_path: str)" from "src/repair/owl_cpi_repair_enhanced.py" starts first by:
 
-In order to test the implementation, we generated some random data for the TBox, ABox and POS files, this data alongside the generator can be found in the benchmark_data folder, we opted for the annotations described above and the randomly generated data to test the methods initially, before using a parser to read OWL standarised data and using well-known benchmarking data. The next step is to adapt this work with these benchmarks, but first we wanted to provide an initial proof for the applicability of the methods on simple generated random data.  
+- Computing the $\pi$-repair as showed above. 
+- Then, it generates the assertions of the deductive closure of the ABox under classical semantics. 
+- Assertions of the $\pi$-repair are discarded from the generated assertions.
+- The closure of the $\pi$-repair is computed using the function "compute_cl_pi_repair()" from "src/repair/owl_supports.py", it consists of all the assertions that can be inferred from the $\pi$-repair, and thus no need to verify them using the $C\pi$-repair method.
+- Now, for the remaining assertions, which are not in the $\pi$-repair or its closure, the supports are computed using "compute_all_supports()" from "src/repair/owl_supports.py". Note that at this level, any assertion that has only one support, cannot be in the $C\pi$-repair. Therefore, assertions with a single support are discarded from the following verification.
+- For each remaining assertion "compute_cpi_repair_raw()" is called, as in the naive method, to check if for each conflict, the assertion has at least one support that dominates the conflict.
 
-## Main functions
+## Results
+The ontology can be found under the folder:
+- "ontologies/univ-bench"
 
-At a first step, we implemented 5 main functions, associated directly with the $c\pi$-repair method.
+The different used datasets can be found under the folders:
 
-### check_integrity of TBox
-In DL-Lite, the TBox should not contain axioms of the type $A \sqsubseteq \neg A$ (self contradicting axioms). So, in order to check the integrity of the TBox we proceed by computing its negative closure, which consists in computing all the negative axioms that can be inferred from it, if this negative closure contains an axiom of the type $A \sqsubseteq \neg A$ then the TBox is not consistent and can't be used with the proposed methods. This step is necessary with each new TBox in order to confirm its consistency.
+- "bench_prepa/dataset_1_university"
+- "bench_prepa/dataset_small_u1"
+- "bench_prepa/dataset.0.2"
 
-It can be run using the following command :
- ```
-python3 src/py_reasoner.py check_integrity -t benchmark_data/data/ontology_2023053117_0.txt
-```
+The POSets can be found under the folder: 
 
-### negative_closure of TBox
-The negative closure computation is necessary to be able to compute the conflicts set, it consists in computing all the negative axioms that can be inferred from the TBox.
+- "bench_prepa/DAGs/DAGs_with_bnlearn/ordered_method". 
+- Other types of POSets were also explored, like the uniform random DAGs generated using the methods "ic-dag" and "melancon" (in folders: "bench_prepa/DAGs/DAGs_with_bnlearn/ic-dag_method" and "bench_prepa/DAGs/DAGs_with_bnlearn/melancon_method"). These DAGs gave similar results.
 
-It can be run using the following command :
- ```
-python3 src/py_reasoner.py negative_closure -t benchmark_data/data/ontology_2023053117_0.txt
-```
+For result reproduction, the function in "src/main2.py" features the different calls made for the experiment.
 
-### conflicts_set of ABox
-The set of conflicts is computed by processing all the negative axioms in the negative closure of the TBox and retrieving the conflcits resulting from them, two assertions A(a) and B(a) are conflicting if the TBox contains the negative axiom $A \sqsubseteq \neg B$. 
-
-It can be run using the following command :
- ```
-python3 src/py_reasoner.py conflicts_set -t src/test_examples/example1/first_tbox.txt -a src/test_examples/example1/first_abox.txt
-```
-
-### compute_cpi_repair
-The $c\pi$-repair of an ABox is a reapir of partially preordered ABoxes, this repair is productive and computed in polynomial time. Moreover, it yields a consistent sub-base on which we can run queries.
-
-It can be run using the following command :
- ```
-python3 src/py_reasoner.py compute_cpi_repair -t src/test_examples/example1/first_tbox.txt -a src/test_examples/example1/first_abox.txt -p /src/test_examples/example1/first_full_pos.txt
-```
-
-### check_in_cpi_repair
-This function is similar to compute_cpi_repair but instead of computing the whole repair, it takes one assertion and checks if it belongs to the repair. It can be useful in some special cases, and mainly for instance checking.
-
-It can be run using the following command :
- ```
-python3 src/py_reasoner.py compute_cpi_repair -t src/test_examples/example1/first_tbox.txt -a src/test_examples/example1/first_abox.txt -p /src/test_examples/example1/first_full_pos.txt -e "Reports(F78)"
-```
+Summary of the results, including charts and plots is found under the folder "bench_prepa/results".
 
 ## Future works
 
 The next steps in this project are:
-- Allow for owl parsing of ontologies and xml of data
-- Test and bench with LUBM benchmarking data (the DL-Lite_R adapted version)
-- Compare $\pi$-repair and $c\pi$-repair.
-- Run profound tests to evaluate code.
-
-
-<!-- ## Comments -->
-
+- Test and bench with other benchmarking ontologies (the DL-Lite_R adapted version)
+- Extend the experminets for other types of repairs (not only the possibilistic repairs).
 
 ## References:
 
-[1] Benferhat, S., Bouraoui, Z., Tabia, K.: How to select one preferred assertional-based repair from inconsistent and prioritized DL-Lite knowledge bases? In: International Joint Conference on Artificial Intelligence (IJCAI), Buenos Aires, Argentina. pp. 1450–1456 (2015)
+[1] A. Laouar, S. Belabbes, S. Benferhat, Tractable closure-based possibilistic repair for partially ordered dl-lite ontologies, in: European Conference on Logics in Artificial Intelligence, Springer, 2023, pp. 353–368
 
-[2] Belabbes, S., Benferhat, S.: Computing a possibility theory repair for partially preordered inconsistent ontologies. IEEE Transactions on Fuzzy Systems pp. 1–10 (2021)
+[2] Benferhat, S., Bouraoui, Z., Tabia, K.: How to select one preferred assertional-based repair from inconsistent and prioritized DL-Lite knowledge bases? In: International Joint Conference on Artificial Intelligence (IJCAI), Buenos Aires, Argentina. pp. 1450–1456 (2015)
+
+[3] Belabbes, S., Benferhat, S.: Computing a possibility theory repair for partially preordered inconsistent ontologies. IEEE Transactions on Fuzzy Systems pp. 1–10 (2021)
+
+[4] A. Chortaras, D. Trivela, G. Stamou, Optimized query rewriting for owl 2 ql, in: Automated Deduction–CADE-23: 23rd International Conference on Automated Deduction, Wrocław, Poland, July 31-August 5, 2011. Proceedings 23, Springer, 2011, pp. 192–206.
+
+[5] C. Lutz, I. Seylan, D. Toman, F. Wolter, The combined approach to OBDA: taming role hierarchies using filters, in: The Semantic Web - ISWC 2013 - 12th International Semantic Web Conference, Sydney, Australia, 2013, pp. 314–330.
+
+[6] M. Scutari, Learning bayesian networks with the bnlearn r package, arXiv preprint arXiv:0908.3817 (2009).
+
+## More
+
+The main focus of this work is a subset of methods for data repairs that operates in the context of possibilistic Knowledge Bases and more generally on partially ordered KBs.  
+[__Possiblistic DL-Lite__](https://link.springer.com/chapter/10.1007/978-3-642-40381-1_27) extends the expressive power of DL-Lite to deal with possibilistic uncertain information without increasing the computational cost. 

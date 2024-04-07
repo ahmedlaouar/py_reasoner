@@ -1,6 +1,7 @@
 import os
 from rdflib import Graph, RDF, OWL
 import sqlite3
+import argparse
 
 def empty_database(db_path):
     if os.path.exists(db_path):
@@ -78,9 +79,20 @@ def insert_data(graph, db_file):
     conn.close()
 
 if __name__ == "__main__":
-    owl_file = "ontologies/univ-bench/lubm-ex-20_disjoint.owl"
-    db_file = "bench_prepa/dataset_1_university/University0.db"
-    owl_data_file = "bench_prepa/dataset_1_university/University0.owl"
+    # Use argparse to parse parameters from command line 
+    parser = argparse.ArgumentParser(description='Convert data from OWL file to sqlite3 database instance.')
+
+    # Add the arguments
+    parser.add_argument('--owl', type=str, required=True, help='Path to the owl file containing the ontology')
+    parser.add_argument('--db', type=str, required=True, help='Path to the target database file')
+    parser.add_argument('--owl_data', type=str, required=True, help='Path to the owl file containing the data')
+
+    # Execute the parse_args() method
+    args = parser.parse_args()
+
+    owl_file = args.owl
+    db_file = args.db
+    owl_data_file = args.owl_data
 
     empty_database(db_file)
     graph = parse_ontology(owl_file)
@@ -88,3 +100,5 @@ if __name__ == "__main__":
 
     graph_data = parse_data(owl_data_file)
     insert_data(graph_data, db_file)
+
+    #example of use: python3 bench_prepa/owl_prepa/owl_data_to_db.py --owl ontologies/univ-bench/lubm-ex-20_disjoint.owl --db bench_prepa/dataset_1_university/University0.db --owl_data bench_prepa/dataset_1_university/University0.owl

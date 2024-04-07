@@ -1,3 +1,4 @@
+import argparse
 import random
 import subprocess
 import rdflib
@@ -150,11 +151,25 @@ def add_conflicts(ontology_path, cursor, p):
                         cursor.execute(f"INSERT INTO {first_tokens[0]} (individual0) VALUES (?)", (row[0],))
 
 if __name__ == "__main__":
-    owl_file = "ontologies/univ-bench/lubm-ex-20_disjoint.owl" 
-    db_file = "bench_prepa/dataset_small_u1/university0.5_p_0.001.db"
+
+    parser = argparse.ArgumentParser(description='Add conflicts to the data with probability p.')
+    
+    parser.add_argument('--owl', type=str, required=True, help='Path to the owl file containing the ontology')
+    parser.add_argument('--db', type=str, required=True, help='Path to the database file')
+    parser.add_argument('-p', type=float, required=True, help='Probability of adding conflicts p')
+
+    # Execute the parse_args() method
+    args = parser.parse_args()
+
+    owl_file = args.owl
+    db_file = args.db
+    p = args.p
+
+    # example of command: python3 bench_prepa/owl_prepa/add_conflicts_to_db.py --owl ontologies/univ-bench/lubm-ex-20_disjoint.owl --db bench_prepa/dataset_small_u1/university0.5_p_0.001.db -p 0.00005
 
     # set probability p to create multiple conflicting ABoxes "0.000005", "0.00001", "0.00005", "0.001", "0.0005"
-    p = 0.00005
+    #p = 0.00005
+    
     conn = sqlite3.connect(db_file)
     cursor = conn.cursor()
     try:

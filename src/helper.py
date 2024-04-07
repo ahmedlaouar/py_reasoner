@@ -1,144 +1,99 @@
-import sys
 import time
-from dl_lite_parser.parser_to_db import abox_to_database, empty_database, read_full_pos
-from repair.assertions_generator import generate_possible_assertions_rec
-from repair.conflicts import conflict_set, reduced_conflict_set
-from repair.cpi_repair import check_assertion_in_cpi_repair, compute_cpi_repair_bis
 import sqlite3
+from dl_lite.assertion import w_assertion
+from repair.owl_conflicts import compute_conflicts, compute_conflicts_naive
+from repair.owl_cpi_repair import check_assertion
+from repair.owl_supports import compute_all_supports
+from repair.utils import read_pos
 
-def conflicts_helper(tbox, abox_path, db_path):
+def conflicts_helper(ontology_path,data_path) :
+    conn = sqlite3.connect(data_path)
+    cursor = conn.cursor()
+
+    # Get the list of tables
+    cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
+    tables = cursor.fetchall()
+
+    # Count rows in each table and sum them
+    total_rows = 0
+    for table in tables:
+        cursor.execute(f"SELECT COUNT(*) FROM {table[0]}")
+        count = cursor.fetchone()[0]
+        total_rows += count
+
+    print(f"The size of the ABox is {total_rows}.")
+
+    start_time = time.time()
     try:
-        tbox.negative_closure()
-        if not tbox.check_integrity():
-            print("This TBox is not consistent, cannot proceed in this case, abort execution.")
-            sys.exit()
+        conflicts = compute_conflicts_naive(ontology_path,cursor)
+    except sqlite3.OperationalError as e:
+            print(f"Error: {e}.")
+    end_time = time.time()
 
-        empty_database(db_path)
+    for conflict in conflicts:
+        print(conflict)
 
-        conn = sqlite3.connect(db_path)
-        cursor = conn.cursor()
-        abox_to_database(abox_path, cursor)
+    print(f"Size of the conflicts is {len(conflicts)}")
 
-        # Measure execution time
-        start_time = time.time()
-        conflicts = conflict_set(tbox, cursor)
-        end_time = time.time()
-        execution_time = end_time - start_time
-        print(f"Execution time: {execution_time} seconds")
+    print(f"Time to compute conflicts is {end_time - start_time}")
 
-        print(f"Size of the conflicts = {len(conflicts)}")
+    print(f"Percent of conflicts w.r.t. the size of the ABox: {len(conflicts)*100/total_rows}")
 
-        for conf in conflicts:
-            print(conf[0], conf[1])
+    conn.commit()
+    conn.close()
 
-        conn.commit()
-        cursor.close()
-        conn.close()
+def read_assertion(line: str):
+    splitted = line.split(';')
+    names = splitted[0].split('(')
+    assertion_name = names[0]
+    if ',' in names[1]:
+        individuals = names[1].split(',')
+        individual_1 = individuals[0]
+        individual_2 = individuals[1].replace(")", "")
+        return  w_assertion(assertion_name,individual_1,individual_2)
+    else:
+        individual_1 = names[1].replace(")", "")
+        return  w_assertion(assertion_name,individual_1)
 
-    except sqlite3.Error as e:
-        print("An error occurred:", e)
-
-def cpi_repair_helper(tbox, abox_path, pos_path, db_path):
+def check_in_cpi_repair_helper(tbox_path,abox_path,pos_path,assertion):
+    pos_dict = read_pos(pos_path)
+    
+    conn = sqlite3.connect(abox_path)
+    cursor = conn.cursor()
     try:
-        # Measure execution time
-        start_time = time.time()
-        tbox.negative_closure()
-        if not tbox.check_integrity():
-            print("This TBox is not consistent, cannot proceed in this case, abort execution.")
-            sys.exit()
-        inter_time0 = time.time()
-        print(f"Time to compute negative closure of TBox: {inter_time0 - start_time}")
-
-        empty_database(db_path)
-        # Connect to the SQLite database
-        conn = sqlite3.connect(db_path)
-        cursor = conn.cursor()
-
-        print("-------------- Reading ABox to database -------------")
-        abox_to_database(abox_path, cursor)
+        # Get the list of tables
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
+        tables = cursor.fetchall()
+        # Count rows in each table and sum them
+        total_rows = 0
+        for table in tables:
+            cursor.execute(f"SELECT COUNT(*) FROM {table[0]}")
+            count = cursor.fetchone()[0]
+            total_rows += count
+        print(f"Size of the ABox: {total_rows}.")
         
-        # Query to get ABox size
-        cursor.execute("SELECT COUNT(*) FROM assertions")
-        abox_size = cursor.fetchone()[0]
+        ABox_name = abox_path.split("/")[-1]
+        print(f"Checking if: {assertion} is in the cpi-repair of ABox: {ABox_name}.")
+
+        # compute the conflicts, conflicts are of the form ((table1name, id, degree),(table2name, id, degree))
+        conflicts = compute_conflicts(tbox_path,cursor,pos_dict)
         
-        pos_matrix = read_full_pos(pos_path)
-        print(f"Reading done, size of the ABox: {abox_size}, POS size: {len(pos_matrix)-1}")
-        inter_time1 = time.time()
-        print(f"Time to read: {inter_time1 - inter_time0}")
+        # compute supports of the assertion
+        # returns a dictionnary with assertions indexes in the list as keys and as values lists of supports with the form [(table_name,id,degree)] 
+        supports = compute_all_supports([assertion], tbox_path, cursor, pos_dict)
+        supports_size = sum((len(val) for val in supports.values()))
+        print(f"Number of all the supports: {supports_size}")
         
-        # Compute the conflicts without dominance check
-        conflicts = conflict_set(tbox, cursor)
-        print(f"Size of the conflicts without dominance check: {len(conflicts)}")
-        inter_time2 = time.time()
-        print(f"Time to compute conflicts without dominance check: {inter_time2 - inter_time1}")
+        args = assertion, conflicts, supports[assertion], pos_dict
         
-        # Compute the conflicts with dominance check
-        reduced_conflicts = reduced_conflict_set(tbox, cursor, pos_matrix)
-        print(f"Size of the conflicts with dominance check: {len(reduced_conflicts)}")
-        inter_time3 = time.time()
-        print(f"Time to compute conflicts with dominance check: {inter_time3 - inter_time2}")
-
-        check_list = generate_possible_assertions_rec(cursor, tbox.get_positive_axioms())
-        inter_time4 = time.time()
-        print(f"Size of assertions to test: {len(check_list) + abox_size}")
-        print(f"Time to generate additional assertions to test: {inter_time4 - inter_time3}")
-
-        for elt in check_list:
-            print(elt)
-
-        cpi_repair = compute_cpi_repair_bis(cursor, tbox, pos_matrix, check_list, reduced_conflicts)
-
-        print(f"The size of the cpi_repair: {len(cpi_repair)}")
-        
-        for elt in cpi_repair:
-            print(elt)
-
-        inter_time5 = time.time()
-        cp_repair_time = inter_time5 - inter_time3
-        print(f"Time to compute cpi_repair: {cp_repair_time}")
-
-        end_time = time.time()
-        execution_time = end_time - start_time
-        print(f"Execution time: {execution_time} seconds")
-
-        conn.commit()
-        cursor.close()
-        conn.close()
-
-        return tbox.tbox_size(), abox_size, len(pos_matrix) - 1, len(conflicts), len(cpi_repair), cp_repair_time
-
-    except sqlite3.Error as e:
-        print("An error occurred:", e)
-
-def check_in_cpi_repair_helper(tbox, abox_path, pos_path, check_assertion, db_path):
-    try:
-        tbox.negative_closure()
-        if not tbox.check_integrity():
-            print("This TBox is not consistent, cannot proceed in this case, abort execution.")
-            sys.exit()
-
-        empty_database(db_path)
-
-        conn = sqlite3.connect(db_path)
-        cursor = conn.cursor()
-        abox_to_database(abox_path, cursor)
-        pos_order = read_full_pos(pos_path)
-
-        # Measure execution time
-        start_time = time.time()
-
-        if check_assertion_in_cpi_repair(cursor, tbox, pos_order, check_assertion):
-            print(f"{check_assertion} is in the Cpi-repair of the abox")
+        if check_assertion(args) != None:
+            print(f"The assertion {assertion} belongs to the cpi_repair")
         else:
-            print(f"{check_assertion} is not in the Cpi-repair of the abox")
+            print(f"The assertion {assertion} does not belong to the cpi_repair") 
 
-        end_time = time.time()
-        execution_time = end_time - start_time
-        print(f"Execution time: {execution_time} seconds")
-
-        conn.commit()
         cursor.close()
         conn.close()
-
-    except sqlite3.Error as e:
-        print("An error occurred:", e)
+    except sqlite3.OperationalError as e:
+            print(f"Error: {e}.")
+    
+    return

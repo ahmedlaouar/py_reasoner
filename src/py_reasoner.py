@@ -25,7 +25,7 @@ if __name__ == '__main__':
     cpi_parser.add_argument('--pos', type=str, required=True, help='Path to ABox Partial Order Set')
     
     # Subparser to compute cpi-repair using the improved method
-    cpi_improved_parser = subparsers.add_parser('compute_cpi_repair_improved', help='Compute cpi-repair')
+    cpi_improved_parser = subparsers.add_parser('compute_cpi_repair_improved', help='Compute cpi-repair (improved methpd)')
     cpi_improved_parser.add_argument('--tbox', type=str, required=True, help='Path to TBox file')
     cpi_improved_parser.add_argument('--abox', type=str, required=True, help='Path to ABox file')
     cpi_improved_parser.add_argument('--pos', type=str, required=True, help='Path to ABox Partial Order Set')

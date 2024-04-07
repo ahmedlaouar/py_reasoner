@@ -205,8 +205,10 @@ Summary of the results, including charts and plots are found under the folder [b
 ## Future works
 
 The next steps in this project are:
+- Improve prompts and output / build a minimal graphic interface
 - Test and bench with other benchmarking ontologies (the DL-Lite_R adapted version)
 - Extend the experminets for other types of repairs (not only the possibilistic repairs).
+- Implement a solver.
 
 ## References:
 

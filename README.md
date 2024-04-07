@@ -121,6 +121,24 @@ The function `compute_cpi_repair(ontology_path: str, data_path: str, pos_path: s
 
 The resulting repair is a `set()` of assertions. 
 
+Run the following command for an example for computing the $C\pi$-repair of the ABox: `bench_prepa/dataset_small_u1/university0.5_p_0.00001.db` with the DAG `bench_prepa/DAGs/DAGs_with_bnlearn/ordered_method/pos500/prob_0.3.txt` using the naive method:
+```
+python3 src/py_reasoner.py compute_cpi_repair --abox bench_prepa/dataset_small_u1/university0.5_p_0.00001.db --tbox ontologies/univ-bench/lubm-ex-20_disjoint.owl --pos bench_prepa/DAGs/DAGs_with_bnlearn/ordered_method/pos500/prob_0.3.txt
+```
+The result prompt should be similar to the following:
+```
+Computing Cpi-repair for the ABox: university0.5_p_0.00001.db and the TBox: lubm-ex-20_disjoint.owl with the POS: prob_0.3.txt
+Size of the ABox is 9158.
+Number of the generated assertions: 25345
+Time to compute the generated assertions: 1.461
+Number of conflicts: 40
+Time to compute the conflicts: 2.336
+Number of all the computed supports: 25466
+Time to compute all the supports of all the assertions: 31.033
+Size of the cpi_repair: 9929
+Time to compute the cpi_repair: 1.389
+Total time of execution: 36.221
+```
 ### The enhanced $C\pi$-repair
 In this version, the function `compute_cpi_repair_enhanced(ontology_path: str, data_path: str, pos_path: str)` from [src/repair/owl_cpi_repair_enhanced.py](src/repair/owl_cpi_repair_enhanced.py) starts first by:
 
@@ -130,6 +148,34 @@ In this version, the function `compute_cpi_repair_enhanced(ontology_path: str, d
 - The closure of the $\pi$-repair is computed using the function `compute_cl_pi_repair()` from [src/repair/owl_supports.py](src/repair/owl_supports.py), it consists of all the assertions that can be inferred from the $\pi$-repair, and thus no need to verify them using the $C\pi$-repair method.
 - Now, for the remaining assertions, which are not in the $\pi$-repair or its closure, the supports are computed using `compute_all_supports()` from [src/repair/owl_supports.py](src/repair/owl_supports.py). Note that at this level, any assertion that has only one support, cannot be in the $C\pi$-repair. Therefore, assertions with a single support are discarded from the following verification.
 - For each remaining assertion `compute_cpi_repair_raw()` is called, as in the naive method, to check if for each conflict, the assertion has at least one support that dominates the conflict.
+
+Run the following command for an example for computing the $C\pi$-repair of the ABox: `bench_prepa/dataset_small_u1/university0.5_p_0.00001.db` with the DAG `bench_prepa/DAGs/DAGs_with_bnlearn/ordered_method/pos500/prob_0.3.txt` using the improved method:
+```
+python3 src/py_reasoner.py compute_cpi_repair_improved --abox bench_prepa/dataset_small_u1/university0.5_p_0.00001.db --tbox ontologies/univ-bench/lubm-ex-20_disjoint.owl --pos bench_prepa/DAGs/DAGs_with_bnlearn/ordered_method/pos500/prob_0.3.txt
+```
+The result prompt should be similar to the following:
+```
+Computing cpi-repair for the ABox: university0.5_p_0.00001.db and the TBox: lubm-ex-20_disjoint.owl with the POS: prob_0.3.txt
+Size of the ABox: 9158.
+Number of the ABox assertions: 9158
+Time to load the ABox assertions: 0.032
+Number of new generated assertions: 16187
+Time to compute the generated assertions: 1.484
+Number of the conflicts: 14
+Time to compute the conflicts: 1.484
+Size of the pi_repair: 1097
+Time to compute the pi_repair: 2.374
+The number of assertions left to check: 24248
+Size of cl_pi_repair: 2561
+Time to compute the cl_pi_repair: 2.163
+Number of all the computed supports before filtering: 15149
+Number of all the computed supports: 166
+Time to compute all the supports of all the assertions: 24.311
+Size of the cpi_repair: 3658
+Time to compute the cpi_repair: 0.124
+Total time of execution: 30.488
+```
+Note that in the ABove examples of execution, each time a new random assigning of weights from the POset is done. A proper way to evaluate the algorthms is by computing the $\pi$-repair and the $C\pi$-repair using both methods with the same weights assigned to the ABox. 
 
 ## Results
 The ontology can be found in:
@@ -146,7 +192,9 @@ The POSets can be found under the folder:
 - [bench_prepa/DAGs/DAGs_with_bnlearn/ordered_method](bench_prepa/DAGs/DAGs_with_bnlearn/ordered_method). 
 - Other types of POSets were also explored, like the uniform random DAGs generated using the methods `ic-dag` and `melancon` (in folders: [bench_prepa/DAGs/DAGs_with_bnlearn/ic-dag_method](bench_prepa/DAGs/DAGs_with_bnlearn/ic-dag_method) and [bench_prepa/DAGs/DAGs_with_bnlearn/melancon_method](bench_prepa/DAGs/DAGs_with_bnlearn/melancon_method)). These DAGs gave similar results.
 
-For result reproduction, the function in [src/main2.py](src/main2.py) features the different calls made for the experiment.
+For our experiments, we run all the ABoxes in the datasets folders with all the DAGs in the folder [bench_prepa/DAGs/DAGs_with_bnlearn/ordered_method](bench_prepa/DAGs/DAGs_with_bnlearn/ordered_method) using the script in [src/main2.py](src/main2.py).
+
+
 
 Summary of the results, including charts and plots is found under the folder [bench_prepa/results](bench_prepa/results).
 

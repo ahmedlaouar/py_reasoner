@@ -55,9 +55,18 @@ Note that we create a copy of the database .db file before running this command,
 
 ## Partially ordered sets (POSets)
 
-In order to represent the partial order defined over the dataset, we associate weights to the assertions. These weights belong to a partially ordered set. We opted for random Directed Acyclic Graphs to represent these sets. We used the [__bnlearn__](https://www.bnlearn.com/) R package to generate different types of DAGs, the goal is to capture different situations of POSets. In a DAG, the number of nodes indicate the size of the POSet (number of weights) to be associated with the assertions, an arc between two assertions indicate the preference relation and the absence of an arc in both directions between two nodes encodes incomparability. The probability of having an arc represents the density of the DAG, a more dense DAG has less incomparabilities and is closer to a totally ordered set, a DAG with all possible arcs represent a totally ordered set. 
+In order to represent the partial order defined over the dataset, we associate weights to the assertions. These weights belong to a partially ordered set. We opted for random Directed Acyclic Graphs to represent these sets. We used the [__bnlearn__](https://www.bnlearn.com/) R package to generate different types of DAGs, the goal is to capture different situations of POSets. In a DAG, the number of nodes indicates the size of the POSet (number of weights) to be associated with the assertions, an arc between two assertions indicate the preference relation and the absence of an arc in both directions between two nodes encodes incomparability. The probability of having an arc represents the density of the DAG, a more dense DAG has less incomparabilities and is closer to a totally ordered set, a DAG with all possible arcs represent a totally ordered set. Generated DAGs vary in size from $\{50,100,250,500,750,1000,2500\}$ and in the probability of having an arc between two nodes which is varied from $[0.1,\dots,0.9]$.
 
-The code to generate the DAGs is available in [bench_prepa/owl_prepa/pos_generator_bnlearn.r](bench_prepa/owl_prepa/pos_generator_bnlearn.r). Generated DAGs vary in size from $\{50,100,250,500,750,1000,2500\}$ and in the probability of having an arc between two nodes which is varied from $[0.1,\dots,0.9]$. Each generated DAG is saved in a txt file, where in each line, a source node is associated to the target nodes to which its arcs are pointing. Functions in [bench_prepa/owl_prepa/complete_pos.py](bench_prepa/owl_prepa/complete_pos.py) are used to add all indirect arcs explicitly to the generated file.
+The code to generate the DAGs is available in the script [bench_prepa/owl_prepa/pos_generator_bnlearn.r](bench_prepa/owl_prepa/pos_generator_bnlearn.r). In the script, setting the parameter `num_nodes` to `100` creates DAGs with probablities varying from `0.1` to `0.9`:
+
+``` 
+Rscript bench_prepa/owl_prepa/pos_generator_bnlearn.r
+```
+
+Each generated DAG is saved in a txt file, where in each line, a source node is associated to the target nodes to which its arcs are pointing. The script in [bench_prepa/owl_prepa/complete_pos.py](bench_prepa/owl_prepa/complete_pos.py) completes all the DAGs under the folder [bench_prepa/DAGs/DAGs_with_bnlearn/ordered_method](bench_prepa/DAGs/DAGs_with_bnlearn/ordered_method) with all the indirect arcs.
+```
+python3 py_reasoner/bench_prepa/owl_prepa/complete_pos.py
+```
 
 Before any execution of the repairing algorithms, weights from a specified DAG are randomly assigned to the assertions (tuples in the database). The function `add_pos_to_db(data_path:str, pos_path:str)` from [src/repair/utils.py](src/repair/utils.py) makes this step.
 

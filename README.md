@@ -74,6 +74,8 @@ Before any execution of the repairing algorithms, weights from a specified DAG a
 
 The POSet is read into a dictionnary, where each node points to all its direct and indirect less preferred nodes, this makes the preferrence checking process equivalent to reading values of a given key from a dictionnary.
 
+All the data preparation and POSet (DAG) generation and completion scripts can be found under the folder [bench_prepa/owl_prepa](bench_prepa/owl_prepa).
+
 ## The $\pi$-repair
 The $\pi$-repair can be computed using the function `compute_pi_repair(ontology_path: str, data_path: str, pos_path: str)` in [src/repair/owl_pi_repair.py](src/repair/owl_pi_repair.py). It takes paths to the ontology, the database file of the ABox and the POSet. The resulting repair is a `set()` of assertions. 
 
@@ -192,11 +194,13 @@ The POSets can be found under the folder:
 - [bench_prepa/DAGs/DAGs_with_bnlearn/ordered_method](bench_prepa/DAGs/DAGs_with_bnlearn/ordered_method). 
 - Other types of POSets were also explored, like the uniform random DAGs generated using the methods `ic-dag` and `melancon` (in folders: [bench_prepa/DAGs/DAGs_with_bnlearn/ic-dag_method](bench_prepa/DAGs/DAGs_with_bnlearn/ic-dag_method) and [bench_prepa/DAGs/DAGs_with_bnlearn/melancon_method](bench_prepa/DAGs/DAGs_with_bnlearn/melancon_method)). These DAGs gave similar results.
 
-For our experiments, we run all the ABoxes in the datasets folders with all the DAGs in the folder [bench_prepa/DAGs/DAGs_with_bnlearn/ordered_method](bench_prepa/DAGs/DAGs_with_bnlearn/ordered_method) using the script in [src/main2.py](src/main2.py).
+For our experiments, we computed the repairs of all the ABoxes in the datasets folders assigned with each of the DAGs in the folder [bench_prepa/DAGs/DAGs_with_bnlearn/ordered_method](bench_prepa/DAGs/DAGs_with_bnlearn/ordered_method) using the script in [src/main2.py](src/main2.py).
 
+For result reproduction, a lot of executions are done, we separated the executions with ABoxes sizes. Running only for the small sized ABoxes in [bench_prepa/dataset_small_u1](bench_prepa/dataset_small_u1) is fast and illustrates how experiments work. 
 
+<!--- Experiments results are saved in csv files under the folder [bench_prepa/execution_results](bench_prepa/execution_results). -->
 
-Summary of the results, including charts and plots is found under the folder [bench_prepa/results](bench_prepa/results).
+Summary of the results, including charts and plots are found under the folder [bench_prepa/results](bench_prepa/results).
 
 ## Future works
 

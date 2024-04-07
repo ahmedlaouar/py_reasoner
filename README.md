@@ -42,6 +42,8 @@ python3 bench_prepa/owl_prepa/owl_data_to_db.py --owl ontologies/univ-bench/lubm
 
 We generated three different sizes for the datasets: 9156, 75671 and 463349 assertions.
 
+### Adding conflicts to the data
+
 The datasets obtained using the previous steps are consistent (free of conflicts). The conflicts are randomly added to the data as follows. For each negative axiom inferred from the ontology, individuals present in a concept assertion are added to a contradicting assertion with probability $p$, and individuals present in a role assertion are added to a contradicting assertion with probability $p/2$. We used increasing values for $p$ to obtain five different ratios of inconsistency for each ABox. Values in $\{5 \times 10^{-6}, 10^{-5}, 5 \times 10^{-5}, 10^{-4}, 5 \times 10^{-4}\}$ were used, different values may be used for different ABoxes to introduce certain levels of inconsistency. 
 
 The script in [bench_prepa/owl_prepa/add_conflicts_to_db.py](bench_prepa/owl_prepa/add_conflicts_to_db.py) was used to add the conflicts.
@@ -79,7 +81,32 @@ This function makes calls to the following functions:
 
 - `get_all_abox_assertions()` from [src/repair/owl_assertions_generator.py](src/repair/owl_assertions_generator.py): this function read all the assertions in the provided sqlite database and returns them as objects of the class `assertion` from [src/dl_lite/assertion.py](src/dl_lite/assertion.py)
 - `compute_conflicts()` from [src/repair/owl_conflicts.py](src/repair/owl_conflicts.py): this function reads all the negative axioms of the ontology, generate a conjunctive query (CQ) for each, rewrites the query using the Rapid tool (it makes a single external java call), the resulting CQs are transformed to sql queries and executed on the sqlite datbase. The results of the querying here are conflicts of the form `((table1name, id, degree),(table2name, id, degree))`. This is the minimal form we can get about an assertion in the database, since the most important information are the degrees of the assertions in a conflict.
+
+Run the following command to see an exmaple of the computation of the conflicts:
+
+```
+python3 src/py_reasoner.py compute_conflicts --abox bench_prepa/dataset_small_u1/university0.5_p_0.00001.db --tbox ontologies/univ-bench/lubm-ex-20_disjoint.owl
+```
+
 - `compute_pi_repair_raw()` iterates over all the assertions and verifies if each assertion is at least more certain than an element of each conflict to return it in the resulting repair. Function `dominates()` from [src/repair/owl_dominance.py](src/repair/owl_dominance.py) makes the strict order checking. Note that we used `multiprocessing.Pool()` to parallelize the loop.
+
+Run the following command to see an exmaple for computing the $\pi$-repair of the ABox: `bench_prepa/dataset_small_u1/university0.5_p_0.00001.db` with the DAG `bench_prepa/DAGs/DAGs_with_bnlearn/ordered_method/pos500/prob_0.3.txt`
+
+```
+python3 src/py_reasoner.py compute_pi_repair --abox bench_prepa/dataset_small_u1/university0.5_p_0.00001.db --tbox ontologies/univ-bench/lubm-ex-20_disjoint.owl --pos bench_prepa/DAGs/DAGs_with_bnlearn/ordered_method/pos500/prob_0.3.txt 
+```
+The result prompt should be similar to the following:
+```
+Computing pi-repair for the ABox: university0.5_p_0.00001.db and the TBox: lubm-ex-20_disjoint.owl with the POS: prob_0.3.txt
+Size of the ABox: 9158.
+Number of the generated assertions: 9158
+Time to compute the generated assertions: 0.023
+Number of the conflicts: 1
+Time to compute the conflicts: 1.988
+Size of the pi_repair: 2603
+Time to compute the pi_repair: 0.184
+Total time of execution: 2.196
+```
 
 ## The $C\pi$-repair
 The $C\pi$-repair can be computed either using the function `compute_cpi_repair(ontology_path: str, data_path: str, pos_path: str)` from [src/repair/owl_cpi_repair.py](src/repair/owl_cpi_repair.py) or the function `compute_cpi_repair_enhanced(ontology_path: str, data_path: str, pos_path: str)` from [src/repair/owl_cpi_repair_enhanced.py](src/repair/owl_cpi_repair_enhanced.py).

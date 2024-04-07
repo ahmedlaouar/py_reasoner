@@ -1,46 +1,7 @@
-import sqlite3
-import time
-from repair.owl_conflicts import compute_conflicts_naive
 from repair.owl_cpi_repair import compute_cpi_repair
 from repair.owl_cpi_repair_enhanced import compute_cpi_repair_enhanced
 from repair.owl_pi_repair import compute_pi_repair
 from repair.utils import add_pos_to_db
-
-def conflicts_helper(ontology_path,data_path) :
-    conn = sqlite3.connect(data_path)
-    cursor = conn.cursor()
-
-    # Get the list of tables
-    cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
-    tables = cursor.fetchall()
-
-    # Count rows in each table and sum them
-    total_rows = 0
-    for table in tables:
-        cursor.execute(f"SELECT COUNT(*) FROM {table[0]}")
-        count = cursor.fetchone()[0]
-        total_rows += count
-
-    print(f"The size of the ABox is {total_rows}.")
-
-    start_time = time.time()
-    try:
-        conflicts = compute_conflicts_naive(ontology_path,cursor)
-    except sqlite3.OperationalError as e:
-            print(f"Error: {e}.")
-    end_time = time.time()
-
-    print(f"Size of the conflicts is {len(conflicts)}")
-
-    print(f"Time to compute conflicts is {end_time - start_time}")
-
-    print(f"Percent of conflicts w.r.t. the size of the ABox: {len(conflicts)*100/total_rows}")
-
-    #for conflict in conflicts:
-    #    print(conflict)
-
-    conn.commit()
-    conn.close()
 
 if __name__ == "__main__":
 
@@ -73,7 +34,7 @@ if __name__ == "__main__":
 
                     results1 = compute_pi_repair(ontology_path,data_path,pos_path)
 
-                    #results2 = compute_cpi_repair(ontology_path,data_path,pos_path)
+                    results2 = compute_cpi_repair(ontology_path,data_path,pos_path)
 
                     results3 = compute_cpi_repair_enhanced(ontology_path,data_path,pos_path)
 

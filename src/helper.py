@@ -30,14 +30,25 @@ def conflicts_helper(ontology_path,data_path) :
             print(f"Error: {e}.")
     end_time = time.time()
 
-    for conflict in conflicts:
-        print(conflict)
+    #for conflict in conflicts:
+    #    print(conflict)
 
     print(f"Size of the conflicts is {len(conflicts)}")
 
     print(f"Time to compute conflicts is {end_time - start_time}")
 
-    print(f"Percent of conflicts w.r.t. the size of the ABox: {len(conflicts)*100/total_rows}")
+    print(f"Percentage of conflicts w.r.t. the size of the ABox: {len(conflicts)*100/total_rows}")
+
+    assertions = []
+
+    for conflict in conflicts:
+       assertions.append((conflict[0]))
+       assertions.append((conflict[1]))
+    
+    distinct_assertions = set(assertions)
+    print(f"Number of ABox assertions that are in some conflict: {len(distinct_assertions)}")
+
+    print(f"Percentage of ABox assertions that are in some conflict: {len(distinct_assertions)*100/total_rows}")
 
     conn.commit()
     conn.close()

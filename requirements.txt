@@ -1,0 +1,6 @@
+rdflib
+dotenv
+psycopg2-binary
+logzero
+pandas
+matplotlib

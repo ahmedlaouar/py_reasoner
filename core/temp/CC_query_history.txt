@@ -1,0 +1,131 @@
+sql = f"""
+SELECT 1 FROM {self.quote_identifier(rel1)} t1 JOIN {self.quote_identifier(rel2)} t2 ON {join_conditions}
+LEFT JOIN {support_table}
+ON (
+  (
+    (
+      ((s.derivationTimestamp IS NOT NULL AND t1.derivationTimestamp IS NOT NULL AND s.derivationTimestamp::timestamptz > t1.derivationTimestamp) OR (s.wikiTimestamp IS NOT NULL AND t1.wikiTimestamp IS NOT NULL AND s.wikiTimestamp::timestamptz > t1.wikiTimestamp) OR (s.source = 'instance-types_lang=en_specific' AND t1.source = 'instance_types_lhd_dbo_en'))
+      AND NOT ((t1.derivationTimestamp IS NOT NULL AND s.derivationTimestamp IS NOT NULL AND t1.derivationTimestamp > s.derivationTimestamp::timestamptz) OR (t1.wikiTimestamp IS NOT NULL AND s.wikiTimestamp IS NOT NULL AND t1.wikiTimestamp > s.wikiTimestamp::timestamptz) OR (t1.source = 'instance-types_lang=en_specific' AND s.source = 'instance_types_lhd_dbo_en'))
+    ) OR (
+      ((s.derivationTimestamp IS NOT NULL AND t2.derivationTimestamp IS NOT NULL AND s.derivationTimestamp::timestamptz > t2.derivationTimestamp) OR (s.wikiTimestamp IS NOT NULL AND t2.wikiTimestamp IS NOT NULL AND s.wikiTimestamp::timestamptz > t2.wikiTimestamp) OR (s.source = 'instance-types_lang=en_specific' AND t2.source = 'instance_types_lhd_dbo_en'))
+      AND NOT ((t2.derivationTimestamp IS NOT NULL AND s.derivationTimestamp IS NOT NULL AND t2.derivationTimestamp > s.derivationTimestamp::timestamptz) OR (t2.wikiTimestamp IS NOT NULL AND s.wikiTimestamp IS NOT NULL AND t2.wikiTimestamp > s.wikiTimestamp::timestamptz) OR (t2.source = 'instance-types_lang=en_specific' AND s.source = 'instance_types_lhd_dbo_en'))
+    )
+  )
+)
+GROUP BY t1.source, t2.source
+HAVING COUNT(s.source) = 0
+"""
+
+sql = f"""
+SELECT 1
+FROM {self.quote_identifier(rel1)} t1
+JOIN {self.quote_identifier(rel2)} t2 ON {join_conditions}
+WHERE NOT EXISTS (
+  SELECT 1
+  FROM {support_table}
+  WHERE
+    (
+      (
+        (s.derivationTimestamp IS NOT NULL AND t1.derivationTimestamp IS NOT NULL AND s.derivationTimestamp::timestamptz > t1.derivationTimestamp)
+        OR
+        (s.wikiTimestamp IS NOT NULL AND t1.wikiTimestamp IS NOT NULL AND s.wikiTimestamp::timestamptz > t1.wikiTimestamp)
+        OR
+        (s.source = 'instance-types_lang=en_specific' AND t1.source = 'instance_types_lhd_dbo_en')
+      )
+      AND NOT (
+        (t1.derivationTimestamp IS NOT NULL AND s.derivationTimestamp IS NOT NULL AND t1.derivationTimestamp > s.derivationTimestamp::timestamptz)
+        OR
+        (t1.wikiTimestamp IS NOT NULL AND s.wikiTimestamp IS NOT NULL AND t1.wikiTimestamp > s.wikiTimestamp::timestamptz)
+        OR
+        (t1.source = 'instance-types_lang=en_specific' AND s.source = 'instance_types_lhd_dbo_en')
+      )
+    )
+    OR
+    (
+      (
+        (s.derivationTimestamp IS NOT NULL AND t2.derivationTimestamp IS NOT NULL AND s.derivationTimestamp::timestamptz > t2.derivationTimestamp)
+        OR
+        (s.wikiTimestamp IS NOT NULL AND t2.wikiTimestamp IS NOT NULL AND s.wikiTimestamp::timestamptz > t2.wikiTimestamp)
+        OR
+        (s.source = 'instance-types_lang=en_specific' AND t2.source = 'instance_types_lhd_dbo_en')
+      )
+      AND NOT (
+        (t2.derivationTimestamp IS NOT NULL AND s.derivationTimestamp IS NOT NULL AND t2.derivationTimestamp > s.derivationTimestamp::timestamptz)
+        OR
+        (t2.wikiTimestamp IS NOT NULL AND s.wikiTimestamp IS NOT NULL AND t2.wikiTimestamp > s.wikiTimestamp::timestamptz)
+        OR
+        (t2.source = 'instance-types_lang=en_specific' AND s.source = 'instance_types_lhd_dbo_en')
+      )
+    )
+)
+"""
+
+sql = f"""
+SELECT 1
+FROM {self.quote_identifier(rel1)} t1
+JOIN {self.quote_identifier(rel2)} t2 ON {join_conditions}
+WHERE NOT EXISTS (
+  SELECT 1
+  FROM {support_table}
+  WHERE
+    (
+      (
+        (s.derivationTimestamp IS NOT NULL AND t1.derivationTimestamp IS NOT NULL AND s.derivationTimestamp::timestamptz > t1.derivationTimestamp)
+        OR
+        (s.wikiTimestamp IS NOT NULL AND t1.wikiTimestamp IS NOT NULL AND s.wikiTimestamp::timestamptz > t1.wikiTimestamp)
+        OR
+        (s.source = 'instance-types_lang=en_specific' AND t1.source = 'instance_types_lhd_dbo_en')
+      )
+    )
+    OR
+    (
+      (
+        (s.derivationTimestamp IS NOT NULL AND t2.derivationTimestamp IS NOT NULL AND s.derivationTimestamp::timestamptz > t2.derivationTimestamp)
+        OR
+        (s.wikiTimestamp IS NOT NULL AND t2.wikiTimestamp IS NOT NULL AND s.wikiTimestamp::timestamptz > t2.wikiTimestamp)
+        OR
+        (s.source = 'instance-types_lang=en_specific' AND t2.source = 'instance_types_lhd_dbo_en')
+      )
+    )
+)
+"""
+
+
+sql = f"""
+SELECT 1 FROM {self.quote_identifier(rel1)} t1 JOIN {self.quote_identifier(rel2)} t2 ON {join_conditions} 
+JOIN {support_table}
+ON (
+  (
+    (
+      (s.derivationTimestamp IS NOT NULL AND t1.derivationTimestamp IS NOT NULL AND s.derivationTimestamp::timestamptz <= t1.derivationTimestamp) 
+      AND
+      (s.wikiTimestamp IS NOT NULL AND t1.wikiTimestamp IS NOT NULL AND s.wikiTimestamp::timestamptz <= t1.wikiTimestamp) 
+      AND
+      (s.source != 'instance-types_lang=en_specific' OR t1.source != 'instance_types_lhd_dbo_en')
+    )
+    OR (
+      (s.derivationTimestamp IS NOT NULL AND t1.derivationTimestamp IS NOT NULL AND s.derivationTimestamp::timestamptz < t1.derivationTimestamp)
+      OR
+      (s.wikiTimestamp IS NOT NULL AND t1.wikiTimestamp IS NOT NULL AND s.wikiTimestamp::timestamptz < t1.wikiTimestamp)
+      OR
+      (s.source == 'instance_types_lhd_dbo_en' AND t1.source != 'instance-types_lang=en_specific')
+    )
+  ) AND (
+    (
+      (s.derivationTimestamp IS NOT NULL AND t2.derivationTimestamp IS NOT NULL AND s.derivationTimestamp::timestamptz <= t2.derivationTimestamp) 
+      AND 
+      (s.wikiTimestamp IS NOT NULL AND t2.wikiTimestamp IS NOT NULL AND s.wikiTimestamp::timestamptz <= t2.wikiTimestamp) 
+      AND
+      (s.source != 'instance-types_lang=en_specific' OR t2.source != 'instance_types_lhd_dbo_en')
+    )
+    OR (
+      (s.derivationTimestamp IS NOT NULL AND t2.derivationTimestamp IS NOT NULL AND s.derivationTimestamp::timestamptz < t2.derivationTimestamp)
+      OR
+      (s.wikiTimestamp IS NOT NULL AND t2.wikiTimestamp IS NOT NULL AND s.wikiTimestamp::timestamptz < t2.wikiTimestamp)
+      OR
+      (s.source == 'instance_types_lhd_dbo_en' AND t2.source != 'instance-types_lang=en_specific')
+    )
+    )
+)
+LIMIT 1;
+"""

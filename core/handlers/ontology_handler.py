@@ -15,6 +15,7 @@ class OntologyHandler:
         logger.debug(f"The ontolgy's namespace: {namespace}.")
         prefix = rdflib.Namespace(namespace)
         self.graph.bind("", prefix)
+        logger.debug((f"Number of axioms (triples): {len(self.graph)}"))
 
     def get_uri(self):    
         test = [x for x, _, _ in self.graph.triples((None, rdflib.RDF.type, rdflib.OWL.Ontology))]

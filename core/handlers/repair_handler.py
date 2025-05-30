@@ -80,6 +80,14 @@ class RepairHandler:
         logger.debug(f"Time to compute the conflicts: {inter_time1 - inter_time0}")
         exe_results["Conflicts_time"] = inter_time1 - inter_time0
         exe_results["Conflicts_size"] = len(conflicts)
+
+        unique_assertions_in_conflicts = set()
+        for a1,a2 in conflicts:
+            unique_assertions_in_conflicts.add(a1)
+            unique_assertions_in_conflicts.add(a2)
+        
+        logger.debug(f"The number of unique assertions in conflicts: {len(unique_assertions_in_conflicts)}")
+        exe_results["assertions_in_conflict"] = len(unique_assertions_in_conflicts)
         
         # browse assertions and compute supports
         # returns a dictionnary with assertions indexes in the list as keys and as values lists of supports with the form [(table_name,id,degree)] 
@@ -227,6 +235,8 @@ class RepairHandler:
         
         all_assertions = self.aboxHandler.compute_weighted_closure(self.ontologyHandler)
 
+        logger.debug(f"the number of all the assertions in the weighted closure: {len(all_assertions)}")
+
         selected = random.choice(list(all_assertions.values()))
         return selected
 
@@ -250,6 +260,14 @@ class RepairHandler:
         logger.debug(f"Time to compute the conflicts: {inter_time1 - inter_time0}")
         exe_results["Conflicts_time"] = inter_time1 - inter_time0
         exe_results["Conflicts_size"] = len(conflicts)
+
+        unique_assertions_in_conflicts = set()
+        for a1,a2 in conflicts:
+            unique_assertions_in_conflicts.add(a1)
+            unique_assertions_in_conflicts.add(a2)
+        
+        logger.debug(f"The number of unique assertions in conflicts: {len(unique_assertions_in_conflicts)}")
+        exe_results["assertions_in_conflict"] = len(unique_assertions_in_conflicts)
         
         # extract the supports of the assertion
         supports = {}

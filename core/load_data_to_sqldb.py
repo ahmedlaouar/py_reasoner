@@ -170,12 +170,13 @@ def insert_data(ttl_file, conn):
     Reads RDF triples from a TTL file and inserts them into a PostgreSQL database.
     """
     cursor = conn.cursor()
-    co = 0  # Counter for tables not found
     tab_num = 0
     not_inserted = 0
 
     logger.debug(f"Processing data file {ttl_file}...")
 
+    existing_tables = set()
+    missing_tables = set()
     with open(ttl_file, "r", encoding="utf-8") as file:
         for line in file:
             if line.startswith("#"):
@@ -196,31 +197,46 @@ def insert_data(ttl_file, conn):
                 src = line_list[5]  # Source
                 # Ensure we only process class insertions
                 if p == "http://www.w3.org/1999/02/22-rdf-syntax-ns#type":
-                    table_name = o  # Ensure valid table names
-
+                    table_name = o
+                    values = (s, t1, t2, src)
                     query = sql.SQL('''
                         INSERT INTO {} (individual0, derivationTimestamp, wikiTimestamp, source) 
                         VALUES (%s, %s, %s, %s)
                     ''').format(sql.Identifier(table_name))
-
-                    cursor.execute(query, (s, t1, t2, src))
-                    tab_num += 1
                 else:
-                    not_inserted += 1
-                    logger.debug(f"Skipped: line {line.strip()} not inserted!")
+                    table_name = p
+                    values = (s, o, t1, t2, src)
+                    query = sql.SQL('''
+                        INSERT INTO {} (individual0, individual1, derivationTimestamp, wikiTimestamp, source) 
+                        VALUES (%s, %s, %s, %s, %s)
+                    ''').format(sql.Identifier(table_name))
 
-                    # ObjectProperty parsing
-                    #table_name = p #.split('#')[-1]
-                    #cursor.execute('INSERT INTO "{}" (individual0, individual1) VALUES (?, ?)'.format(table_name), (s, o))
+                # Efficient table existence check
+                if table_name in missing_tables:
+                    not_inserted += 1
+                    continue
+                elif table_name not in existing_tables:
+                    cursor.execute(
+                        "SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = %s)", (table_name,)
+                    )
+                    if not cursor.fetchone()[0]:
+                        missing_tables.add(table_name)
+                        not_inserted += 1
+                        continue
+                    existing_tables.add(table_name)
+
+                # Now it's safe to insert
+                cursor.execute(query, values)
+                tab_num += 1
+
             except psycopg2.Error as e:
-                co += 1
                 logger.debug(f"Database Error: {e}")
                 conn.rollback()  # Reset the transaction so future queries work
                 continue
 
     conn.commit()
 
-    logger.debug(f"Processed assertions: {tab_num}, Not inserted: {not_inserted}, Absent tables: {co}")
+    logger.debug(f"Processed assertions: {tab_num}, Not inserted: {not_inserted}, Absent tables: {len(missing_tables)}")
 
     cursor.close()
 
@@ -275,7 +291,7 @@ def create_all_preferences_table(conn):
         cursor.execute(f'SELECT COUNT(*) FROM all_facts')
         total_rows = cursor.fetchone()[0]
         mid_time = time.time()
-        logger.debug(f'Finished insering all rows from all tables, result: {total_rows} rows, to the TEMP TABLE all_facts in {mid_time - start_time}.')
+        logger.debug(f'Finished inserting all rows from all tables, result: {total_rows} rows, to the TEMP TABLE all_facts in {mid_time - start_time}.')
 
         query = """
             INSERT INTO NotGreater (table1, id1, table2, id2)
@@ -310,7 +326,7 @@ def create_all_preferences_table(conn):
         logger.debug(f"Error: {e}")
         conn.rollback()
 
-def main(tBox_file, data_files):
+def main(tBox_file, data_files, useNotGreaterTable=False):
     aboxHandler = ABoxHandler()
     CONN = aboxHandler.connect()
 
@@ -327,7 +343,8 @@ def main(tBox_file, data_files):
     for data_file in data_files:
         insert_data(data_file, CONN)
 
-    create_all_preferences_table(CONN)
+    if useNotGreaterTable:
+        create_all_preferences_table(CONN)
 
     aboxHandler.disconnect()
 
@@ -342,8 +359,20 @@ if __name__ == "__main__":
 
     data_file = args.abox
 
-    main(tBox_file, [data_file])
+    data_files = [data_file]
+    if '100000' in data_file:
+        data_files.append("dataset_preparation/mapping-obj_100000.csv")
+    elif '50000' in data_file:
+        data_files.append("dataset_preparation/mapping-obj_50000.csv")
+    elif '10000' in data_file:
+        data_files.append("dataset_preparation/mapping-obj_10000.csv")
+    elif '1000' in data_file:
+        data_files.append("dataset_preparation/mapping-obj_1000.csv")
+
+    main(tBox_file, data_files)
     
+    # example command: myenv/bin/python core/load_data_to_sqldb.py "ontologies/DBO/ontology--DEV_type=parsed.owl" "dataset_preparation/it_1000.csv"
+
     """
     tBox_file = "ontologies/DBO/ontology--DEV_type=parsed.owl" #"ontologies/DBO/ontology_type=parsed.owl" #
     data_files = ["dataset_preparation/instance_types_lhd_dbo_en_with_timestamps.csv", "dataset_preparation/instance-types_lang=en_specific_with_timestamps.csv"]

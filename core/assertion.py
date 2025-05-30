@@ -7,7 +7,7 @@ OLD_SOURCE = 'instance_types_lhd_dbo_en'
 NEW_SOURCE = 'instance-types_lang=en_specific'
 
 class assertion:
-    def __init__(self, assertion_name, individual_0, individual_1 = None, derivationTimestamp = None, wikiTimestamp = None, source = None, weight=-1):
+    def __init__(self, assertion_name, individual_0, individual_1 = None, derivationTimestamp = None, wikiTimestamp = None, source = None, weight = -1, id = -1):
         self.__assertion_name = assertion_name
         self.__individual_0 = individual_0
         self.__individual_1 = individual_1
@@ -16,9 +16,13 @@ class assertion:
         self.__wikiTimestamp = wikiTimestamp
         self.__is_role = (self.__individual_1  is not None)
         self.__weight = weight
+        self.id = id
         
     def get_assertion_name(self):
         return self.__assertion_name
+    
+    def get_assertion_id(self):
+        return self.id
 
     def get_individuals(self):
         if self.__is_role:

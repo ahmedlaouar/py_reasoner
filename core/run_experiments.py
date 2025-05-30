@@ -32,7 +32,7 @@ def instance_checking_experiment(ontology_path):
 
     # Ensure directory exists
     os.makedirs("results", exist_ok=True)
-    csv_path = "results/ABox_RDF_type_IC_experiments.csv"
+    csv_path = "results/ABox_RDF_type_and_mappingbased_objects_IC_experiments.csv"
     file_exists = os.path.isfile(csv_path)
     is_empty = not file_exists or os.stat(csv_path).st_size == 0
 
@@ -47,7 +47,7 @@ def instance_checking_experiment(ontology_path):
     logger.debug(f"Time to run is {end_time-start_time} seconds.")
     aboxHandler.disconnect()
 
-def run_one_experiment(ontology_path):
+def computeRepair_experiment(ontology_path):
     start_time = time.time()
     
     ontologyHandler = OntologyHandler(ontology_path, format='application/rdf+xml')
@@ -70,7 +70,7 @@ def run_one_experiment(ontology_path):
 
     # Ensure directory exists
     os.makedirs("results", exist_ok=True)
-    csv_path = "results/ABox_RDF_type_experiments_fixed.csv"
+    csv_path = "results/ABox_RDF_type_and_mappingbased_objects_compute_repair_experiments.csv"
     file_exists = os.path.isfile(csv_path)
     is_empty = not file_exists or os.stat(csv_path).st_size == 0
 
@@ -105,20 +105,26 @@ if __name__ == '__main__':
 
     tBox_file = "ontologies/DBO/ontology--DEV_type=parsed.owl"
 
-    for size in [10000]: #1000, 10000, 50000, 100000
-        for percent in [0.5]: #0.02, 0.2, 0.5
+    for size in [50000]: #1000, 10000, 50000, 100000
+        for percent in [0.02, 0.2, 0.5]: #0.02, 0.2, 0.5
 
             data_file = f"dataset_preparation/it_{names[size]}_p{names[percent]}.csv"
-            #data_file = "dataset_preparation/it_100000.csv"
+            #data_file = "dataset_preparation/it_1000.csv"
 
+            roles_file = f"dataset_preparation/mapping-obj_{size}.csv"
+            
             logger.info(f"Loading: {data_file.split('/')[-1]}")
 
-            # load data to postgresql database using load_data_to_sqldb.main
-            main(tBox_file, [data_file])
+            data_files = [data_file, roles_file]
 
-            # run_one_experiment(tBox_file)
+            # load data to postgresql database using load_data_to_sqldb.main
+
+            useNotGreaterTable = False # for running computeRepair experiments
+            main(tBox_file, data_files, useNotGreaterTable)
+
+            computeRepair_experiment(tBox_file)
             
-            for i in range(3):
-                instance_checking_experiment(tBox_file)
+            #for i in range(1):
+            #    instance_checking_experiment(tBox_file)
 
     logger.debug('Done.')

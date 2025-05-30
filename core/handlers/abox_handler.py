@@ -138,7 +138,6 @@ class ABoxHandler:
         cursor = self.CONN.cursor()
         batch_size = 5000
         for i in range(0, len(all_queries), batch_size):
-            #start_time = time.time()
             batch = all_queries[i:i + batch_size]
             exists_queries = self.generate_exists_sql_queries(batch)
 
@@ -152,11 +151,7 @@ class ABoxHandler:
                     logger.debug(f"[Error] SQL error in batch {i}-{i + batch_size}: {e}")
                     logger.debug(f"[Debug] SQL query:\n{q}")
                     raise
-            
-            #end_time = time.time()
-            # Calculate and display progress
-            #progress = (i / len(all_queries)) * 100
-            #logger.debug(f"Progress: {progress:.2f}%, time spent: {end_time - start_time:.2f} seconds.")
+
         cursor.close()
         return True
     
@@ -213,13 +208,28 @@ class ABoxHandler:
             table1 = self.quote_identifier(rel1)
             table2 = self.quote_identifier(rel2)
 
-            select_clause = (
-                f"SELECT t1.id, t1.individual0, t1.derivationTimestamp, t1.wikiTimestamp, t1.source, "
-                f"t2.id, t2.individual0, t2.derivationTimestamp, t2.wikiTimestamp, t2.source "
-                f"FROM {table1} t1 JOIN {table2} t2 ON {join_conditions}"
-            )
+            if len(vars1) == 1 and len(vars2) == 1:
+                select_clause = (
+                    f"SELECT t1.id, t1.individual0, t1.derivationTimestamp, t1.wikiTimestamp, t1.source, t2.id, t2.individual0, t2.derivationTimestamp, t2.wikiTimestamp, t2.source "
+                    f"FROM {table1} t1 JOIN {table2} t2 ON {join_conditions}"
+                )
+            elif len(vars1) == 2 and len(vars2) == 1:
+                select_clause = (
+                    f"SELECT t1.id, t1.individual0, t1.individual1, t1.derivationTimestamp, t1.wikiTimestamp, t1.source, t2.id, t2.individual0, t2.derivationTimestamp, t2.wikiTimestamp, t2.source "
+                    f"FROM {table1} t1 JOIN {table2} t2 ON {join_conditions}"
+                )
+            elif len(vars1) == 1 and len(vars2) == 2:
+                select_clause = (
+                    f"SELECT t1.id, t1.individual0, t1.derivationTimestamp, t1.wikiTimestamp, t1.source, t2.id, t2.individual0, t2.individual1, t2.derivationTimestamp, t2.wikiTimestamp, t2.source "
+                    f"FROM {table1} t1 JOIN {table2} t2 ON {join_conditions}"
+                )
+            elif len(vars1) == 2 and len(vars2) == 2:
+                select_clause = (
+                    f"SELECT t1.id, t1.individual0, t1.individual1, t1.derivationTimestamp, t1.wikiTimestamp, t1.source, t2.id, t2.individual0, t2.individual1, t2.derivationTimestamp, t2.wikiTimestamp, t2.source "
+                    f"FROM {table1} t1 JOIN {table2} t2 ON {join_conditions}"
+                )
 
-            select_queries.append((select_clause, rel1, rel2))  # Keep track of table names too
+            select_queries.append((select_clause, rel1, rel2, len(vars1), len(vars2)))  # Keep track of table names and length of variables too
 
         return select_queries
     
@@ -244,12 +254,35 @@ class ABoxHandler:
             batch = all_queries[i:i + batch_size]
             select_queries = self.generate_conflicts_sql_query(batch)
 
-            for query, table1, table2 in select_queries:
+            for query, table1, table2, v1len, v2len in select_queries:
                 try:
                     cursor.execute(query)
                     for row in cursor.fetchall():
-                        a1 = assertion(assertion_name=table1,individual_0=row[1],individual_1=None,derivationTimestamp=row[2],wikiTimestamp=row[3],source=row[4])
-                        a2 = assertion(assertion_name=table2,individual_0=row[6],individual_1=None,derivationTimestamp=row[7],wikiTimestamp=row[8],source=row[9])
+                        # Initialize indexes
+                        idx = 0
+                        # --- First assertion (t1) ---
+                        id1 = row[idx]; idx += 1
+                        ind0_1 = row[idx]; idx += 1
+                        ind1_1 = row[idx] if v1len == 2 else None
+                        if v1len == 2: idx += 1
+                        ts1 = row[idx]; idx += 1
+                        wt1 = row[idx]; idx += 1
+                        src1 = row[idx]; idx += 1
+                        
+                        a1 = assertion(assertion_name=table1,individual_0=ind0_1,individual_1=ind1_1,derivationTimestamp=ts1,wikiTimestamp=wt1,source=src1,id=id1)
+                        
+                        # --- Second assertion (t2) ---
+                        id2 = row[idx]; idx += 1
+                        ind0_2 = row[idx]; idx += 1
+                        ind1_2 = row[idx] if v2len == 2 else None
+                        if v2len == 2: idx += 1
+                        ts2 = row[idx]; idx += 1
+                        wt2 = row[idx]; idx += 1
+                        src2 = row[idx]; idx += 1
+
+                        a2 = assertion(assertion_name=table2,individual_0=ind0_2,individual_1=ind1_2,derivationTimestamp=ts2,wikiTimestamp=wt2,source=src2,id=id2)
+                        
+                        conflicts.append((a1, a2))
                         #result = (a1, a2)
                         #if not any(self.dominates(conflict,result) for conflict in conflicts):                    
                         #    to_remove = [conflict for conflict in conflicts if self.dominates(result,conflict)]
@@ -340,10 +373,10 @@ class ABoxHandler:
                     # logger.error("SQL query returned some values")
                     for row in rows:
                         if len(row) == 6:
-                            temp_assertion = assertion(assertion_name=table_name, individual_0=row[1], individual_1 = None, derivationTimestamp = row[2], wikiTimestamp = row[3], source = row[4])
+                            temp_assertion = assertion(assertion_name=table_name, individual_0=row[1], individual_1 = None, derivationTimestamp = row[2], wikiTimestamp = row[3], source = row[4],id=row[0])
                             supports[i_assertion].append(temp_assertion)
                         if len(row) == 7:
-                            temp_assertion = assertion(assertion_name=table_name, individual_0=row[1], individual_1 = row[2], derivationTimestamp = row[3], wikiTimestamp = row[4], source = row[5])
+                            temp_assertion = assertion(assertion_name=table_name, individual_0=row[1], individual_1 = row[2], derivationTimestamp = row[3], wikiTimestamp = row[4], source = row[5],id=row[0])
                             supports[i_assertion].append(temp_assertion)
         
         cursor.close()
@@ -395,6 +428,9 @@ class ABoxHandler:
                         assertion_k = assertion(concepts[assertions_counter],result[0])
                         all_assertions_to_check.add(assertion_k)
         
+        concepts_number = len(all_assertions_to_check)
+        logger.error(f"The number of all concept assertions: {concepts_number}")
+
         roles = [prop_uri.split('#')[-1] for prop_uri in ontologyHandler.graph.subjects(predicate=RDF.type, object=OWL.ObjectProperty)]
         role_queries = []
         for role_name in roles:
@@ -414,6 +450,8 @@ class ABoxHandler:
                     if len(result) == 2:
                         assertion_k = assertion(roles[assertions_counter],result[0],result[1])
                         all_assertions_to_check.add(assertion_k)
+
+        logger.error(f"The number of all role assertions: {len(all_assertions_to_check) - concepts_number}")
         
         cursor.close()
 
@@ -436,7 +474,7 @@ class ABoxHandler:
             sql_query = 'SELECT * FROM "{}"'.format(table_name)
         else : #if tokens[1] == "?0":
             sql_query = 'SELECT * FROM "{}"'.format(table_name)
-        return sql_query, table_name
+        return sql_query, table_name, tokens
 
     def compute_weighted_closure(self, ontologyHandler):
         """Returns all the possible assertions as a list of SupportedAssertion objects (computes a partially ordered weighted closure of the initial ABox).
@@ -452,28 +490,48 @@ class ABoxHandler:
             concept_queries.append(separation_query)
         all_concept_queries = ontologyHandler.rewrite_queries(concept_queries)
         assertions_counter = 0
-        
+        error_size = 0
         for cq_query in all_concept_queries:
             if cq_query == "BornIN(AHMED, SKIKDA)":
                 assertions_counter += 1
                 continue
-            sql_query, table_name = self.generate_wieghted_closure_sql_query(cq_query)
+            sql_query, table_name, tokens = self.generate_wieghted_closure_sql_query(cq_query)
             cursor.execute(sql_query)
             results = cursor.fetchall()
             if len(results) != 0:
                 for result in results:
-                    if len(result) == 6:
-                        key = (concepts[assertions_counter], result[1], None)
+                    assertion_name = table_name
+                    idx = 0
+                    id = result[idx]; idx+=1
+                    individual_0=result[idx]; idx+=1
+                    individual_1=result[idx] if len(tokens) == 2 else None
+                    if len(tokens) == 2: idx+=1
+                    dts = result[idx]; idx+=1
+                    wts = result[idx]; idx+=1
+                    source = result[idx]; idx+=1
 
-                        temp_assertion = assertion(assertion_name=table_name,individual_0=result[1],individual_1=None,derivationTimestamp=result[2],wikiTimestamp=result[3],source=result[4])
+                    # temp_assertion is the support, it can be retrieved as it is in database using SELECT*
+                    temp_assertion = assertion(assertion_name=assertion_name,individual_0=individual_0,individual_1=individual_1,derivationTimestamp=dts,wikiTimestamp=wts,source=source,id=id)
 
-                        if key in all_assertions_to_check:
-                            all_assertions_to_check[key].add_support(temp_assertion)
-                        else:
-                            supported_assertion = SupportedAssertion(*key)
-                            supported_assertion.add_support(temp_assertion)
-                            all_assertions_to_check[key] = supported_assertion
-                    
+                    # key refers to an assertion that can depend on order of query elements, e.g. Q(?0,?1) <- <{role_name}>(?0,?1) or Q(?0,?1) <- <{role_name}>(?1,?0) makes a difference
+                    # tokens are returned as they are for this purpose
+                    if len(tokens) == 1 :
+                        key = (concepts[assertions_counter], individual_0, None)
+                    elif len(tokens) == 2 and tokens[0] == "?0":
+                        key = (concepts[assertions_counter], individual_0, None)
+                    elif len(tokens) == 2 and tokens[1] == "?0":
+                        key = (concepts[assertions_counter], individual_1, None)
+
+                    if key in all_assertions_to_check:
+                        all_assertions_to_check[key].add_support(temp_assertion)
+                    else:
+                        supported_assertion = SupportedAssertion(*key)
+                        supported_assertion.add_support(temp_assertion)
+                        all_assertions_to_check[key] = supported_assertion
+        
+        concepts_number = len(all_assertions_to_check)
+        logger.error(f"The number of all concept assertions: {concepts_number}")
+
         roles = [prop_uri.split('#')[-1] for prop_uri in ontologyHandler.graph.subjects(predicate=RDF.type, object=OWL.ObjectProperty)]
         role_queries = []
         for role_name in roles:
@@ -485,16 +543,20 @@ class ABoxHandler:
             if cq_query == "BornIN(AHMED, SKIKDA)":
                 assertions_counter += 1
                 continue
-            sql_query = self.generate_closure_sql_query(cq_query)
+            sql_query, table_name, tokens = self.generate_wieghted_closure_sql_query(cq_query)
             cursor.execute(sql_query)
             results = cursor.fetchall()
             if len(results) != 0:
                 for result in results:
-                    if len(result) == 7:
-                        key = (concepts[assertions_counter], result[1], result[2])
-                        
-                        temp_assertion = assertion(assertion_name=table_name, individual_0=result[1], individual_1 = result[2], derivationTimestamp = result[3], wikiTimestamp = result[4], source = result[5])
-                        
+                    if len(result) != 7:
+                        error_size+=1
+                    if len(result) == 7:                        
+                        temp_assertion = assertion(assertion_name=table_name, individual_0=result[1], individual_1 = result[2], derivationTimestamp = result[3], wikiTimestamp = result[4], source = result[5],id=result[0])
+                        if len(tokens) == 2 and tokens[0] == "?0":
+                            key = (roles[assertions_counter], result[1], result[2])
+                        else: # if len(tokens) == 2 and tokens[1] == "?0":
+                            key = (roles[assertions_counter], result[2], result[1])
+
                         if key in all_assertions_to_check:
                             all_assertions_to_check[key].add_support(temp_assertion)
                         else:
@@ -502,6 +564,10 @@ class ABoxHandler:
                             supported_assertion.add_support(temp_assertion)
                             all_assertions_to_check[key] = supported_assertion
         
+        logger.error(f"error size: {error_size}")
+
+        logger.error(f"The number of all role assertions: {len(all_assertions_to_check) - concepts_number}")
+
         cursor.close()
 
         return all_assertions_to_check
@@ -585,27 +651,32 @@ LIMIT 1;
             
         return sql_list
     
+    def get_assertion_id_from_DB(self, assertion, cursor):
+         # get each supports ID in table and put it in tuple with table name (assertion.get_assertion_name()):
+        dts = f"= '{assertion.get_derivationTimestamp()}'::timestamptz" if assertion.get_derivationTimestamp() else "IS NULL"
+        wts = f"= '{assertion.get_wikiTimestamp()}'::timestamptz" if assertion.get_wikiTimestamp() else "IS NULL"
+        id_query = '''
+                SELECT id FROM "{}"  WHERE individual0 = \'{}\' AND derivationTimestamp {} AND wikiTimestamp {} AND source = \'{}\' 
+            '''.format(assertion.get_assertion_name(),assertion.get_individuals()[0],dts,wts,assertion.get_source())
+            
+        cursor.execute(id_query)
+        row = cursor.fetchone()
+        if row:
+            id = row[0]
+            return id            
+        else:
+            logger.error(f"Id of suuport {assertion.__str__()} not found, check again!")
+
     def generate_no_preferred_support_sql_queries_using_NotGreater(self, queries, supports, cursor):
         sql_list = []
 
         # Prepare support rows
         support_rows = []
         for assertion in supports:
-            # get each supports ID in table and put it in tuple with table name (assertion.get_assertion_name()):
-            dts = f"= '{assertion.get_derivationTimestamp()}'::timestamptz" if assertion.get_derivationTimestamp() else "IS NULL"
-            wts = f"= '{assertion.get_wikiTimestamp()}'::timestamptz" if assertion.get_wikiTimestamp() else "IS NULL"
-
-            id_query = '''
-                SELECT id FROM "{}"  WHERE individual0 = \'{}\' AND derivationTimestamp {} AND wikiTimestamp {} AND source = \'{}\' 
-            '''.format(assertion.get_assertion_name(),assertion.get_individuals()[0],dts,wts,assertion.get_source())
-            
-            cursor.execute(id_query)
-            row = cursor.fetchone()
-            if row:
-                id = row[0]
-                support_rows.append((id,assertion.get_assertion_name()))
-            else:
-                logger.error(f"Id of suuport {assertion.__str__()} not found, check again!")
+            id = assertion.get_assertion_id()
+            if id == -1:
+                id = self.get_assertion_id_from_DB(assertion, cursor)
+            support_rows.append((id,assertion.get_assertion_name()))
     
         for query_str in queries:
             atoms = self.parse_atoms(query_str)

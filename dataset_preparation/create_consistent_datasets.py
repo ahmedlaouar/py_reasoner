@@ -22,8 +22,8 @@ if __name__ == '__main__':
 
     for size in [1000, 10000, 50000, 100000]:
 
-        input_file = 'dataset_preparation/instance-types_lang=en_specific_with_timestamps.csv'
-        output_file = f'dataset_preparation/it_{size}.csv'
+        input_file = "dataset_preparation/mappingbased-objects_lang=en_with_timestamps.csv" # 'dataset_preparation/instance-types_lang=en_specific_with_timestamps.csv'
+        output_file = f'dataset_preparation/mapping-obj_{size}.csv' # f'dataset_preparation/it_{size}.csv'
         sampled_count = generate_consistent_aboxes(input_file, output_file, size) 
 
         print(f"Sampled {sampled_count} rows.")

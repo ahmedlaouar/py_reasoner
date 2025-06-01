@@ -13,9 +13,18 @@ names = {
     50000 : "n5e04",
     100000 : "n1e05",
     0.02 : "2e-02",
+    0.05 : "2e-05",
     0.2 : "2e-01",
+    0.3 : "3e-01",
     0.5 : "5e-01"
 }
+
+def format_assertion(a):
+    if not a.is_role():
+        return f"<{a.get_individuals()[0]}>|<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>|<{a.get_assertion_name()}>|\"{a.get_derivationTimestamp()}\"^^xsd:dateTime|\"{a.get_wikiTimestamp()}\"^^xsd:dateTime|{a.get_source()}\n"
+    else:
+        return f"<{a.get_individuals()[0]}>|<{a.get_assertion_name()}>|<{a.get_individuals()[1]}>|\"{a.get_derivationTimestamp()}\"^^xsd:dateTime|\"{a.get_wikiTimestamp()}\"^^xsd:dateTime|{a.get_source()}\n"
+
 
 def generate_conflicting_dataset(conflicts, size, percent_in_conf):
     """This functions will generate a csv file of the form: 
@@ -30,28 +39,25 @@ def generate_conflicting_dataset(conflicts, size, percent_in_conf):
     The filling lines from the csv file should just be copied as they are, no change is needed for them.
     """
 
-    # output_file = f"dataset_preparation/instance-types_with_timestamps_{size}_p_{percent_in_conf}.csv"
+    random.shuffle(conflicts)
 
-    output_file = f"dataset_preparation/it_{names[size]}_p{names[percent_in_conf]}.csv"
+    output_file = f"dataset_preparation/dbr_{names[size]}_p{names[percent_in_conf]}.csv"
 
-    source_file = "dataset_preparation/it_100000.csv"
+    source_files = ["dataset_preparation/instance-types_lang=en_specific_with_timestamps.csv", "dataset_preparation/mappingbased-objects_lang=en_with_timestamps.csv", "dataset_preparation/instance_types_lhd_dbo_en_with_timestamps.csv"]
     
     conflict_limit = int(size * percent_in_conf)
     added_assertions = set()
     lines = []
-
-    def format_assertion(a):
-        if not a.is_role():
-            return f"<{a.get_individuals()[0]}>|<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>|<{a.get_assertion_name()}>|\"{a.get_derivationTimestamp()}\"^^xsd:dateTime|\"{a.get_wikiTimestamp()}\"^^xsd:dateTime|{a.get_source()}\n"
-        else:
-            return f"<{a.get_individuals()[0]}>|<{a.get_assertion_name()}>|<{a.get_individuals()[1]}>|\"{a.get_derivationTimestamp()}\"^^xsd:dateTime|\"{a.get_wikiTimestamp()}\"^^xsd:dateTime|{a.get_source()}\n"
-
+    
     # Step 2: Add conflicting assertions until the limit is reached
     for a1, a2 in conflicts:
         if len(added_assertions) >= conflict_limit:
             break
+        if a1.get_source() == a2.get_source() and not(a1.get_derivationTimestamp() and a2.get_derivationTimestamp()) and not(a1.get_wikiTimestamp() and a2.get_wikiTimestamp()):
+            continue
         key1 = (a1.get_assertion_name(), *a1.get_individuals())
         key2 = (a2.get_assertion_name(), *a2.get_individuals())
+
         if key1 not in added_assertions:
             lines.append(format_assertion(a1))
             added_assertions.add(key1)
@@ -61,21 +67,48 @@ def generate_conflicting_dataset(conflicts, size, percent_in_conf):
             lines.append(format_assertion(a2))
             added_assertions.add(key2)
 
-    # Step 3: Fill the rest with random lines from the base dataset (as raw lines, unmodified)
+    # Step 3: fill with random assertions from the database 
     remaining = size - len(lines)
-    if remaining > 0:
-        with open(source_file, 'r', encoding='utf-8') as f:
-            reservoir = []
 
-            for i, line in enumerate(f):
-                if i < remaining:
+    new_lines = []
+    # Open all files at once
+    file_handlers = [open(f, 'r', encoding='utf-8') for f in source_files]
+    try:
+        # Create a line iterator for each file
+        file_iters = [iter(fh) for fh in file_handlers]
+        # Initialize reservoir sampling
+        reservoir = []
+        total_seen = 0
+        while len(reservoir) < remaining:
+            # Randomly choose a file
+            chosen_idx = random.randint(0, len(file_iters) - 1)
+            try:
+                line = next(file_iters[chosen_idx])
+                total_seen += 1
+                # Reservoir sampling
+                if len(reservoir) < remaining:
                     reservoir.append(line)
                 else:
-                    j = random.randint(0, i)
-                    if j < remaining:
-                        reservoir[j] = line
+                    idx = random.randint(0, total_seen - 1)
+                    if idx < remaining:
+                        reservoir[idx] = line
+            except StopIteration:
+                # Remove exhausted file
+                file_iters.pop(chosen_idx)
+                file_handlers.pop(chosen_idx)
 
-        lines.extend(reservoir)
+            if not file_iters:
+                break  # all files are exhausted
+
+        new_lines = reservoir
+
+    finally:
+        for fh in file_handlers:
+            fh.close()
+
+    # Step 3: Fill the rest with random lines from the base dataset (as raw lines, unmodified)
+    
+    lines.extend(new_lines)
 
     # Step 4: Write all to the output file
     with open(output_file, 'w', encoding='utf-8') as out:
@@ -86,7 +119,7 @@ def generate_conflicting_dataset(conflicts, size, percent_in_conf):
 if __name__ == '__main__':
     """"""
 
-    percents = [0.02, 0.2, 0.5]
+    percents = [0.05, 0.3, 0.5]
     sizes = [1000, 10000, 50000, 100000]
 
     ontology_path = "ontologies/DBO/ontology--DEV_type=parsed.owl"
@@ -98,8 +131,7 @@ if __name__ == '__main__':
 
     # Step 1: Get conflicts
     conflicts = aboxHandler.compute_conflicts(ontologyHandler)
-    random.shuffle(conflicts)
-
+    
     for percent in percents:
         for size in sizes:
             lines = generate_conflicting_dataset(conflicts, size, percent)

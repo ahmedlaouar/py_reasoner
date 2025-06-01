@@ -16,7 +16,9 @@ names = {
     50000 : "n5e04",
     100000 : "n1e05",
     0.02 : "2e-02",
+    0.05 : "2e-05",
     0.2 : "2e-01",
+    0.3 : "3e-01",
     0.5 : "5e-01"
 }
 
@@ -47,23 +49,47 @@ if __name__ == '__main__':
 
     #logger.debug(f"The number of all the possible assertions of this ABox (closure size): {len(assertions_to_check)}.")
 
-    size = 50000
-    percent = 0.02
-    data_file = f"dataset_preparation/it_{names[size]}_p{names[percent]}.csv"
+    size = 10000
+    percent = 0.05
 
-    data_file = "dataset_preparation/instance-types_lang=en_specific_with_timestamps.csv" # "dataset_preparation/instance_types_lhd_dbo_en_with_timestamps.csv" # 
+    #d1 = "dataset_preparation/instance-types_lang=en_specific_with_timestamps.csv" 
+    #d2 = "dataset_preparation/instance_types_lhd_dbo_en_with_timestamps.csv" # 
+    #r1 = "dataset_preparation/mappingbased-objects_lang=en_with_timestamps.csv"
 
-    logger.info(f"Loading: {data_file.split('/')[-1]}")
+    #roles_file = f"dataset_preparation/mapping-obj_{size}.csv"
+            
+    #logger.info(f"Loading: {data_file.split('/')[-1]}")
+
+    data_file = f"dataset_preparation/dbr_{names[size]}_p{names[percent]}.csv"
+    data_files = [data_file]
+    #data_files = [d1, d2, r1]
 
     # load data to postgresql database using load_data_to_sqldb.main
-    main(ontology_path, [data_file])
+    main(ontology_path, data_files)
 
     conflicts = aboxHandler.compute_conflicts(ontologyHandler)
 
     #consistent = aboxHandler.consistency_checking(ontologyHandler)
+    #logger.debug(f"The evaluation of the statement the ABox is consistent is: {consistent}.")
 
-    for a1,a2 in conflicts:
-        print(a1,a2)
+    str_confs = []
+
+    similar_source_co = 0
+    
+    with open('temp_conflicts_file.txt', 'w', encoding='utf-8') as out:
+
+        for a1,a2 in conflicts:
+            if a1.get_source() == a2.get_source() == 'instance-types_lang=en_specific':
+                similar_source_co += 1
+                #print(a1.__str__(), a2.__str__())
+
+            line = f"[{a1.__str__()}, {a2.__str__()}] \n"
+            out.write(line)
+    
+        
+    logger.error(f"Number of conflicts with the same source: {similar_source_co}")
+
+    logger.debug(f"The number of conflicts of this database = {len(conflicts)}.")
     
     #repairHandler = RepairHandler(ontologyHandler, aboxHandler)
 
@@ -92,8 +118,8 @@ if __name__ == '__main__':
 
     end_time = time.time()
 
-    #logger.debug(f"The number of conflicts of this database = {len(conflicts)}.")
-    #logger.debug(f"The evaluation of the statement the ABox is consistent is: {consistent}.")
+    
+    
 
     logger.debug(f"Time to run is {end_time-start_time} seconds.")
 

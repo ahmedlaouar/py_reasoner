@@ -70,7 +70,7 @@ def computeRepair_experiment(ontology_path):
 
     # Ensure directory exists
     os.makedirs("results", exist_ok=True)
-    csv_path = "results/ABox_RDF_type_and_mappingbased_objects_compute_repair_experiments.csv"
+    csv_path = "results/ABox_RDF_dbr_repair_experiments.csv"
     file_exists = os.path.isfile(csv_path)
     is_empty = not file_exists or os.stat(csv_path).st_size == 0
 
@@ -91,7 +91,9 @@ names = {
     50000 : "n5e04",
     100000 : "n1e05",
     0.02 : "2e-02",
+    0.05 : "2e-05",
     0.2 : "2e-01",
+    0.3 : "3e-01",
     0.5 : "5e-01"
 }
 
@@ -106,16 +108,13 @@ if __name__ == '__main__':
     tBox_file = "ontologies/DBO/ontology--DEV_type=parsed.owl"
 
     for size in [50000]: #1000, 10000, 50000, 100000
-        for percent in [0.02, 0.2, 0.5]: #0.02, 0.2, 0.5
+        for percent in [0.5]: # 0.05, 0.3,   0.02, 0.2, 0.5
 
-            data_file = f"dataset_preparation/it_{names[size]}_p{names[percent]}.csv"
-            #data_file = "dataset_preparation/it_1000.csv"
-
-            roles_file = f"dataset_preparation/mapping-obj_{size}.csv"
+            data_file = f"dataset_preparation/dbr_{names[size]}_p{names[percent]}.csv"
             
             logger.info(f"Loading: {data_file.split('/')[-1]}")
 
-            data_files = [data_file, roles_file]
+            data_files = [data_file]
 
             # load data to postgresql database using load_data_to_sqldb.main
 
@@ -123,8 +122,5 @@ if __name__ == '__main__':
             main(tBox_file, data_files, useNotGreaterTable)
 
             computeRepair_experiment(tBox_file)
-            
-            #for i in range(1):
-            #    instance_checking_experiment(tBox_file)
 
     logger.debug('Done.')

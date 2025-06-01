@@ -35,7 +35,7 @@ class OntologyHandler:
         for row in result1: #.bindings:
             s = row.s.toPython()
             o = row.o.toPython()
-            negative_axioms.append(f"{s},owl:disjointWith,{o}")
+            negative_axioms.append(f"{s}|owl:disjointWith|{o}")
 
         # use the following for conflicts or roles "DL-Lite_R"
         query2 = """
@@ -46,7 +46,7 @@ class OntologyHandler:
         for row in result2:
             s = row.s.toPython()
             o = row.o.toPython()
-            negative_axioms.append(f"{s},owl:propertyDisjointWith,{o}")
+            negative_axioms.append(f"{s}|owl:propertyDisjointWith|{o}")
         
         logger.debug(f'The number of the disjointness (negative) axioms in the ontology is {len(negative_axioms)}.')
         logger.debug(f"The first negative axiom {negative_axioms[0]}")
@@ -82,7 +82,7 @@ class OntologyHandler:
     
     def generate_query(self, axiom):
         # from a negative axiom generate a conjunctive query, here with 2 atoms since we use DL-Lite_R
-        ax = axiom.split(",")
+        ax = axiom.split("|")
         if ax[1] == "owl:disjointWith" :
             query = f"Q(?0) <- <{ax[0]}>(?0), <{ax[2]}>(?0)"
         elif ax[1] == "owl:propertyDisjointWith" :

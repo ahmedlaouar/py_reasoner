@@ -100,7 +100,7 @@ class ABoxHandler:
         if not exists_clauses:
             return "SELECT false AS result;"  # No valid queries to evaluate
 
-        return f"SELECT {' OR '.join(exists_clauses)} AS result;"
+        return f"SELECT 1 WHERE {' OR '.join(exists_clauses)};"
     
     def generate_exists_sql_queries(self, queries):
         sql_list = []
@@ -149,7 +149,7 @@ class ABoxHandler:
                         return False
                 except Exception as e:
                     logger.debug(f"[Error] SQL error in batch {i}-{i + batch_size}: {e}")
-                    logger.debug(f"[Debug] SQL query:\n{q}")
+                    logger.debug(f"[Debug] SQL query:\n{exists_queries}")
                     raise
 
         cursor.close()
@@ -210,22 +210,22 @@ class ABoxHandler:
 
             if len(vars1) == 1 and len(vars2) == 1:
                 select_clause = (
-                    f"SELECT t1.id, t1.individual0, t1.derivationTimestamp, t1.wikiTimestamp, t1.source, t2.id, t2.individual0, t2.derivationTimestamp, t2.wikiTimestamp, t2.source "
+                    f"SELECT DISTINCT t1.id, t1.individual0, t1.derivationTimestamp, t1.wikiTimestamp, t1.source, t2.id, t2.individual0, t2.derivationTimestamp, t2.wikiTimestamp, t2.source "
                     f"FROM {table1} t1 JOIN {table2} t2 ON {join_conditions}"
                 )
             elif len(vars1) == 2 and len(vars2) == 1:
                 select_clause = (
-                    f"SELECT t1.id, t1.individual0, t1.individual1, t1.derivationTimestamp, t1.wikiTimestamp, t1.source, t2.id, t2.individual0, t2.derivationTimestamp, t2.wikiTimestamp, t2.source "
+                    f"SELECT DISTINCT t1.id, t1.individual0, t1.individual1, t1.derivationTimestamp, t1.wikiTimestamp, t1.source, t2.id, t2.individual0, t2.derivationTimestamp, t2.wikiTimestamp, t2.source "
                     f"FROM {table1} t1 JOIN {table2} t2 ON {join_conditions}"
                 )
             elif len(vars1) == 1 and len(vars2) == 2:
                 select_clause = (
-                    f"SELECT t1.id, t1.individual0, t1.derivationTimestamp, t1.wikiTimestamp, t1.source, t2.id, t2.individual0, t2.individual1, t2.derivationTimestamp, t2.wikiTimestamp, t2.source "
+                    f"SELECT DISTINCT t1.id, t1.individual0, t1.derivationTimestamp, t1.wikiTimestamp, t1.source, t2.id, t2.individual0, t2.individual1, t2.derivationTimestamp, t2.wikiTimestamp, t2.source "
                     f"FROM {table1} t1 JOIN {table2} t2 ON {join_conditions}"
                 )
             elif len(vars1) == 2 and len(vars2) == 2:
                 select_clause = (
-                    f"SELECT t1.id, t1.individual0, t1.individual1, t1.derivationTimestamp, t1.wikiTimestamp, t1.source, t2.id, t2.individual0, t2.individual1, t2.derivationTimestamp, t2.wikiTimestamp, t2.source "
+                    f"SELECT DISTINCT t1.id, t1.individual0, t1.individual1, t1.derivationTimestamp, t1.wikiTimestamp, t1.source, t2.id, t2.individual0, t2.individual1, t2.derivationTimestamp, t2.wikiTimestamp, t2.source "
                     f"FROM {table1} t1 JOIN {table2} t2 ON {join_conditions}"
                 )
 
@@ -289,7 +289,6 @@ class ABoxHandler:
                         #    if to_remove:
                         #        conflicts = [x for x in conflicts if x not in to_remove]
                         #    conflicts.append(result)
-                        conflicts.append((a1, a2))
 
                 except Exception as e:
                     logger.debug(f"[Error] SQL query execution failed: {e}")
@@ -464,16 +463,7 @@ class ABoxHandler:
         table_name = query.split(">(")[0][1:]
         tokens = query.split(">(")[1][:-1].split(", ")
 
-        if len(tokens) == 1:
-            sql_query = 'SELECT * FROM "{}"'.format(table_name)
-        elif tokens[0] == "?0" and tokens[1] == "?1":
-            sql_query = 'SELECT * FROM "{}"'.format(table_name)
-        elif tokens[1] == "?0" and tokens[0] == "?1":
-            sql_query = 'SELECT * FROM "{}"'.format(table_name)
-        elif tokens[0] == "?0":
-            sql_query = 'SELECT * FROM "{}"'.format(table_name)
-        else : #if tokens[1] == "?0":
-            sql_query = 'SELECT * FROM "{}"'.format(table_name)
+        sql_query = 'SELECT * FROM "{}"'.format(table_name)
         return sql_query, table_name, tokens
 
     def compute_weighted_closure(self, ontologyHandler):

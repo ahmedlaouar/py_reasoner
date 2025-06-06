@@ -1,0 +1,10 @@
+ABox_ID,new_method_ABox_size,percent_assertions_in_conf,new_method_Conflicts_size,new_method_Conflicts_time,new_method_Closure_size,old_method_Closure_time,new_method_Closure_time
+dbr_n1e03_p5e-02,1000,8.3,72,59.29,3833,3.0,2.98
+dbr_n1e03_p3e-01,1000,32.7,794,60.05,4716,2.87,3.05
+dbr_n1e03_p5e-01,1000,52.4,1643,60.34,5248,3.0,2.94
+dbr_n1e04_p5e-02,10000,7.03,1782,62.15,34968,2.73,3.58
+dbr_n1e04_p3e-01,10000,32.36,28098,64.95,42691,3.01,3.34
+dbr_n1e04_p5e-01,10000,51.56,51495,63.06,49535,3.31,3.3
+dbr_n5e04_p5e-02,50000,10.68,25643,69.6,175376,2.88,4.38
+dbr_n5e04_p3e-01,50000,33.02,230548,74.6,210992,3.38,6.76
+dbr_n5e04_p5e-01,50000,51.79,397370,67.36,238008,3.63,7.07

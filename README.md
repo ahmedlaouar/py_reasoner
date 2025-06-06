@@ -24,6 +24,14 @@ List of main changes and updates:
 ### Setting up dependencies and requirements:
 - Either: install the dependencies in `requirements.txt`; or:
 - Simply run the bash script `prepare.sh` (it creates a python venv for the project then installs the required libraries).
+- Prepare a local postgresql database and create a local `.env` file in which the following information should be added:
+  - DB_NAME=[db_name]
+  - DB_USER=[username]
+  - DB_PASSWORD=[pswd]
+  - DB_HOST=[localhost]
+  - DB_PORT=[port]
+
+  👉 For help setting up PostgreSQL locally, see the [official PostgreSQL documentation](https://www.postgresql.org/docs/current/tutorial-install.html) or follow this [DigitalOcean guide](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-postgresql-on-ubuntu-22-04).
 
 ### Load full data-sets from Zenodo:
 - The original data is saved in (3) separate files, representing data sources from DBpedia ontology and datasets (redristributed here under the licence).

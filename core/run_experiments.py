@@ -91,7 +91,7 @@ names = {
     50000 : "n5e04",
     100000 : "n1e05",
     0.02 : "2e-02",
-    0.05 : "2e-05",
+    0.05 : "5e-02",
     0.2 : "2e-01",
     0.3 : "3e-01",
     0.5 : "5e-01"
@@ -107,8 +107,8 @@ if __name__ == '__main__':
 
     tBox_file = "ontologies/DBO/ontology--DEV_type=parsed.owl"
 
-    for size in [50000]: #1000, 10000, 50000, 100000
-        for percent in [0.5]: # 0.05, 0.3,   0.02, 0.2, 0.5
+    for size in [1000, 10000, 50000]: #1000, 10000, 50000, 100000
+        for percent in [0.05, 0.3, 0.5]: #0.02, 0.2, 0.5
 
             data_file = f"dataset_preparation/dbr_{names[size]}_p{names[percent]}.csv"
             

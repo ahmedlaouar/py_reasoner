@@ -5,9 +5,95 @@ This is a guide for data preparation and result reproduction for the implementat
 This implementation needs three main ingredients:
 
 - An ontology: a [__DL-Lite_R__](https://link.springer.com/article/10.1007/s10817-007-9078-x) TBox.
-- A database: a data set representing the ABox, may contain conflicts.
-- A partially ordered set: represents the set of weights to be associated with the database elements, it expresses partial order independently from the ABox.
+- A database: a data set representing the ABox, which may contain conflicts.
+<!--- - A partially ordered set: represents the set of weights to be associated with the database elements, it expresses partial order independently from the ABox. -->
 
+## Repo versions
+
+This repo contains both:
+- The version of the experiments from the DL2024 paper [On the Computation of a Productive Partially Ordered Possibilistic Repair](https://univ-artois.hal.science/hal-04622237/file/DL-2024-paper-6.pdf) in the branch `DL2024-version`.
+- A new updated version in the `master` branch that details experiments with real-world data (for the new submission)!
+
+List of main changes and updates:
+- Integration of the DBpedia ontology and ABox in the experiments.
+- A new (more efficient) method for computing the $C\pi$-repair.
+- ...
+
+## Full guide to experiments reproduction for the $c\pi$-acceptance method:
+
+### Setting up dependencies and requirements:
+- Either: install the dependencies in `requirements.txt`; or:
+- Simply run the bash script `prepare.sh` (it creates a python venv for the project then installs the required libraries).
+
+### Load full data-sets from Zenodo:
+- The original data is saved in (3) separate files, representing data sources from DBpedia ontology and datasets (redristributed here under the licence).
+- We augmented the data with timestamps from the Wikipedia API and using timestamps from the wiki version data was derived from (using the object property `prov:wasDerivedFrom`).
+- We provide full-augmented data in Zenodo in (3) separate files.
+
+#### Option 1: re-extract the ABoxes: 
+- Load the full-augmented datasets into the PostrgreSQL database: run the script in `dataset_preparation/load_full_data.py` as a module using:
+```python
+python3 -m dataset_preparation.load_full_data
+```
+
+- The, use the script in `dataset_preparation/create_conflicting_datasets.py` to generate the conflicting ABoxes by running:
+
+```python
+python3 -m dataset_preparation.create_conflicting_datasets
+```
+(must be run as module to avoid importing exceptions)
+
+- We also generated consistent ABoxes to fully test our system: simply run the script in `dataset_preparation/create_consistent_datasets.py`
+
+The script randomly samples assertions from one datasource and populates them to the postgresql database.
+ 
+
+#### Option 2 (faster): use the provided ABoxes directly from Zenodo:
+Load prepared ABoxes from Zenodo: avoid data preparation and use our ABoxes directly:
+- A small dataset (1k and 10k assertions) provided within the github project.
+- The remaining are also provided in Zenodo.
+
+
+### Re-run experiments:
+- The main `py_reasoner` implementation scripts are under the `core` folder, the `src` folder contains codes from a previous version (not working for these experiments).
+
+- Use the script in `core/run_experiments.py` to re-launch full experimental evaluation.
+
+- The results are saved in the folder: `results`, the main result files are `results/ABox_RDF_type_experiments_larger_repair.csv`, `ABox_RDF_dbr_repair_experiments.csv` and `results/ABox_RDF_type_experiments_smaller_repair.csv`.
+
+  The files contain similar results, the difference is that of using different subsets containing either only concept assertions, role assertions or both.
+
+- The analysis and plots generation is done in the notebook in `core/results_stats.ipynb`.
+  Re-run cells to re-produce the figures saved in `results/figures`.
+
+### Interface with the system:
+
+- Check the consistency of an ABox:
+
+- Compute a repair using one of the methods:
+
+- Check the $c\pi$-acceptance of a given assertion:
+
+  - randomly select one:
+  
+  - provide your assertion:
+
+
+## License
+
+This project's code and analysis is licensed under the [Creative Commons Attribution-ShareAlike 4.0 International License (CC BY-SA 4.0)](https://creativecommons.org/licenses/by-sa/4.0/).
+
+## Source of Data
+
+This project includes data extracted and derived from [DBpedia](https://www.dbpedia.org/), which is licensed under the [Creative Commons Attribution-ShareAlike 3.0 Unported License (CC BY-SA 3.0)](https://creativecommons.org/licenses/by-sa/3.0/).
+These files are marked accordingly and must be used under the terms of that license.
+
+Modifications and annotations were performed by the authors of this project.
+
+© DBpedia contributors. All rights reserved.
+
+
+<!---
 ## Libraries and tools
 
 - Python.
@@ -198,17 +284,17 @@ For our experiments, we computed the repairs of all the ABoxes in the datasets f
 
 For result reproduction, a lot of executions are done, we separated the executions with ABoxes sizes. Running only for the small sized ABoxes in [bench_prepa/dataset_small_u1](bench_prepa/dataset_small_u1) is fast and illustrates how experiments work. 
 
-<!--- Experiments results are saved in csv files under the folder [bench_prepa/execution_results](bench_prepa/execution_results). -->
+<!--- Experiments results are saved in csv files under the folder [bench_prepa/execution_results](bench_prepa/execution_results). 
 
-Summary of the results, including charts and plots are found under the folder [bench_prepa/results](bench_prepa/results).
+Summary of the results, including charts and plots are found under the folder [bench_prepa/results](bench_prepa/results). -->
+
 
 ## Future works
 
 The next steps in this project are:
-- Improve prompts and output / build a minimal graphic interface
-- Test and bench with other benchmarking ontologies (the DL-Lite_R adapted version)
-- Extend the experminets for other types of repairs (not only the possibilistic repairs).
-- Implement a solver.
+- 
+- 
+- 
 
 ## References:
 
@@ -226,5 +312,5 @@ The next steps in this project are:
 
 ## More
 
-The main focus of this work is a subset of methods for data repairs that operates in the context of possibilistic Knowledge Bases and more generally on partially ordered KBs.  
+The main focus of this work is a subset of methods for data repairs that operates in the context of possibilistic Knowledge Bases and more specifically on partially ordered KBs.  
 [__Possiblistic DL-Lite__](https://link.springer.com/chapter/10.1007/978-3-642-40381-1_27) extends the expressive power of DL-Lite to deal with possibilistic uncertain information without increasing the computational cost. 

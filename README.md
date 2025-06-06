@@ -28,7 +28,10 @@ List of main changes and updates:
 ### Load full data-sets from Zenodo:
 - The original data is saved in (3) separate files, representing data sources from DBpedia ontology and datasets (redristributed here under the licence).
 - We augmented the data with timestamps from the Wikipedia API and using timestamps from the wiki version data was derived from (using the object property `prov:wasDerivedFrom`).
-- We provide full-augmented data in Zenodo in (3) separate files.
+- We provide full-augmented data in [Zenodo](https://doi.org/10.5281/zenodo.15605504) (DOI 10.5281/zenodo.15605504) in (3) separate files:
+  - `instance-types_lang=en_specific_with_timestamps.csv`
+  - `instance_types_lhd_dbo_en_with_timestamps.csv`
+  - `mappingbased-objects_lang=en_with_timestamps.csv`
 
 #### Option 1: re-extract the ABoxes: 
 - Load the full-augmented datasets into the PostrgreSQL database: run the script in `dataset_preparation/load_full_data.py` as a module using:
@@ -51,8 +54,9 @@ The script randomly samples assertions from one datasource and populates them to
 #### Option 2 (faster): use the provided ABoxes directly from Zenodo:
 Load prepared ABoxes from Zenodo: avoid data preparation and use our ABoxes directly:
 - A small dataset (1k and 10k assertions) provided within the github project.
-- The remaining are also provided in Zenodo.
+- The remaining fiels are all provided in [Zenodo](https://doi.org/10.5281/zenodo.15605504) (DOI 10.5281/zenodo.15605504).
 
+*** Before running the experiments, copy the data downloaded from Zenodo to the folder `dataset_preparation/` ***
 
 ### Re-run experiments:
 - The main `py_reasoner` implementation scripts are under the `core` folder, the `src` folder contains codes from a previous version (not working for these experiments).

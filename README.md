@@ -7,13 +7,24 @@ This implementation needs two main ingredients:
 - An ontology: a [__DL-Lite_R__](https://link.springer.com/article/10.1007/s10817-007-9078-x) TBox.
 - A database: a data set representing the ABox, which may contain conflicts.
 
-## Repo versions
+## 📌 Version & Citation
 
-This repo contains both:
+This repository is actively maintained.
+
+If you are reading this in the context of our paper submission titled:  
+**"Closure-Based Tractable Possibilistic Inference from Partially Ordered DL-Lite Ontologies"**, please refer to the tagged version of the code used in that paper:
+
+🔗 **[https://github.com/ahmedlaouar/py_reasoner/tree/jelia2025](https://github.com/ahmedlaouar/py_reasoner/tree/jelia2025)**
+
+This tag captures exactly the version of the code and data used for the results in that paper.  
+We recommend readers use that version for reproducibility.
+
+If you're interested in the newer or ongoing improvements, see the master branch.
+
+This repository also contains:
 - The version of the experiments from the DL2024 paper [On the Computation of a Productive Partially Ordered Possibilistic Repair](https://univ-artois.hal.science/hal-04622237/file/DL-2024-paper-6.pdf) in the branch `DL2024-version`.
-- A new updated version in the `master` branch that details experiments with real-world data (for the new submission)!
 
-List of main changes and updates:
+### List of the most recent changes and updates:
 - Integration of the DBpedia ontology and ABox in the experiments.
 - A new (more efficient) method for computing the $C\pi$-repair.
 

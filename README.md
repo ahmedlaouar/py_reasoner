@@ -1,12 +1,11 @@
 # Guide for the experimentation study of the $C\pi$-repair
 
-This is a guide for data preparation and result reproduction for the implementation of the closure-based partially orered possibilsitic repair ($C\pi$-repair)[1].
+This is a guide for data preparation and result reproduction for the implementation of the closure-based partially ordered possibilistic repair ($C\pi$-repair)[1].
 
-This implementation needs three main ingredients:
+This implementation needs two main ingredients:
 
 - An ontology: a [__DL-Lite_R__](https://link.springer.com/article/10.1007/s10817-007-9078-x) TBox.
 - A database: a data set representing the ABox, which may contain conflicts.
-<!--- - A partially ordered set: represents the set of weights to be associated with the database elements, it expresses partial order independently from the ABox. -->
 
 ## Repo versions
 
@@ -17,13 +16,16 @@ This repo contains both:
 List of main changes and updates:
 - Integration of the DBpedia ontology and ABox in the experiments.
 - A new (more efficient) method for computing the $C\pi$-repair.
-- ...
 
 ## Full guide to experiments reproduction for the $c\pi$-acceptance method:
 
 ### Setting up dependencies and requirements:
 - Either: install the dependencies in `requirements.txt`; or:
 - Simply run the bash script `prepare.sh` (it creates a python venv for the project then installs the required libraries).
+
+- Rapid: a DL-Lite query-rewriting tool [4]. It can be found within the [__Combo__](https://home.uni-leipzig.de/clu/) project and also within the systems studied in the [__ForBackBench__](https://github.com/georgeKon/ForBackBench/tree/main) benchmarking framework (for Chasing Vs Query Rewriting).
+- Note: the Rapid tool is build with java, hence, a java installation must be present in order to be able to make calls to this tool.
+
 - Prepare a local postgresql database and create a local `.env` file in which the following information should be added:
   - DB_NAME=[db_name]
   - DB_USER=[username]
@@ -42,12 +44,12 @@ List of main changes and updates:
   - `mappingbased-objects_lang=en_with_timestamps.csv`
 
 #### Option 1: re-extract the ABoxes: 
-- Load the full-augmented datasets into the PostrgreSQL database: run the script in `dataset_preparation/load_full_data.py` as a module using:
+- Load the full-augmented datasets into the PostgreSQL database: run the script in `dataset_preparation/load_full_data.py` as a module using:
 ```python
 python3 -m dataset_preparation.load_full_data
 ```
 
-- The, use the script in `dataset_preparation/create_conflicting_datasets.py` to generate the conflicting ABoxes by running:
+- Then, use the script in `dataset_preparation/create_conflicting_datasets.py` to generate the conflicting ABoxes by running:
 
 ```python
 python3 -m dataset_preparation.create_conflicting_datasets
@@ -57,17 +59,17 @@ python3 -m dataset_preparation.create_conflicting_datasets
 - We also generated consistent ABoxes to fully test our system: simply run the script in `dataset_preparation/create_consistent_datasets.py`
 
 The script randomly samples assertions from one datasource and populates them to the postgresql database.
- 
+
 
 #### Option 2 (faster): use the provided ABoxes directly from Zenodo:
 Load prepared ABoxes from Zenodo: avoid data preparation and use our ABoxes directly:
 - A small dataset (1k and 10k assertions) provided within the github project.
-- The remaining fiels are all provided in [Zenodo](https://doi.org/10.5281/zenodo.15605504) (DOI 10.5281/zenodo.15605504).
+- The remaining files are all provided in [Zenodo](https://doi.org/10.5281/zenodo.15605504) (DOI 10.5281/zenodo.15605504).
 
 *** Before running the experiments, copy the data downloaded from Zenodo to the folder `dataset_preparation/` ***
 
 ### Re-run experiments:
-- The main `py_reasoner` implementation scripts are under the `core` folder, the `src` folder contains codes from a previous version (not working for these experiments).
+- The main `py_reasoner` implementation scripts are under the `core` folder.
 
 - Use the script in `core/run_experiments.py` to re-launch full experimental evaluation.
 
@@ -76,20 +78,7 @@ Load prepared ABoxes from Zenodo: avoid data preparation and use our ABoxes dire
   The files contain similar results, the difference is that of using different subsets containing either only concept assertions, role assertions or both.
 
 - The analysis and plots generation is done in the notebook in `core/results_stats.ipynb`.
-  Re-run cells to re-produce the figures saved in `results/figures`.
-
-### Interface with the system:
-
-- Check the consistency of an ABox:
-
-- Compute a repair using one of the methods:
-
-- Check the $c\pi$-acceptance of a given assertion:
-
-  - randomly select one:
-  
-  - provide your assertion:
-
+  Re-run cells to reproduce the figures saved in `results/figures`.
 
 ## License
 
@@ -103,6 +92,34 @@ These files are marked accordingly and must be used under the terms of that lice
 Modifications and annotations were performed by the authors of this project.
 
 © DBpedia contributors. All rights reserved.
+
+
+## References:
+
+[1] A. Laouar, S. Belabbes, S. Benferhat, Tractable closure-based possibilistic repair for partially ordered dl-lite ontologies, in: European Conference on Logics in Artificial Intelligence, Springer, 2023, pp. 353–368
+
+[2] Benferhat, S., Bouraoui, Z., Tabia, K.: How to select one preferred assertional-based repair from inconsistent and prioritized DL-Lite knowledge bases? In: International Joint Conference on Artificial Intelligence (IJCAI), Buenos Aires, Argentina. pp. 1450–1456 (2015)
+
+[3] Belabbes, S., Benferhat, S.: Computing a possibility theory repair for partially preordered inconsistent ontologies. IEEE Transactions on Fuzzy Systems pp. 1–10 (2021)
+
+[4] A. Chortaras, D. Trivela, G. Stamou, Optimized query rewriting for owl 2 ql, in: Automated Deduction–CADE-23: 23rd International Conference on Automated Deduction, Wrocław, Poland, July 31-August 5, 2011. Proceedings 23, Springer, 2011, pp. 192–206.
+
+[5] C. Lutz, I. Seylan, D. Toman, F. Wolter, The combined approach to OBDA: taming role hierarchies using filters, in: The Semantic Web - ISWC 2013 - 12th International Semantic Web Conference, Sydney, Australia, 2013, pp. 314–330.
+
+[6] M. Scutari, Learning bayesian networks with the bnlearn r package, arXiv preprint arXiv:0908.3817 (2009).
+
+
+<!--- ### Interface with the system:
+
+- Check the consistency of an ABox:
+
+- Compute a repair using one of the methods:
+
+- Check the $c\pi$-acceptance of a given assertion:
+
+  - randomly select one:
+  
+  - provide your assertion: -->
 
 
 <!---
@@ -301,28 +318,14 @@ For result reproduction, a lot of executions are done, we separated the executio
 Summary of the results, including charts and plots are found under the folder [bench_prepa/results](bench_prepa/results). -->
 
 
-## Future works
+<!--- ## Future works
 
 The next steps in this project are:
 - 
 - 
-- 
+- -->
 
-## References:
-
-[1] A. Laouar, S. Belabbes, S. Benferhat, Tractable closure-based possibilistic repair for partially ordered dl-lite ontologies, in: European Conference on Logics in Artificial Intelligence, Springer, 2023, pp. 353–368
-
-[2] Benferhat, S., Bouraoui, Z., Tabia, K.: How to select one preferred assertional-based repair from inconsistent and prioritized DL-Lite knowledge bases? In: International Joint Conference on Artificial Intelligence (IJCAI), Buenos Aires, Argentina. pp. 1450–1456 (2015)
-
-[3] Belabbes, S., Benferhat, S.: Computing a possibility theory repair for partially preordered inconsistent ontologies. IEEE Transactions on Fuzzy Systems pp. 1–10 (2021)
-
-[4] A. Chortaras, D. Trivela, G. Stamou, Optimized query rewriting for owl 2 ql, in: Automated Deduction–CADE-23: 23rd International Conference on Automated Deduction, Wrocław, Poland, July 31-August 5, 2011. Proceedings 23, Springer, 2011, pp. 192–206.
-
-[5] C. Lutz, I. Seylan, D. Toman, F. Wolter, The combined approach to OBDA: taming role hierarchies using filters, in: The Semantic Web - ISWC 2013 - 12th International Semantic Web Conference, Sydney, Australia, 2013, pp. 314–330.
-
-[6] M. Scutari, Learning bayesian networks with the bnlearn r package, arXiv preprint arXiv:0908.3817 (2009).
-
-## More
+<!--- ## More
 
 The main focus of this work is a subset of methods for data repairs that operates in the context of possibilistic Knowledge Bases and more specifically on partially ordered KBs.  
-[__Possiblistic DL-Lite__](https://link.springer.com/chapter/10.1007/978-3-642-40381-1_27) extends the expressive power of DL-Lite to deal with possibilistic uncertain information without increasing the computational cost. 
+[__Possiblistic DL-Lite__](https://link.springer.com/chapter/10.1007/978-3-642-40381-1_27) extends the expressive power of DL-Lite to deal with possibilistic uncertain information without increasing the computational cost. -->
